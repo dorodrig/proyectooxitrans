@@ -1,0 +1,320 @@
+# ====================================
+# OXITRANS S.A.S - Control de Acceso
+# GitIgnore Completo para Proyecto Fullstack
+# ====================================
+
+# ====================================
+# LOGS Y DEBUGGING
+# ====================================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.npm
+
+# ====================================
+# DEPENDENCIAS
+# ====================================
+node_modules/
+jspm_packages/
+
+# Yarn
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# ====================================
+# BUILD Y DISTRIBUCIÓN
+# ====================================
+dist/
+dist-ssr/
+build/
+out/
+*.tsbuildinfo
+
+# ====================================
+# ENTORNOS Y CONFIGURACIÓN
+# ====================================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+
+# Archivos de configuración sensibles
+config/local.json
+config/production.json
+.npmrc
+
+# ====================================
+# CACHE Y TEMPORALES
+# ====================================
+.cache/
+.parcel-cache/
+.nuxt/
+.next/
+.tmp/
+.temp/
+*.tmp
+*.temp
+
+# Vite
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+
+# ====================================
+# TESTING Y COVERAGE
+# ====================================
+coverage/
+*.lcov
+.nyc_output/
+test-results/
+playwright-report/
+test-results/
+
+# Jest
+jest.config.js
+
+# ====================================
+# EDITORES E IDEs
+# ====================================
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# JetBrains IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# ====================================
+# SISTEMA OPERATIVO
+# ====================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+
+# ====================================
+# DESARROLLO MÓVIL (CAPACITOR)
+# ====================================
+# Android
+android/app/build/
+android/app/release/
+android/app/debug/
+android/build/
+android/.gradle/
+android/local.properties
+android/keystore.properties
+android/app/google-services.json
+
+# iOS
+ios/App/build/
+ios/App/Pods/
+ios/App/Podfile.lock
+ios/App/App.xcworkspace/xcuserdata/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/DerivedData/
+ios/App/GoogleService-Info.plist
+
+# Capacitor
+capacitor.config.json
+
+# ====================================
+# PWA Y SERVICE WORKERS
+# ====================================
+sw.js
+workbox-*.js
+precache-manifest.*.js
+
+# ====================================
+# BASE DE DATOS
+# ====================================
+# Archivos de backup de base de datos
+*.sql.backup
+*.sql.bak
+*.dump
+*.sqlite
+*.sqlite3
+*.db
+
+# Archivos de migración locales
+migrations/local/
+
+# ====================================
+# ARCHIVOS SUBIDOS
+# ====================================
+uploads/
+storage/
+public/uploads/
+server/uploads/
+files/
+images/temp/
+
+# ====================================
+# CERTIFICADOS Y LLAVES
+# ====================================
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.jks
+keystore/
+certificates/
+
+# ====================================
+# DOCKER
+# ====================================
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# ====================================
+# MONITOREO Y ANALYTICS
+# ====================================
+.monitoring/
+analytics/
+logs/application/
+
+# ====================================
+# DOCUMENTACIÓN GENERADA
+# ====================================
+docs/api/generated/
+docs/build/
+
+# ====================================
+# HERRAMIENTAS DE DESARROLLO
+# ====================================
+# ESLint
+.eslintcache
+
+# Prettier
+.prettierignore
+
+# TypeScript
+*.tsbuildinfo
+
+# Storybook
+storybook-static/
+
+# ====================================
+# VARIABLES LOCALES DE DESARROLLO
+# ====================================
+.local
+*.local
+
+# Archivos de configuración personal
+.vscode/settings.json
+.idea/workspace.xml
+
+# ====================================
+# DEPLOYMENT Y CI/CD
+# ====================================
+.vercel
+.netlify/
+.github/workflows/deploy.yml
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# ====================================
+# OXITRANS ESPECÍFICOS
+# ====================================
+# Archivos de empleados (fotos, documentos)
+public/photos/
+server/public/photos/
+employee-photos/
+
+# Reportes generados
+reports/generated/
+exports/
+
+# Configuración específica de la empresa
+config/oxitrans-local.json
+
+# Archivos de desarrollo temporal
+temp/
+tmp/
+dev-tools/
+
+# ====================================
+# SECURITY
+# ====================================
+# Archivos que contienen información sensible
+.secrets
+secrets.json
+private-keys/
+jwt-secrets/
+
+# ====================================
+# PERFORMANCE Y PROFILING
+# ====================================
+.prof
+*.prof
+profile/
+benchmark/
+
+# ====================================
+# OPCIONAL - COMENTAR SI SE NECESITA
+# ====================================
+# package-lock.json  # Descomentar si usas yarn exclusivamente
+# yarn.lock          # Descomentar si usas npm exclusivamente
+
+# ====================================
+# CUSTOM OXITRANS
+# ====================================
+# Carpetas de desarrollo y backup
+Desarrollo JS/
+
+# Agregar aquí archivos específicos del proyecto OXITRANS
+# que no deben subirse al repositorio

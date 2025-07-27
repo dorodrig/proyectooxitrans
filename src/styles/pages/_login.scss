@@ -1,0 +1,165 @@
+// ====================================
+// PÁGINA DE LOGIN
+// ====================================
+
+.login-page {
+  min-height: 100vh;
+  @include center-flex;
+  @include gradient-primary;
+  padding: $spacing-lg;
+  
+  &__container {
+    width: 100%;
+    max-width: 400px;
+    
+    @include mobile-only {
+      max-width: 350px;
+    }
+  }
+  
+  &__logo {
+    @include center-flex;
+    width: 64px;
+    height: 64px;
+    background-color: white;
+    border-radius: 50%;
+    margin: 0 auto $spacing-lg;
+    
+    svg {
+      width: 32px;
+      height: 32px;
+      color: $primary-color;
+    }
+  }
+  
+  &__title {
+    color: white;
+    text-align: center;
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-sm;
+    
+    @include mobile-only {
+      font-size: $font-size-2xl;
+    }
+  }
+  
+  &__subtitle {
+    color: $accent-color;
+    text-align: center;
+    font-size: $font-size-base;
+    margin-bottom: $spacing-2xl;
+  }
+  
+  &__form {
+    @include card;
+    padding: $spacing-2xl;
+    
+    @include mobile-only {
+      padding: $spacing-xl;
+    }
+  }
+  
+  &__input-group {
+    position: relative;
+    margin-bottom: $spacing-lg;
+  }
+  
+  &__label {
+    display: block;
+    color: $gray-700;
+    font-weight: $font-weight-medium;
+    margin-bottom: $spacing-sm;
+    font-size: $font-size-sm;
+  }
+  
+  &__input {
+    @include input-base;
+    padding-right: 40px; // Espacio para el ícono del password
+    
+    &--error {
+      border-color: $error-color;
+      
+      &:focus {
+        border-color: $error-color;
+        box-shadow: 0 0 0 3px rgba($error-color, 0.1);
+      }
+    }
+  }
+  
+  &__password-toggle {
+    position: absolute;
+    right: $spacing-md;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: $gray-400;
+    
+    &:hover {
+      color: $gray-600;
+    }
+    
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+  
+  &__error {
+    background-color: lighten($error-color, 40%);
+    border: 1px solid lighten($error-color, 20%);
+    color: darken($error-color, 20%);
+    padding: $spacing-md;
+    border-radius: $border-radius-md;
+    margin-bottom: $spacing-lg;
+    font-size: $font-size-sm;
+  }
+  
+  &__submit-btn {
+    @include button-primary;
+    width: 100%;
+    padding: $spacing-md;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    gap: $spacing-sm;
+    
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+    
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    
+    // Estado de loading
+    &--loading {
+      color: transparent;
+      position: relative;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(white, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+  
+  &__footer {
+    text-align: center;
+    margin-top: $spacing-lg;
+    color: $gray-500;
+    font-size: $font-size-xs;
+  }
+}

@@ -1,0 +1,192 @@
+// ====================================
+// COMPONENTES BASE
+// ====================================
+
+// Botones
+.btn {
+  @include button-base;
+  padding: $spacing-sm $spacing-lg;
+  font-size: $font-size-base;
+  
+  // Tamaños
+  &--sm {
+    padding: $spacing-xs $spacing-md;
+    font-size: $font-size-sm;
+  }
+  
+  &--lg {
+    padding: $spacing-md $spacing-xl;
+    font-size: $font-size-lg;
+  }
+  
+  // Variantes
+  &--primary {
+    @include button-primary;
+  }
+  
+  &--secondary {
+    @include button-secondary;
+  }
+  
+  &--success {
+    @include button-base;
+    background-color: $success-color;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($success-color, 10%);
+    }
+  }
+  
+  &--warning {
+    @include button-base;
+    background-color: $warning-color;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($warning-color, 10%);
+    }
+  }
+  
+  &--error {
+    @include button-base;
+    background-color: $error-color;
+    color: white;
+    
+    &:hover:not(:disabled) {
+      background-color: darken($error-color, 10%);
+    }
+  }
+  
+  // Estado de loading
+  &--loading {
+    position: relative;
+    color: transparent;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 16px;
+      height: 16px;
+      @include loading-spinner;
+    }
+  }
+}
+
+// Inputs y formularios
+.form-group {
+  margin-bottom: $spacing-lg;
+}
+
+.form-label {
+  display: block;
+  font-weight: $font-weight-medium;
+  color: $gray-700;
+  margin-bottom: $spacing-xs;
+  font-size: $font-size-sm;
+}
+
+.form-input {
+  @include input-base;
+  
+  &--error {
+    border-color: $error-color;
+    
+    &:focus {
+      border-color: $error-color;
+      box-shadow: 0 0 0 3px rgba($error-color, 0.1);
+    }
+  }
+}
+
+.form-error {
+  color: $error-color;
+  font-size: $font-size-sm;
+  margin-top: $spacing-xs;
+}
+
+// Cards
+.card {
+  @include card;
+  
+  &__header {
+    padding: $spacing-lg;
+    border-bottom: 1px solid $gray-200;
+    background-color: $gray-50;
+  }
+  
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $gray-900;
+    margin: 0;
+  }
+  
+  &__content {
+    padding: $spacing-lg;
+  }
+  
+  &__footer {
+    padding: $spacing-lg;
+    border-top: 1px solid $gray-200;
+    background-color: $gray-50;
+  }
+  
+  // Variantes
+  &--hover {
+    @include hover-lift;
+    cursor: pointer;
+  }
+}
+
+// Alertas
+.alert {
+  padding: $spacing-md;
+  border-radius: $border-radius-md;
+  margin-bottom: $spacing-lg;
+  border-left: 4px solid;
+  
+  &--success {
+    background-color: lighten($success-color, 45%);
+    border-left-color: $success-color;
+    color: darken($success-color, 20%);
+  }
+  
+  &--warning {
+    background-color: lighten($warning-color, 40%);
+    border-left-color: $warning-color;
+    color: darken($warning-color, 20%);
+  }
+  
+  &--error {
+    background-color: lighten($error-color, 40%);
+    border-left-color: $error-color;
+    color: darken($error-color, 20%);
+  }
+  
+  &--info {
+    background-color: lighten($info-color, 40%);
+    border-left-color: $info-color;
+    color: darken($info-color, 20%);
+  }
+}
+
+// Loading spinner independiente
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  @include loading-spinner;
+  
+  &--sm {
+    width: 16px;
+    height: 16px;
+  }
+  
+  &--lg {
+    width: 32px;
+    height: 32px;
+  }
+}

@@ -1,0 +1,102 @@
+# ====================================
+# OXITRANS S.A.S - Control de Acceso
+# Git Attributes Configuration
+# ====================================
+
+# Establecer el comportamiento por defecto, en caso de que
+# las personas no tengan core.autocrlf configurado.
+* text=auto
+
+# ====================================
+# CÓDIGO FUENTE
+# ====================================
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.vue text eol=lf
+
+# ====================================
+# ESTILOS
+# ====================================
+*.css text eol=lf
+*.scss text eol=lf
+*.sass text eol=lf
+*.less text eol=lf
+
+# ====================================
+# MARKUP
+# ====================================
+*.html text eol=lf
+*.xml text eol=lf
+*.svg text eol=lf
+
+# ====================================
+# CONFIGURACIÓN
+# ====================================
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.ini text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf
+
+# ====================================
+# DOCUMENTACIÓN
+# ====================================
+*.md text eol=lf
+*.txt text eol=lf
+
+# ====================================
+# BASE DE DATOS
+# ====================================
+*.sql text eol=lf
+
+# ====================================
+# SHELL SCRIPTS
+# ====================================
+*.sh text eol=lf
+*.bash text eol=lf
+
+# ====================================
+# POWERSHELL
+# ====================================
+*.ps1 text eol=crlf
+
+# ====================================
+# ARCHIVOS BINARIOS
+# ====================================
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.flv binary
+*.fla binary
+*.swf binary
+*.gz binary
+*.zip binary
+*.7z binary
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+
+# ====================================
+# ARCHIVOS ESPECÍFICOS DE OXITRANS
+# ====================================
+# Tratamiento especial para archivos del proyecto
+*.oxitrans text eol=lf
+
+# ====================================
+# LINGUIST OVERRIDES
+# ====================================
+# Para estadísticas correctas en GitHub
+public/* linguist-vendored
+*.sql linguist-detectable=true
+database/* linguist-documentation=false

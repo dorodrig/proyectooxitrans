@@ -1,0 +1,36 @@
+// ====================================
+// ARCHIVO PRINCIPAL DE ESTILOS
+// OXITRANS S.A.S - Control de Acceso
+// ====================================
+
+// Abstracts (variables, mixins, functions)
+@import './styles/abstracts/variables';
+@import './styles/abstracts/mixins';
+
+// Base (reset, typography, etc.)
+@import './styles/base/reset';
+
+// Components (botones, cards, forms, etc.)
+@import './styles/components/base';
+
+// Pages (estilos específicos de páginas)
+@import './styles/pages/login';
+@import './styles/pages/dashboard';tailwind components; */
+@tailwind utilities;
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}

@@ -1,0 +1,331 @@
+// ====================================
+// PÁGINA DEL DASHBOARD
+// ====================================
+
+.dashboard {
+  min-height: 100vh;
+  background-color: $gray-50;
+  
+  &__header {
+    background-color: white;
+    box-shadow: $shadow-sm;
+    border-bottom: 1px solid $gray-200;
+    
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 $spacing-lg;
+      
+      @include mobile-only {
+        padding: 0 $spacing-md;
+      }
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 64px;
+      
+      @include mobile-only {
+        flex-direction: column;
+        height: auto;
+        padding: $spacing-md 0;
+        gap: $spacing-md;
+      }
+    }
+    
+    .header-title {
+      font-size: $font-size-xl;
+      font-weight: $font-weight-semibold;
+      color: $gray-900;
+      margin: 0;
+      
+      @include mobile-only {
+        font-size: $font-size-lg;
+        text-align: center;
+      }
+    }
+    
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: $spacing-md;
+      
+      .user-info {
+        color: $gray-700;
+        font-size: $font-size-sm;
+        
+        @include mobile-only {
+          text-align: center;
+        }
+      }
+      
+      .logout-btn {
+        @include button-primary;
+        padding: $spacing-sm $spacing-md;
+        font-size: $font-size-sm;
+        gap: $spacing-xs;
+        
+        svg {
+          width: 14px;
+          height: 14px;
+        }
+      }
+    }
+  }
+  
+  &__main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: $spacing-xl $spacing-lg;
+    
+    @include mobile-only {
+      padding: $spacing-lg $spacing-md;
+    }
+  }
+  
+  // Grid de estadísticas
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-2xl;
+    
+    @include mobile-only {
+      grid-template-columns: 1fr;
+      gap: $spacing-md;
+    }
+  }
+  
+  &__stat-card {
+    @include card;
+    padding: $spacing-lg;
+    transition: transform 0.2s ease-in-out;
+    
+    &:hover {
+      transform: translateY(-2px);
+    }
+    
+    .stat-content {
+      display: flex;
+      align-items: center;
+      gap: $spacing-md;
+    }
+    
+    .stat-icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      @include center-flex;
+      border-radius: $border-radius-lg;
+      
+      svg {
+        width: 24px;
+        height: 24px;
+      }
+      
+      &--users {
+        background-color: lighten($gray-500, 35%);
+        color: $gray-500;
+      }
+      
+      &--present {
+        background-color: lighten($success-color, 35%);
+        color: $success-color;
+      }
+      
+      &--records {
+        background-color: lighten($info-color, 35%);
+        color: $info-color;
+      }
+      
+      &--late {
+        background-color: lighten($error-color, 35%);
+        color: $error-color;
+      }
+    }
+    
+    .stat-info {
+      flex: 1;
+      
+      .stat-label {
+        font-size: $font-size-sm;
+        color: $gray-500;
+        margin-bottom: $spacing-xs;
+        font-weight: $font-weight-medium;
+      }
+      
+      .stat-value {
+        font-size: $font-size-2xl;
+        font-weight: $font-weight-bold;
+        color: $gray-900;
+        margin: 0;
+      }
+    }
+  }
+  
+  // Sección de acciones rápidas
+  &__quick-actions {
+    @include card;
+    padding: $spacing-xl;
+    margin-bottom: $spacing-2xl;
+    
+    .section-title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $gray-900;
+      margin-bottom: $spacing-lg;
+    }
+    
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: $spacing-lg;
+      
+      @include mobile-only {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .action-card {
+      border: 2px dashed $gray-300;
+      border-radius: $border-radius-lg;
+      padding: $spacing-xl;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease-in-out;
+      background-color: white;
+      
+      &:hover {
+        border-color: $gray-400;
+        background-color: $gray-50;
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+      }
+      
+      svg {
+        width: 32px;
+        height: 32px;
+        color: $gray-400;
+        margin-bottom: $spacing-md;
+      }
+      
+      .action-label {
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        color: $gray-900;
+        margin: 0;
+      }
+    }
+  }
+  
+  // Actividad reciente
+  &__recent-activity {
+    @include card;
+    padding: $spacing-xl;
+    
+    .section-title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      color: $gray-900;
+      margin-bottom: $spacing-lg;
+    }
+    
+    .activity-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .activity-item {
+      display: flex;
+      gap: $spacing-md;
+      padding-bottom: $spacing-lg;
+      position: relative;
+      
+      &:not(:last-child) {
+        margin-bottom: $spacing-lg;
+        
+        &::after {
+          content: '';
+          position: absolute;
+          left: 16px;
+          top: 32px;
+          bottom: -$spacing-lg;
+          width: 2px;
+          background-color: $gray-200;
+        }
+      }
+      
+      .activity-icon {
+        flex-shrink: 0;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        @include center-flex;
+        position: relative;
+        z-index: 1;
+        
+        svg {
+          width: 16px;
+          height: 16px;
+          color: white;
+        }
+        
+        &--success {
+          background-color: $success-color;
+        }
+        
+        &--info {
+          background-color: $info-color;
+        }
+        
+        &--warning {
+          background-color: $warning-color;
+        }
+        
+        &--error {
+          background-color: $error-color;
+        }
+      }
+      
+      .activity-content {
+        flex: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        
+        @include mobile-only {
+          flex-direction: column;
+          gap: $spacing-xs;
+        }
+        
+        .activity-text {
+          color: $gray-500;
+          font-size: $font-size-sm;
+          margin: 0;
+          
+          .highlight {
+            font-weight: $font-weight-medium;
+            color: $gray-900;
+          }
+        }
+        
+        .activity-time {
+          color: $gray-500;
+          font-size: $font-size-sm;
+          white-space: nowrap;
+          
+          @include mobile-only {
+            align-self: flex-start;
+          }
+        }
+      }
+    }
+  }
+}

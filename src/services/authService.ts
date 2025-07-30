@@ -2,7 +2,7 @@ import { apiClient } from './apiClient';
 import type { Usuario } from '../types';
 
 interface LoginCredentials {
-  email: string;
+  documento: string;
   password: string;
 }
 
@@ -22,6 +22,29 @@ interface RegisterData {
   departamento: string;
   cargo: string;
   rol: 'admin' | 'empleado' | 'supervisor';
+}
+
+interface RegistroEmpleadoData {
+  nombre: string;
+  apellido: string;
+  email: string;
+  documento: string;
+  tipo_documento: 'CC' | 'CE' | 'PA';
+  telefono?: string;
+  departamento: string;
+  cargo: string;
+  password: string;
+  fecha_ingreso?: string;
+}
+
+interface RegistroResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    id: number;
+    email: string;
+    estado: string;
+  };
 }
 
 export const authService = {
@@ -54,6 +77,11 @@ export const authService = {
   // Registrar nuevo usuario (solo admin)
   register: async (userData: RegisterData): Promise<Usuario> => {
     return apiClient.post('/auth/register', userData);
+  },
+
+  // Registro de empleados (público)
+  registroEmpleado: async (userData: RegistroEmpleadoData): Promise<RegistroResponse> => {
+    return apiClient.post('/auth/registro', userData);
   },
 
   // Obtener usuario actual

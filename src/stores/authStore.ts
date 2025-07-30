@@ -11,7 +11,7 @@ interface AuthStore {
   error: string | null;
   
   // Actions
-  login: (email: string, password: string) => Promise<void>;
+  login: (documento: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   setUser: (usuario: Usuario) => void;
   setToken: (token: string) => void;
@@ -32,10 +32,10 @@ export const useAuthStore = create<AuthStore>()(
         isLoading: false,
         error: null,
 
-        login: async (email: string, password: string) => {
+        login: async (documento: string, password: string) => {
           set({ isLoading: true, error: null });
           try {
-            const response = await authService.login({ email, password });
+            const response = await authService.login({ documento, password });
             
             set({
               usuario: response.usuario,

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../stores/authStore';
-import { LogIn, Eye, EyeOff, Building2 } from 'lucide-react';
+import { LogIn, Eye, EyeOff, Building2, UserPlus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [documento, setDocumento] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [localError, setLocalError] = useState('');
@@ -14,13 +15,13 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     setLocalError('');
 
-    if (!email || !password) {
+    if (!documento || !password) {
       setLocalError('Por favor, complete todos los campos');
       return;
     }
 
     try {
-      await login(email, password);
+      await login(documento, password);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error de autenticación';
       setLocalError(errorMessage);
@@ -41,19 +42,19 @@ export const LoginPage: React.FC = () => {
         <div className="login-page__form">
           <form onSubmit={handleSubmit}>
             <div className="login-page__input-group">
-              <label htmlFor="email" className="login-page__label">
-                Correo Electrónico
+              <label htmlFor="documento" className="login-page__label">
+                Número de Documento
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="documento"
+                name="documento"
+                type="text"
+                autoComplete="username"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={documento}
+                onChange={(e) => setDocumento(e.target.value)}
                 className="login-page__input"
-                placeholder="Ingrese su email"
+                placeholder="Ingrese su número de documento"
               />
             </div>
 
@@ -109,6 +110,13 @@ export const LoginPage: React.FC = () => {
             <p>
               ¿Problemas para acceder? Contacte al administrador del sistema
             </p>
+            <div className="login-page__register-link">
+              <p>¿Es un empleado nuevo?</p>
+              <Link to="/registro" className="login-page__register-btn">
+                <UserPlus />
+                Registrar Cuenta
+              </Link>
+            </div>
           </div>
         </div>
       </div>

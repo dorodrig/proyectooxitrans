@@ -19,16 +19,19 @@
   
   &__logo {
     @include center-flex;
-    width: 64px;
-    height: 64px;
-    background-color: white;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, white, rgba(white, 0.9));
     border-radius: 50%;
     margin: 0 auto $spacing-lg;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    border: 3px solid rgba(white, 0.3);
     
     svg {
-      width: 32px;
-      height: 32px;
-      color: $primary-color;
+      width: 40px;
+      height: 40px;
+      color: $oxitrans-red;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
   }
   
@@ -45,15 +48,21 @@
   }
   
   &__subtitle {
-    color: $accent-color;
+    color: rgba(white, 0.9);
     text-align: center;
     font-size: $font-size-base;
     margin-bottom: $spacing-2xl;
+    font-weight: $font-weight-medium;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
   
   &__form {
     @include card;
     padding: $spacing-2xl;
+    background: rgba(white, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(white, 0.2);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
     
     @include mobile-only {
       padding: $spacing-xl;
@@ -122,17 +131,34 @@
     width: 100%;
     padding: $spacing-md;
     font-size: $font-size-base;
-    font-weight: $font-weight-medium;
+    font-weight: $font-weight-semibold;
     gap: $spacing-sm;
+    background: linear-gradient(135deg, $oxitrans-red, $oxitrans-red-dark);
+    border: none;
+    box-shadow: 0 4px 15px rgba($oxitrans-red, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     
     svg {
       width: 16px;
       height: 16px;
     }
     
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, $oxitrans-red-dark, darken($oxitrans-red-dark, 10%));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba($oxitrans-red, 0.5);
+    }
+    
+    &:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 15px rgba($oxitrans-red, 0.4);
+    }
+    
     &:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+      transform: none;
     }
     
     // Estado de loading
@@ -159,7 +185,52 @@
   &__footer {
     text-align: center;
     margin-top: $spacing-lg;
-    color: $gray-500;
+    color: rgba(white, 0.7);
     font-size: $font-size-xs;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  &__register-link {
+    margin-top: $spacing-lg;
+    padding-top: $spacing-lg;
+    border-top: 1px solid rgba(white, 0.3);
+    
+    p {
+      color: $oxitrans-gray-light;
+      font-size: $font-size-sm;
+      margin-bottom: $spacing-md;
+      font-weight: $font-weight-medium;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  &__register-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-sm;
+    background: $oxitrans-gray-light;
+    color: white;
+    text-decoration: none;
+    padding: $spacing-md $spacing-lg;
+    border-radius: $border-radius-md;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(white, 0.3);
+    backdrop-filter: blur(10px);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    
+    &:hover {
+      background: rgba(white, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      border-color: rgba(white, 0.5);
+    }
+    
+    svg {
+      width: 16px;
+      height: 16px;
+    }
   }
 }

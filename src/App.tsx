@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useEffect } from 'react';
 import { useAuthStore } from './stores/authStore';
 import { LoginPage } from './pages/LoginPage';
+import { RegistroPage } from './pages/RegistroPage';
 import { DashboardPage } from './pages/DashboardPage';
 
 function App() {
@@ -20,6 +21,12 @@ function App() {
             path="/login" 
             element={
               isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />
+            } 
+          />
+          <Route 
+            path="/registro" 
+            element={
+              isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegistroPage />
             } 
           />
           <Route 

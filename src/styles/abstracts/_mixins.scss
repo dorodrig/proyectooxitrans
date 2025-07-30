@@ -85,9 +85,17 @@
   overflow: hidden;
 }
 
-// Mixin para gradientes
+// Mixin para gradientes corporativos OXITRANS
 @mixin gradient-primary {
-  background: linear-gradient(135deg, $primary-color, $secondary-color);
+  background: linear-gradient(135deg, $oxitrans-red, $oxitrans-red-dark);
+}
+
+@mixin gradient-secondary {
+  background: linear-gradient(135deg, $oxitrans-gray, $oxitrans-black);
+}
+
+@mixin gradient-light {
+  background: linear-gradient(135deg, $oxitrans-red-light, $oxitrans-red);
 }
 
 // Mixin para texto truncado

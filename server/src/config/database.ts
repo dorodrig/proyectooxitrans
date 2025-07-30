@@ -44,6 +44,17 @@ export const executeQuery = async (query: string, params?: unknown[]): Promise<m
   }
 };
 
+// Función para ejecutar INSERT/UPDATE/DELETE queries
+export const executeInsertQuery = async (query: string, params?: unknown[]): Promise<mysql.ResultSetHeader> => {
+  try {
+    const [result] = await pool.execute<mysql.ResultSetHeader>(query, params);
+    return result;
+  } catch (error) {
+    console.error('Error ejecutando query:', error);
+    throw error;
+  }
+};
+
 // Función para transacciones
 export const executeTransaction = async (
   queries: { query: string; params?: unknown[] }[]

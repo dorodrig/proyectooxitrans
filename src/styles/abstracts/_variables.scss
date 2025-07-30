@@ -2,18 +2,26 @@
 // VARIABLES OXITRANS S.A.S
 // ====================================
 
-// Colores principales
-$primary-color: #1e40af;
-$secondary-color: #3b82f6;
-$accent-color: #fbbf24;
-$dark-color: #1f2937;
+// Colores corporativos OXITRANS
+$oxitrans-red: #dc2626;        // Rojo principal del logo
+$oxitrans-red-dark: #b91c1c;   // Rojo más oscuro
+$oxitrans-red-light: #f87171;  // Rojo más claro
+$oxitrans-gray: #374151;       // Gris corporativo
+$oxitrans-gray-light: #6b7280; // Gris claro
+$oxitrans-black: #111827;      // Negro del logo
+
+// Colores principales basados en identidad OXITRANS
+$primary-color: $oxitrans-red;
+$secondary-color: $oxitrans-red-light;
+$accent-color: #fbbf24;        // Mantener amarillo para alertas/avisos
+$dark-color: $oxitrans-black;
 $light-color: #f8fafc;
 
 // Colores del sistema
 $success-color: #10b981;
 $warning-color: #f59e0b;
-$error-color: #ef4444;
-$info-color: #3b82f6;
+$error-color: #dc2626;         // Usar el rojo corporativo para errores
+$info-color: $oxitrans-red;    // Información en rojo corporativo
 
 // Colores grises
 $gray-50: #f9fafb;

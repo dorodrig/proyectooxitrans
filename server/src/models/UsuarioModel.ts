@@ -1,4 +1,4 @@
-import { executeQuery } from '../config/database';
+import { executeQuery, executeInsertQuery } from '../config/database';
 import type { Usuario } from '../types';
 import bcrypt from 'bcryptjs';
 
@@ -95,6 +95,22 @@ export class UsuarioModel {
     return this.formatUser(results[0]);
   }
   
+  // Obtener usuario por documento
+  static async findByDocument(documento: string): Promise<Usuario | null> {
+    const query = `
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
+             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
+             foto_url, created_at, updated_at
+      FROM usuarios 
+      WHERE documento = ? AND estado != 'eliminado'
+    `;
+    
+    const results = await executeQuery(query, [documento]) as UserRow[];
+    if (results.length === 0) return null;
+    
+    return this.formatUser(results[0]);
+  }
+  
   // Obtener usuario para login (incluye password)
   static async findByEmailWithPassword(email: string): Promise<(Usuario & { passwordHash: string }) | null> {
     const query = `
@@ -106,6 +122,26 @@ export class UsuarioModel {
     `;
     
     const results = await executeQuery(query, [email]) as (UserRow & { password_hash: string })[];
+    if (results.length === 0) return null;
+    
+    const user = this.formatUser(results[0]);
+    return {
+      ...user,
+      passwordHash: results[0].password_hash
+    };
+  }
+
+  // Obtener usuario para login por documento (incluye password)
+  static async findByDocumentWithPassword(documento: string): Promise<(Usuario & { passwordHash: string }) | null> {
+    const query = `
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
+             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
+             foto_url, password_hash, created_at, updated_at
+      FROM usuarios 
+      WHERE documento = ? AND estado = 'activo'
+    `;
+    
+    const results = await executeQuery(query, [documento]) as (UserRow & { password_hash: string })[];
     if (results.length === 0) return null;
     
     const user = this.formatUser(results[0]);
@@ -373,5 +409,47 @@ export class UsuarioModel {
     
     const result = await executeQuery(query, [hashedPassword, new Date(), id]) as DbRow[];
     return (result[0]?.affectedRows as number) > 0;
+  }
+
+  // Crear usuario con contraseña personalizada (para registro)
+  static async createWithPassword(
+    userData: Omit<Usuario, 'id' | 'created_at' | 'updated_at'>, 
+    password: string
+  ): Promise<string> {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    const query = `
+      INSERT INTO usuarios (
+        nombre, apellido, email, telefono, documento, tipo_documento,
+        rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
+        foto_url, password_hash
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    
+    const params = [
+      userData.nombre,
+      userData.apellido,
+      userData.email,
+      userData.telefono || null,
+      userData.documento,
+      userData.tipoDocumento,
+      userData.rol,
+      userData.estado,
+      userData.fechaIngreso,
+      userData.departamento,
+      userData.cargo,
+      userData.codigoAcceso || null,
+      userData.fotoUrl || null,
+      hashedPassword
+    ];
+
+    const result = await executeInsertQuery(query, params);
+    
+    // Para INSERT, result tiene la propiedad insertId directamente
+    if (result && result.insertId) {
+      return result.insertId.toString();
+    }
+    
+    throw new Error('Error al crear el usuario');
   }
 }

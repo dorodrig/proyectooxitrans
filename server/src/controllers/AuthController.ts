@@ -16,19 +16,19 @@ export class AuthController {
   // Login de usuario
   static async login(req: Request, res: Response): Promise<void> {
     try {
-      const { email, password } = req.body;
+      const { documento, password } = req.body;
       
       // Validar datos requeridos
-      if (!email || !password) {
+      if (!documento || !password) {
         res.status(400).json({
           success: false,
-          message: 'Email y contraseña son requeridos'
+          message: 'Documento y contraseña son requeridos'
         });
         return;
       }
       
       // Buscar usuario
-      const user = await UsuarioModel.findByEmailWithPassword(email);
+      const user = await UsuarioModel.findByDocumentWithPassword(documento);
       if (!user) {
         res.status(401).json({
           success: false,
@@ -52,7 +52,7 @@ export class AuthController {
       
       const payload = { 
         userId: user.id, 
-        email: user.email, 
+        documento: user.documento, 
         rol: user.rol 
       };
       
@@ -95,7 +95,7 @@ export class AuthController {
       
       interface JwtPayload {
         userId: string;
-        email: string;
+        documento: string;
         rol: string;
         iat?: number;
         exp?: number;
@@ -181,6 +181,123 @@ export class AuthController {
       
     } catch (error) {
       console.error('Error al cambiar contraseña:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Registro de empleados
+  static async registro(req: Request, res: Response): Promise<void> {
+    try {
+      const {
+        nombre,
+        apellido,
+        email,
+        documento,
+        tipo_documento,
+        telefono,
+        departamento,
+        cargo,
+        password,
+        fecha_ingreso
+      } = req.body;
+
+      // Validar datos requeridos
+      const requiredFields = {
+        nombre,
+        apellido,
+        email,
+        documento,
+        tipo_documento,
+        departamento,
+        cargo,
+        password
+      };
+
+      for (const [field, value] of Object.entries(requiredFields)) {
+        if (!value) {
+          res.status(400).json({
+            success: false,
+            message: `El campo ${field} es requerido`
+          });
+          return;
+        }
+      }
+
+      // Validar email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        res.status(400).json({
+          success: false,
+          message: 'Por favor ingrese un email válido'
+        });
+        return;
+      }
+
+      // Verificar si ya existe un usuario con el mismo email o documento
+      const existingUser = await UsuarioModel.findByEmail(email);
+      if (existingUser) {
+        res.status(400).json({
+          success: false,
+          message: 'Ya existe un usuario con este email'
+        });
+        return;
+      }
+
+      const existingDocument = await UsuarioModel.findByDocument(documento);
+      if (existingDocument) {
+        res.status(400).json({
+          success: false,
+          message: 'Ya existe un usuario con este documento'
+        });
+        return;
+      }
+
+      // Crear nuevo usuario con estado "inactivo"
+      const userData = {
+        nombre,
+        apellido,
+        email,
+        telefono: telefono || undefined,
+        documento,
+        tipoDocumento: tipo_documento,
+        rol: 'empleado' as const,
+        estado: 'inactivo' as const, // IMPORTANTE: El usuario se crea inactivo
+        fechaIngreso: new Date(fecha_ingreso || new Date().toISOString().split('T')[0]),
+        departamento,
+        cargo,
+        codigoAcceso: undefined,
+        fotoUrl: undefined
+      };
+
+      const userId = await UsuarioModel.createWithPassword(userData, password);
+
+      res.status(201).json({
+        success: true,
+        message: 'Usuario registrado exitosamente. Su cuenta será revisada por un administrador.',
+        data: {
+          id: userId,
+          email: email,
+          estado: 'inactivo'
+        }
+      });
+
+    } catch (error) {
+      console.error('Error en registro:', error);
+      
+      // Manejar errores específicos de base de datos
+      if (error instanceof Error) {
+        if (error.message.includes('Duplicate entry')) {
+          res.status(400).json({
+            success: false,
+            message: 'El email o documento ya están registrados'
+          });
+          return;
+        }
+      }
+
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'

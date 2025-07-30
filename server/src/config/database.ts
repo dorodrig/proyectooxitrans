@@ -20,11 +20,31 @@ const dbConfig = {
 // Pool de conexiones
 export const pool = mysql.createPool(dbConfig);
 
-// Función para probar la conexión
+// Función para probar la conexión y crear tablas necesarias
 export const testConnection = async (): Promise<boolean> => {
   try {
     const connection = await pool.getConnection();
     console.log('✅ Conexión a la base de datos establecida correctamente');
+    
+    // Crear tabla de tokens de restablecimiento si no existe
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        usuario_id INT NOT NULL,
+        token VARCHAR(255) NOT NULL UNIQUE,
+        expires_at TIMESTAMP NOT NULL,
+        usado BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        used_at TIMESTAMP NULL,
+        
+        FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+        INDEX idx_token (token),
+        INDEX idx_usuario_id (usuario_id),
+        INDEX idx_expires_at (expires_at),
+        INDEX idx_usado (usado)
+      );
+    `);
+    
     connection.release();
     return true;
   } catch (error) {

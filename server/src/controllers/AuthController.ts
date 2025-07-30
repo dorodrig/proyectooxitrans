@@ -304,4 +304,152 @@ export class AuthController {
       });
     }
   }
+
+  // ====================================
+  // RESTABLECIMIENTO DE CONTRASEÑA
+  // ====================================
+
+  // Solicitar restablecimiento de contraseña (simplificado por documento)
+  static async requestPasswordReset(req: Request, res: Response): Promise<void> {
+    try {
+      const { documento } = req.body;
+
+      if (!documento) {
+        res.status(400).json({
+          success: false,
+          message: 'El número de documento es requerido'
+        });
+        return;
+      }
+
+      // Verificar si el usuario existe
+      const usuario = await UsuarioModel.findByDocument(documento);
+      
+      if (!usuario) {
+        // Por seguridad, respondemos con el mismo mensaje aunque no exista
+        res.status(200).json({
+          success: true,
+          message: 'Si el documento existe, podrás restablecer tu contraseña',
+          documentExists: false
+        });
+        return;
+      }
+
+      // Si el usuario existe, generamos un token temporal
+      const resetToken = await UsuarioModel.createPasswordResetToken(Number(usuario.id));
+      
+      res.status(200).json({
+        success: true,
+        message: 'Documento verificado correctamente',
+        documentExists: true,
+        resetToken,
+        usuario: {
+          nombre: usuario.nombre,
+          apellido: usuario.apellido,
+          documento: usuario.documento
+        }
+      });
+
+    } catch (error) {
+      console.error('Error en requestPasswordReset:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Verificar token de restablecimiento
+  static async verifyResetToken(req: Request, res: Response): Promise<void> {
+    try {
+      const { token } = req.params;
+
+      if (!token) {
+        res.status(400).json({
+          success: false,
+          message: 'Token requerido'
+        });
+        return;
+      }
+
+      const verification = await UsuarioModel.verifyPasswordResetToken(token);
+
+      if (!verification.valid) {
+        res.status(400).json({
+          success: false,
+          message: 'Token inválido o expirado'
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Token válido'
+      });
+
+    } catch (error) {
+      console.error('Error en verificación de token:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  // Restablecer contraseña
+  static async resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { token, password, confirmPassword } = req.body;
+
+      // Validar datos requeridos
+      if (!token || !password || !confirmPassword) {
+        res.status(400).json({
+          success: false,
+          message: 'Token, contraseña y confirmación son requeridos'
+        });
+        return;
+      }
+
+      // Validar que las contraseñas coincidan
+      if (password !== confirmPassword) {
+        res.status(400).json({
+          success: false,
+          message: 'Las contraseñas no coinciden'
+        });
+        return;
+      }
+
+      // Validar longitud de contraseña
+      if (password.length < 6) {
+        res.status(400).json({
+          success: false,
+          message: 'La contraseña debe tener al menos 6 caracteres'
+        });
+        return;
+      }
+
+      // Restablecer contraseña
+      const success = await UsuarioModel.resetPasswordWithToken(token, password);
+
+      if (!success) {
+        res.status(400).json({
+          success: false,
+          message: 'Token inválido o expirado'
+        });
+        return;
+      }
+
+      res.status(200).json({
+        success: true,
+        message: 'Contraseña restablecida exitosamente'
+      });
+
+    } catch (error) {
+      console.error('Error en restablecimiento de contraseña:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
 }

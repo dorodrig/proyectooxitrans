@@ -4,6 +4,7 @@ import { useAuthStore } from './stores/authStore';
 import { LoginPage } from './pages/LoginPage';
 import { RegistroPage } from './pages/RegistroPage';
 import { DashboardPage } from './pages/DashboardPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 function App() {
   const { isAuthenticated, initializeAuth } = useAuthStore();
@@ -27,6 +28,12 @@ function App() {
             path="/registro" 
             element={
               isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegistroPage />
+            } 
+          />
+          <Route 
+            path="/forgot-password" 
+            element={
+              isAuthenticated ? <Navigate to="/dashboard" replace /> : <ForgotPasswordPage />
             } 
           />
           <Route 

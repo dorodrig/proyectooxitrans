@@ -452,4 +452,100 @@ export class UsuarioModel {
     
     throw new Error('Error al crear el usuario');
   }
+
+  // ====================================
+  // MÉTODOS PARA RESTABLECIMIENTO DE CONTRASEÑA
+  // ====================================
+
+  // Crear token de recuperación de contraseña (por ID de usuario)
+  static async createPasswordResetToken(userId: number): Promise<string> {
+    // Generar token único
+    const crypto = await import('crypto');
+    const token = crypto.randomBytes(32).toString('hex');
+    
+    // Token expira en 1 hora
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+
+    const query = `
+      INSERT INTO password_reset_tokens (usuario_id, token, expires_at)
+      VALUES (?, ?, ?)
+    `;
+
+    await executeInsertQuery(query, [userId, token, expiresAt]);
+    return token;
+  }
+
+  // Verificar token de recuperación
+  static async verifyPasswordResetToken(token: string): Promise<{ valid: boolean; userId?: string }> {
+    const query = `
+      SELECT usuario_id, expires_at, usado
+      FROM password_reset_tokens
+      WHERE token = ? AND usado = FALSE
+    `;
+
+    const results = await executeQuery(query, [token]) as Array<{
+      usuario_id: number;
+      expires_at: Date;
+      usado: boolean;
+    }>;
+
+    if (results.length === 0) {
+      return { valid: false };
+    }
+
+    const tokenData = results[0];
+    const now = new Date();
+    const expiresAt = new Date(tokenData.expires_at);
+
+    if (now > expiresAt) {
+      return { valid: false };
+    }
+
+    return { valid: true, userId: tokenData.usuario_id.toString() };
+  }
+
+  // Restablecer contraseña usando token
+  static async resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
+    const tokenVerification = await this.verifyPasswordResetToken(token);
+    
+    if (!tokenVerification.valid || !tokenVerification.userId) {
+      return false;
+    }
+
+    // Hash de la nueva contraseña
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar contraseña
+    const updatePasswordQuery = `
+      UPDATE usuarios 
+      SET password_hash = ?, updated_at = NOW()
+      WHERE id = ?
+    `;
+
+    // Marcar token como usado
+    const markTokenUsedQuery = `
+      UPDATE password_reset_tokens 
+      SET usado = TRUE, used_at = NOW()
+      WHERE token = ?
+    `;
+
+    try {
+      await executeInsertQuery(updatePasswordQuery, [hashedPassword, tokenVerification.userId]);
+      await executeInsertQuery(markTokenUsedQuery, [token]);
+      return true;
+    } catch (error) {
+      console.error('Error al restablecer contraseña:', error);
+      return false;
+    }
+  }
+
+  // Limpiar tokens expirados (para mantenimiento)
+  static async cleanExpiredTokens(): Promise<void> {
+    const query = `
+      DELETE FROM password_reset_tokens 
+      WHERE expires_at < NOW() OR usado = TRUE
+    `;
+    
+    await executeInsertQuery(query, []);
+  }
 }

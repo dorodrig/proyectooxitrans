@@ -107,6 +107,33 @@ export const authService = {
     });
   },
 
+  // Solicitar restablecimiento de contraseña
+  requestPasswordReset: async (documento: string): Promise<{
+    documentExists: boolean;
+    resetToken?: string;
+    usuario?: {
+      nombre: string;
+      apellido: string;
+      documento: string;
+    };
+  }> => {
+    return apiClient.post('/auth/forgot-password', { documento });
+  },
+
+  // Verificar token de restablecimiento
+  verifyResetToken: async (token: string): Promise<void> => {
+    return apiClient.get(`/auth/verify-reset-token/${token}`);
+  },
+
+  // Restablecer contraseña
+  resetPassword: async (token: string, newPassword: string): Promise<void> => {
+    return apiClient.post('/auth/reset-password', {
+      token,
+      password: newPassword,
+      confirmPassword: newPassword,
+    });
+  },
+
   // Obtener usuario desde localStorage
   getUserFromStorage: (): Usuario | null => {
     try {
@@ -122,3 +149,15 @@ export const authService = {
     return !!localStorage.getItem('auth_token');
   },
 };
+
+// Exportar funciones específicas para compatibilidad
+export const login = authService.login;
+export const registroEmpleado = authService.registroEmpleado;
+export const getCurrentUser = authService.getCurrentUser;
+export const verifyToken = authService.verifyToken;
+export const changePassword = authService.changePassword;
+export const requestPasswordReset = authService.requestPasswordReset;
+export const verifyResetToken = authService.verifyResetToken;
+export const resetPassword = authService.resetPassword;
+export const getUserFromStorage = authService.getUserFromStorage;
+export const hasToken = authService.hasToken;

@@ -336,6 +336,25 @@ END //
 DELIMITER ;
 
 -- ====================================
+-- TABLA DE TOKENS DE RECUPERACIÓN DE CONTRASEÑA
+-- ====================================
+CREATE TABLE password_reset_tokens (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    usado BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    used_at TIMESTAMP NULL,
+    
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    INDEX idx_token (token),
+    INDEX idx_usuario_id (usuario_id),
+    INDEX idx_expires_at (expires_at),
+    INDEX idx_usado (usado)
+);
+
+-- ====================================
 -- VERIFICACIÓN FINAL
 -- ====================================
 

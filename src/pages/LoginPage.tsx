@@ -107,6 +107,11 @@ export const LoginPage: React.FC = () => {
           </form>
 
           <div className="login-page__footer">
+            <div className="login-page__forgot-password">
+              <Link to="/forgot-password" className="login-page__forgot-link">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
             <p>
               ¿Problemas para acceder? Contacte al administrador del sistema
             </p>

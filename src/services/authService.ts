@@ -51,14 +51,23 @@ export const authService = {
   // Iniciar sesión
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     const response = await apiClient.post('/auth/login', credentials);
-    
-    // Guardar token en localStorage
-    if (response.token) {
-      localStorage.setItem('auth_token', response.token);
-      localStorage.setItem('usuario', JSON.stringify(response.usuario));
+    if (import.meta.env.DEV) {
+      console.log('[authService] Respuesta cruda login:', response);
     }
-    
-    return response;
+    // Adaptar a la estructura real del backend
+    const token = response?.data?.token;
+    const usuario = response?.data?.user;
+    if (!token || typeof token !== 'string') {
+      throw new Error('El backend no devolvió un token válido. Respuesta: ' + JSON.stringify(response));
+    }
+    localStorage.removeItem('auth_token');
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('usuario', JSON.stringify(usuario));
+    return {
+      token,
+      usuario,
+      message: response.message || 'Login exitoso',
+    };
   },
 
   // Cerrar sesión

@@ -24,6 +24,10 @@ const getAuthToken = (): string | null => {
 // Función para agregar el token a las headers
 const getAuthHeaders = () => {
   const token = getAuthToken();
+  if (import.meta.env.DEV) {
+    // Solo en desarrollo, log para depuración
+    console.log('[apiClient] Token enviado:', token);
+  }
   return {
     ...fetchConfig.headers,
     ...(token && { Authorization: `Bearer ${token}` }),

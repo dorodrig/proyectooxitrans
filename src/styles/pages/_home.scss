@@ -1,0 +1,86 @@
+// Estilos para la HomePage de OXITRANS
+@use '../abstracts' as *;
+.home-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, rgba($oxitrans-red, 0.08) 0%, rgba($oxitrans-red-dark, 0.12) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2rem 1rem 4rem 1rem;
+
+  h1 {
+    color: $oxitrans-red;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2.5rem;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .grid {
+    width: 100%;
+    max-width: 900px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+
+  .card-home {
+    background: white;
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 32px rgba($oxitrans-red, 0.08), 0 1.5px 6px rgba(0,0,0,0.04);
+    padding: 2.5rem 2rem 2rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    border: 1.5px solid #f3f4f6;
+    transition: box-shadow 0.2s, border 0.2s, transform 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+      box-shadow: 0 12px 40px rgba($oxitrans-red, 0.18), 0 2px 8px rgba(0,0,0,0.08);
+      border-color: $oxitrans-red;
+      transform: translateY(-4px) scale(1.03);
+    }
+
+    .bg-oxitrans-red\/10 {
+      background: rgba($oxitrans-red, 0.10);
+    }
+    .text-oxitrans-red {
+      color: $oxitrans-red;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #22223b;
+      text-align: center;
+    }
+    p {
+      color: #6b7280;
+      font-size: 1rem;
+      text-align: center;
+      margin: 0;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 600px) {
+  .home-page {
+    h1 {
+      font-size: 1.5rem;
+    }
+    .grid {
+      gap: 1rem;
+    }
+    .card-home {
+      padding: 1.5rem 1rem 1rem 1rem;
+    }
+  }
+}

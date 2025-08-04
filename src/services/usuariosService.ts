@@ -18,23 +18,29 @@ interface UpdateUserData extends Partial<CreateUserData> {
   id: string;
 }
 
-interface UsuariosResponse {
-  usuarios: Usuario[];
-  total: number;
-  page: number;
-  limit: number;
+
+// Estructura real de la respuesta del backend
+interface UsuariosResponseBackend {
+  success: boolean;
+  data: {
+    usuarios: Usuario[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages?: number;
+  };
 }
 
 export const usuariosService = {
   // Obtener todos los usuarios con paginación
-  getAll: async (page = 1, limit = 10, search?: string): Promise<UsuariosResponse> => {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      limit: limit.toString(),
-      ...(search && { search }),
-    });
-    
-    return apiClient.get(`/usuarios?${params}`);
+  getAll: async (page = 1, limit = 10, search?: string): Promise<UsuariosResponseBackend> => {
+    const params = new URLSearchParams();
+    params.append('page', page.toString());
+    params.append('limit', limit.toString());
+    if (search && search.trim() !== '') {
+      params.append('search', search);
+    }
+    return apiClient.get(`/usuarios?${params.toString()}`);
   },
 
   // Obtener usuario por ID

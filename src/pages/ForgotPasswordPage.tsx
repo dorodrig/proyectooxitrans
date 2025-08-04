@@ -34,10 +34,9 @@ const ForgotPasswordPage: React.FC = () => {
 
     try {
       const response = await requestPasswordReset(documento);
-      
       if (response.documentExists) {
-        setUserData(response.usuario);
-        setResetToken(response.resetToken);
+        setUserData(response.usuario ?? null);
+        setResetToken(response.resetToken ?? '');
         setStep('password');
         setMessage('Documento verificado. Ahora puedes establecer tu nueva contraseña.');
       } else {

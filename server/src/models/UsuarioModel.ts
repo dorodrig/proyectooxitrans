@@ -186,17 +186,19 @@ export class UsuarioModel {
   
   // Obtener usuarios con paginación
   static async findAllPaginated(page: number, limit: number, search: string = ''): Promise<{usuarios: Usuario[], total: number}> {
-    const offset = (page - 1) * limit;
-    
+    const safeLimit = Number.isFinite(Number(limit)) && !isNaN(Number(limit)) ? Number(limit) : 10;
+    const safePage = Number.isFinite(Number(page)) && !isNaN(Number(page)) ? Number(page) : 1;
+    const offset = (safePage - 1) * safeLimit;
+
     let whereClause = "WHERE estado != 'eliminado'";
     const params: (string | number)[] = [];
-    
-    if (search) {
+
+    if (search && search.trim() !== '') {
       whereClause += " AND (nombre LIKE ? OR apellido LIKE ? OR email LIKE ? OR documento LIKE ?)";
       const searchParam = `%${search}%`;
       params.push(searchParam, searchParam, searchParam, searchParam);
     }
-    
+
     // Query para obtener usuarios
     const usersQuery = `
       SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
@@ -205,21 +207,26 @@ export class UsuarioModel {
       FROM usuarios 
       ${whereClause}
       ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
+      LIMIT ${safeLimit} OFFSET ${offset}
     `;
-    
+
     // Query para contar total
     const countQuery = `
       SELECT COUNT(*) as total
       FROM usuarios 
       ${whereClause}
     `;
-    
+
+    // Siempre pasar limit y offset como números al final del array de parámetros
+    // Debug: log de query final
+    console.log('[findAllPaginated] Query ejecutada:', usersQuery);
+    console.log('[findAllPaginated] Params:', params);
+
     const [usuarios, countResult] = await Promise.all([
-      executeQuery(usersQuery, [...params, limit, offset]) as Promise<UserRow[]>,
+      executeQuery(usersQuery, params) as Promise<UserRow[]>,
       executeQuery(countQuery, params) as Promise<Array<{ total: number }>>
     ]);
-    
+
     return {
       usuarios: usuarios.map((user: UserRow) => this.formatUser(user)),
       total: countResult[0].total

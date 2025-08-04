@@ -2,7 +2,13 @@ import { Router } from 'express';
 import { AuthController } from '../controllers/AuthController';
 import { authenticateToken } from '../middleware/auth';
 
+
 const router = Router();
+// Logout (solo para frontend, no hace nada en backend)
+router.post('/logout', (req, res) => {
+  // Aquí podrías invalidar el token en una lista negra si lo implementas
+  res.status(200).json({ success: true, message: 'Sesión cerrada' });
+});
 
 // Rutas públicas
 router.post('/login', AuthController.login);

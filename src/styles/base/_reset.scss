@@ -1,7 +1,9 @@
+@use 'sass:color';
 // ====================================
 // RESET Y ESTILOS BASE
 // ====================================
 
+@use '../abstracts' as *;
 * {
   margin: 0;
   padding: 0;
@@ -32,7 +34,7 @@ a {
   transition: color 0.2s ease-in-out;
   
   &:hover {
-    color: darken($primary-color, 15%);
+    color: color.adjust($primary-color, $lightness: -15%);
   }
   
   &:focus {

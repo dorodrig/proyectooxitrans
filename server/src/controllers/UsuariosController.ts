@@ -8,15 +8,16 @@ export class UsuariosController {
   static async getAll(req: Request, res: Response): Promise<void> {
     try {
       const { page = 1, limit = 10, search = '' } = req.query;
-      const pageNum = parseInt(page as string);
-      const limitNum = parseInt(limit as string);
-      
+      // Forzar conversión segura a number
+      const pageNum = Number.isFinite(Number(page)) && !isNaN(Number(page)) ? Number(page) : 1;
+      const limitNum = Number.isFinite(Number(limit)) && !isNaN(Number(limit)) ? Number(limit) : 10;
+
       const { usuarios, total } = await UsuarioModel.findAllPaginated(
         pageNum,
         limitNum,
-        search as string
+        typeof search === 'string' ? search : ''
       );
-      
+
       res.json({
         success: true,
         data: {

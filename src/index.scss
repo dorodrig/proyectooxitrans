@@ -4,20 +4,21 @@
 // ====================================
 
 // Abstracts (variables, mixins, functions)
-@import './styles/abstracts/variables';
-@import './styles/abstracts/mixins';
+@use './styles/abstracts' as *;
 
 // Base (reset, typography, etc.)
-@import './styles/base/reset';
+@use './styles/base/reset' as *;
 
 // Components (botones, cards, forms, etc.)
-@import './styles/components/base';
+@use './styles/components/base' as *;
 
 // Pages (estilos específicos de páginas)
-@import './styles/pages/login';
-@import './styles/pages/registro';
-@import './styles/pages/dashboard';
-@import './styles/pages/password-reset';
+@use './styles/pages/login' as *;
+@use './styles/pages/registro' as *;
+@use './styles/pages/dashboard' as *;
+@use './styles/pages/password-reset' as *;
+@use './styles/pages/home' as *;
+@use './styles/pages/admin-usuarios' as *;
 
 /* Tailwind components */
 @tailwind utilities;

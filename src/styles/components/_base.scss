@@ -1,7 +1,9 @@
+@use 'sass:color';
 // ====================================
 // COMPONENTES BASE
 // ====================================
 
+@use '../abstracts' as *;
 // Botones
 .btn {
   @include button-base;
@@ -34,7 +36,7 @@
     color: white;
     
     &:hover:not(:disabled) {
-      background-color: darken($success-color, 10%);
+        background-color: color.adjust($success-color, $lightness: -10%);
     }
   }
   
@@ -44,7 +46,7 @@
     color: white;
     
     &:hover:not(:disabled) {
-      background-color: darken($warning-color, 10%);
+        background-color: color.adjust($warning-color, $lightness: -10%);
     }
   }
   
@@ -54,7 +56,7 @@
     color: white;
     
     &:hover:not(:disabled) {
-      background-color: darken($error-color, 10%);
+        background-color: color.adjust($error-color, $lightness: -10%);
     }
   }
   
@@ -150,27 +152,27 @@
   border-left: 4px solid;
   
   &--success {
-    background-color: lighten($success-color, 45%);
+    background-color: color.adjust($success-color, $lightness: 45%);
     border-left-color: $success-color;
-    color: darken($success-color, 20%);
+     color: color.adjust($success-color, $lightness: -20%);
   }
   
   &--warning {
-    background-color: lighten($warning-color, 40%);
+    background-color: color.adjust($warning-color, $lightness: 40%);
     border-left-color: $warning-color;
-    color: darken($warning-color, 20%);
+     color: color.adjust($warning-color, $lightness: -20%);
   }
   
   &--error {
-    background-color: lighten($error-color, 40%);
+    background-color: color.adjust($error-color, $lightness: 40%);
     border-left-color: $error-color;
-    color: darken($error-color, 20%);
+     color: color.adjust($error-color, $lightness: -20%);
   }
   
   &--info {
-    background-color: lighten($info-color, 40%);
+    background-color: color.adjust($info-color, $lightness: 40%);
     border-left-color: $info-color;
-    color: darken($info-color, 20%);
+     color: color.adjust($info-color, $lightness: -20%);
   }
 }
 

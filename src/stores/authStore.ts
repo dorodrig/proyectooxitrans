@@ -123,21 +123,33 @@ export const useAuthStore = create<AuthStore>()(
           }
         },
 
-        initializeAuth: () => {
-          // Verificar si hay datos en localStorage al inicializar
-          const token = authService.hasToken();
+        initializeAuth: async () => {
+          set({ isLoading: true });
+          const token = localStorage.getItem('auth_token');
           const usuario = authService.getUserFromStorage();
-          
           if (token && usuario) {
-            set({
-              usuario,
-              token: localStorage.getItem('auth_token'),
-              isAuthenticated: true,
-            });
-            
             // Verificar que el token siga siendo válido
-            get().verifyToken();
+            const isValid = await get().verifyToken();
+            if (isValid) {
+              set({
+                usuario,
+                token,
+                isAuthenticated: true,
+                isLoading: false,
+              });
+              return;
+            }
           }
+          // Si no hay token válido o no existe en localStorage, limpiar todo
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('usuario');
+          set({
+            usuario: null,
+            token: null,
+            isAuthenticated: false,
+            isLoading: false,
+            error: null,
+          });
         },
       }),
       {

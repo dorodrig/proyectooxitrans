@@ -66,15 +66,17 @@ const AdminUsuariosPage: React.FC = () => {
     },
     onMutate: async ({ id, nuevoEstado }) => {
       await queryClient.cancelQueries({ queryKey: ['usuarios'] });
-      const previousData = queryClient.getQueryData(['usuarios', searchQuery]);
+      const previousData = queryClient.getQueryData<{ data: { usuarios: Usuario[] } }>(['usuarios', searchQuery]);
       // Actualización optimista
-      queryClient.setQueryData(['usuarios', searchQuery], (oldData: any) => {
-        if (!oldData?.data?.usuarios) return oldData;
+      queryClient.setQueryData(['usuarios', searchQuery], (oldData) => {
+        if (!oldData || typeof oldData !== 'object') return oldData;
+        const usuarios = (oldData as { data?: { usuarios?: Usuario[] } })?.data?.usuarios;
+        if (!usuarios) return oldData;
         return {
-          ...oldData,
+          ...(oldData ?? {}),
           data: {
-            ...oldData.data,
-            usuarios: oldData.data.usuarios.map((u: Usuario) =>
+            ...((oldData as { data: { usuarios: Usuario[] } }).data),
+            usuarios: usuarios.map((u: Usuario) =>
               u.id === id ? { ...u, estado: nuevoEstado } : u
             ),
           },

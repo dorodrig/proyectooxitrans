@@ -29,6 +29,25 @@ interface UserRow {
 }
 
 export class UsuarioModel {
+  // Asignar rol a un usuario
+  static async asignarRol(id: string, rol: 'admin' | 'empleado' | 'supervisor'): Promise<boolean> {
+    const query = `
+      UPDATE usuarios
+      SET rol = ?, updated_at = ?
+      WHERE id = ? AND estado != 'eliminado'
+    `;
+    const result = await executeQuery(query, [rol, new Date(), id]);
+    // Helper para extraer affectedRows de cualquier tipo de resultado
+    const getAffectedRows = (res: unknown): number => {
+      if (Array.isArray(res)) {
+        return typeof res[0]?.affectedRows === 'number' ? res[0].affectedRows : 0;
+      } else if (typeof res === 'object' && res !== null && 'affectedRows' in res) {
+        return typeof (res as { affectedRows?: number }).affectedRows === 'number' ? (res as { affectedRows: number }).affectedRows : 0;
+      }
+      return 0;
+    };
+    return getAffectedRows(result) > 0;
+  }
   
   // Crear un nuevo usuario
   static async create(userData: Omit<Usuario, 'id' | 'created_at' | 'updated_at'>): Promise<string> {

@@ -2,6 +2,7 @@
 // ARCHIVO PRINCIPAL DE ESTILOS
 // OXITRANS S.A.S - Control de Acceso
 // ====================================
+@use './styles/components/asignarRolUsuario';
 
 // Abstracts (variables, mixins, functions)
 @use './styles/abstracts' as *;
@@ -19,6 +20,7 @@
 @use './styles/pages/password-reset' as *;
 @use './styles/pages/home' as *;
 @use './styles/pages/admin-usuarios' as *;
+@use './styles/pages/asignarRolesPage' as *;
 
 /* Tailwind components */
 @tailwind utilities;

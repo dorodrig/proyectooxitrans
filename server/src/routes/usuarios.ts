@@ -39,6 +39,9 @@ router.get('/:id', UsuariosController.getById);
 router.post('/', createUserValidation, UsuariosController.create);
 router.put('/:id', updateUserValidation, UsuariosController.update);
 router.put('/:id/status', UsuariosController.toggleStatus);
+
+// Endpoint para asignar rol a un usuario
+router.put('/:id/rol', UsuariosController.asignarRol);
 router.post('/:id/reset-password', UsuariosController.resetPassword);
 router.delete('/:id', UsuariosController.delete);
 

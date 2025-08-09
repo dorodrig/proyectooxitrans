@@ -1,0 +1,82 @@
+
+@use '../abstracts' as *;
+
+.asignar-rol-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+  z-index: 50;
+  transition: all 0.2s;
+
+  .modal-content {
+    background: $light-color;
+    // Si tienes un mixin para dark-mode, ajústalo aquí
+    // @include dark-mode {
+    //   background: $dark-color;
+    // }
+    border-radius: 1.25rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    padding: 2rem;
+    width: 100%;
+    max-width: 28rem;
+    border: 1px solid $secondary-color;
+    // @include dark-mode {
+    //   border: 1px solid $dark-color;
+    // }
+    animation: fade-in 0.2s;
+
+    h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    color: $primary-color;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: $primary-color;
+    }
+    select {
+      width: 100%;
+      margin-bottom: 1.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid $secondary-color;
+      padding: 0.5rem;
+      // @include dark-mode {
+      //   border: 1px solid $color-dark-border;
+      // }
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+      }
+    }
+    .error {
+      margin-bottom: 1rem;
+      color: $error-color;
+      text-align: center;
+      font-weight: 600;
+    }
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1rem;
+      .btn, .btn-primary {
+        padding: 0.5rem 1.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      }
+    }
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

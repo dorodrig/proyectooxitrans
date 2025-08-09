@@ -5,6 +5,7 @@ import { useAuthStore } from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import type { Usuario } from '../types';
 
+
 const AdminUsuariosPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
@@ -118,16 +119,24 @@ const AdminUsuariosPage: React.FC = () => {
           {accionError}
         </div>
       )}
-      <form onSubmit={handleSearch} className="mb-4 flex gap-2">
-        <input
-          type="text"
-          placeholder="Buscar por nombre o documento..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="form-input w-64"
-        />
-        <button type="submit" className="btn-primary">Buscar</button>
-      </form>
+      <div className="acciones-usuarios">
+        <form onSubmit={handleSearch}>
+          <input
+            type="text"
+            placeholder="Buscar por nombre o documento..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="form-input w-full max-w-xs"
+          />
+          <button type="submit" className="btn-primary">Buscar</button>
+        </form>
+        <button
+          className="btn-primary asignar-roles-btn"
+          onClick={() => navigate('/admin/asignar-roles')}
+        >
+          Asignar Roles
+        </button>
+      </div>
       {isLoading ? (
         <p>Cargando usuarios...</p>
       ) : error ? (

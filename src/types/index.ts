@@ -1,3 +1,4 @@
+export type Rol = 'admin' | 'empleado' | 'supervisor';
 export interface Usuario {
   id: string;
   nombre: string;

@@ -4,7 +4,7 @@
   "description": "Backend para Sistema de Control de Acceso OXITRANS S.A.S",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "nodemon --exec ts-node src/index_simple.ts",
+    "dev": "nodemon --exec ts-node src/index.ts",
     "dev:test": "nodemon --exec ts-node src/index_test.ts",
     "dev:full": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
@@ -24,7 +24,7 @@
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "express": "^4.21.2",
+    "express": "^4.18.2",
     "express-rate-limit": "^8.0.1",
     "express-validator": "^7.2.1",
     "helmet": "^8.1.0",

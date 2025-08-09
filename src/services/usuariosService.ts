@@ -1,6 +1,10 @@
+import type { Rol } from '../types';
 import { apiClient } from './apiClient';
 import type { Usuario } from '../types';
 
+async function asignarRol(id: string, nuevoRol: Rol) {
+  return apiClient.put(`/usuarios/${id}/rol`, { rol: nuevoRol });
+}
 interface CreateUserData {
   nombre: string;
   apellido: string;
@@ -32,6 +36,7 @@ interface UsuariosResponseBackend {
 }
 
 export const usuariosService = {
+  asignarRol,
   // Obtener todos los usuarios con paginación
   getAll: async (page = 1, limit = 10, search?: string): Promise<UsuariosResponseBackend> => {
     const params = new URLSearchParams();

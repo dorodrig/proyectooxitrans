@@ -3,6 +3,42 @@ import { UsuarioModel } from '../models/UsuarioModel';
 import { validationResult } from 'express-validator';
 
 export class UsuariosController {
+  // Asignar rol a un usuario
+  static async asignarRol(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { rol } = req.body;
+      console.log('[asignarRol] id recibido:', id, 'rol recibido:', rol);
+      if (!['admin', 'empleado', 'supervisor'].includes(rol)) {
+        res.status(400).json({
+          success: false,
+          message: 'Rol inválido'
+        });
+        return;
+      }
+      const updated = await UsuarioModel.asignarRol(id, rol);
+      console.log('[asignarRol] resultado update:', updated);
+      if (!updated) {
+        res.status(404).json({
+          success: false,
+          message: 'Usuario no encontrado'
+        });
+        return;
+      }
+      const usuario = await UsuarioModel.findById(id);
+      res.json({
+        success: true,
+        message: 'Rol asignado correctamente',
+        data: usuario
+      });
+    } catch (error) {
+      console.error('Error asignando rol:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
   
   // Obtener todos los usuarios con paginación
   static async getAll(req: Request, res: Response): Promise<void> {

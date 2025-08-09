@@ -1,0 +1,145 @@
+@use '../abstracts' as *;
+
+.asignar-roles-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, $light-color 0%, $light-color 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 0;
+
+  .asignar-roles-container {
+    width: 100%;
+    max-width: 900px;
+    background: $light-color;
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+    padding: 2.5rem;
+    border: 1px solid $secondary-color;
+    margin-bottom: 2rem;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: $primary-color;
+  }
+
+  .search-form {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+
+    input {
+      width: 18rem;
+      border-radius: 0.75rem;
+      border: 1px solid $secondary-color;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.15);
+      }
+    }
+    button {
+      @extend .btn !optional;
+      padding: 0.5rem 1.5rem;
+      border-radius: 0.75rem;
+    }
+  }
+
+  .mensaje {
+    margin-bottom: 1.5rem;
+    padding: 0.75rem 1rem;
+  background: $light-color;
+    color: $success-color;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  .tabla-usuarios {
+    width: 100%;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    margin-bottom: 2rem;
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      thead {
+        background: $light-color;
+        th {
+          padding: 1rem;
+          text-align: left;
+          font-weight: 700;
+          color: $primary-color;
+        }
+      }
+      tbody {
+        tr {
+          transition: background 0.2s;
+          &:hover {
+          background: $secondary-color;
+          }
+        }
+        td {
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid $secondary-color;
+        }
+      }
+    }
+    .seleccionar-btn {
+      @extend .btn !optional;
+      padding: 0.4rem 1.2rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+    .seleccionar-btn[disabled] {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+
+  .asignar-rol-form {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    select {
+      border-radius: 0.5rem;
+      border: 1px solid $secondary-color;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+        box-shadow: 0 0 0 2px rgba($primary-color, 0.15);
+      }
+    }
+    button {
+      @extend .btn-primary !optional;
+      padding: 0.5rem 1.5rem;
+      border-radius: 0.5rem;
+    }
+  }
+
+  .volver-btn {
+    @extend .btn !optional;
+    background: $secondary-color;
+    color: $primary-color;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    margin-top: 1rem;
+    &:hover {
+      background: $primary-color;
+      color: #fff;
+    }
+  }
+}

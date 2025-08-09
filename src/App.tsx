@@ -4,10 +4,11 @@ import { useAuthStore } from './stores/authStore';
 import { LoginPage } from './pages/LoginPage';
 import { RegistroPage } from './pages/RegistroPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { lazy, Suspense } from 'react';
+const AdminUsuariosPage = lazy(() => import('./pages/AdminUsuariosPage'));
+const AsignarRolesPage = lazy(() => import('./pages/AsignarRolesPage'));
 import HomePage from './pages/HomePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import React, { lazy, Suspense } from 'react';
-const AdminUsuariosPage = lazy(() => import('./pages/AdminUsuariosPage'));
 
 
 function App() {
@@ -59,6 +60,16 @@ function App() {
               isAuthenticated ? (
                 <Suspense fallback={<div>Cargando...</div>}>
                   <AdminUsuariosPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/admin/asignar-roles"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <AsignarRolesPage />
                 </Suspense>
               ) : <Navigate to="/login" replace />
             }

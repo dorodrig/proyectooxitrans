@@ -11,6 +11,7 @@ import rateLimit from 'express-rate-limit';
 import { testConnection } from './config/database';
 import authRoutes from './routes/auth';
 import usuariosRoutes from './routes/usuarios';
+import regionalesRoutes from './routes/regionales';
 import registrosRoutes from './routes/registros';
 
 // Cargar variables de entorno
@@ -68,6 +69,7 @@ if (process.env.NODE_ENV === 'production') {
 // Rutas de la API
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/regionales', regionalesRoutes);
 app.use('/api/registros', registrosRoutes);
 
 // Ruta de health check

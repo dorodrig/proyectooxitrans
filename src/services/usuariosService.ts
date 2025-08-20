@@ -1,3 +1,7 @@
+// Asignar regional y tipo de usuario a un usuario final
+async function asignarRegionalYTipo(id: string, regionalId: string, tipoUsuario: 'planta' | 'visita') {
+  return apiClient.put(`/usuarios/${id}/regional`, { regionalId, tipoUsuario });
+}
 import type { Rol } from '../types';
 import { apiClient } from './apiClient';
 import type { Usuario } from '../types';
@@ -37,6 +41,7 @@ interface UsuariosResponseBackend {
 
 export const usuariosService = {
   asignarRol,
+  asignarRegionalYTipo,
   // Obtener todos los usuarios con paginación
   getAll: async (page = 1, limit = 10, search?: string): Promise<UsuariosResponseBackend> => {
     const params = new URLSearchParams();
@@ -73,19 +78,10 @@ export const usuariosService = {
     return apiClient.put(`/usuarios/${id}/status`, { estado });
   },
 
-  // Buscar usuarios por criterios
-  search: async (criteria: {
-    nombre?: string;
-    departamento?: string;
-    cargo?: string;
-    rol?: string;
-    estado?: string;
-  }): Promise<Usuario[]> => {
+  // Buscar usuarios por nombre o documento
+  buscar: async (search: string): Promise<Usuario[]> => {
     const params = new URLSearchParams();
-    Object.entries(criteria).forEach(([key, value]) => {
-      if (value) params.append(key, value);
-    });
-    
+    params.append('search', search);
     return apiClient.get(`/usuarios/search?${params}`);
   },
 

@@ -29,6 +29,24 @@ interface UserRow {
 }
 
 export class UsuarioModel {
+  // Asignar regional y tipo_usuario a un usuario
+  static async asignarRegionalYTipo(id: string, regionalId: string, tipoUsuario: 'planta' | 'visita'): Promise<boolean> {
+    const query = `
+      UPDATE usuarios
+      SET regional_id = ?, tipo_usuario = ?, updated_at = ?
+      WHERE id = ? AND estado != 'eliminado'
+    `;
+    const result = await executeQuery(query, [regionalId, tipoUsuario, new Date(), id]);
+    const getAffectedRows = (res: unknown): number => {
+      if (Array.isArray(res)) {
+        return typeof res[0]?.affectedRows === 'number' ? res[0].affectedRows : 0;
+      } else if (typeof res === 'object' && res !== null && 'affectedRows' in res) {
+        return typeof (res as { affectedRows?: number }).affectedRows === 'number' ? (res as { affectedRows: number }).affectedRows : 0;
+      }
+      return 0;
+    };
+    return getAffectedRows(result) > 0;
+  }
   // Asignar rol a un usuario
   static async asignarRol(id: string, rol: 'admin' | 'empleado' | 'supervisor'): Promise<boolean> {
     const query = `

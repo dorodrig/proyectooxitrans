@@ -3,6 +3,27 @@ import { UsuarioModel } from '../models/UsuarioModel';
 import { validationResult } from 'express-validator';
 
 export class UsuariosController {
+  // Asignar regional y tipo_usuario a un usuario
+  static async asignarRegionalYTipo(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const { regionalId, tipoUsuario } = req.body;
+      if (!regionalId || !['planta', 'visita'].includes(tipoUsuario)) {
+        res.status(400).json({ success: false, message: 'Datos inválidos' });
+        return;
+      }
+      const updated = await UsuarioModel.asignarRegionalYTipo(id, regionalId, tipoUsuario);
+      if (!updated) {
+        res.status(404).json({ success: false, message: 'Usuario no encontrado' });
+        return;
+      }
+      const usuario = await UsuarioModel.findById(id);
+      res.json({ success: true, message: 'Regional y tipo asignados correctamente', data: usuario });
+    } catch (error) {
+      console.error('Error asignando regional y tipo:', error);
+      res.status(500).json({ success: false, message: 'Error interno del servidor' });
+    }
+  }
   // Asignar rol a un usuario
   static async asignarRol(req: Request, res: Response): Promise<void> {
     try {

@@ -38,6 +38,7 @@ router.get('/departamento/:departamento', UsuariosController.getByDepartamento);
 router.get('/:id', UsuariosController.getById);
 router.post('/', createUserValidation, UsuariosController.create);
 router.put('/:id', updateUserValidation, UsuariosController.update);
+router.put('/:id/regional', UsuariosController.asignarRegionalYTipo);
 router.put('/:id/status', UsuariosController.toggleStatus);
 
 // Endpoint para asignar rol a un usuario

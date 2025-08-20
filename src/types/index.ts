@@ -1,3 +1,14 @@
+// Regional para control maestro
+export interface Regional {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+  created_at?: Date;
+  updated_at?: Date;
+}
+
+// Tipo de usuario para control maestro
+export type TipoUsuario = 'planta' | 'visita';
 export type Rol = 'admin' | 'empleado' | 'supervisor';
 export interface Usuario {
   id: string;

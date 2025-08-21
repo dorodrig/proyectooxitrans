@@ -1,3 +1,7 @@
+// Asignar cargo a un usuario
+async function asignarCargo(id: string, cargo: string) {
+  return apiClient.put(`/usuarios/${id}/cargo`, { cargo });
+}
 // Asignar regional y tipo de usuario a un usuario final
 async function asignarRegionalYTipo(id: string, regionalId: string, tipoUsuario: 'planta' | 'visita') {
   return apiClient.put(`/usuarios/${id}/regional`, { regionalId, tipoUsuario });
@@ -42,6 +46,7 @@ interface UsuariosResponseBackend {
 export const usuariosService = {
   asignarRol,
   asignarRegionalYTipo,
+  asignarCargo,
   // Obtener todos los usuarios con paginación
   getAll: async (page = 1, limit = 10, search?: string): Promise<UsuariosResponseBackend> => {
     const params = new URLSearchParams();

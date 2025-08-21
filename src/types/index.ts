@@ -3,6 +3,8 @@ export interface Regional {
   id: string;
   nombre: string;
   descripcion?: string;
+  latitud?: number;
+  longitud?: number;
   created_at?: Date;
   updated_at?: Date;
 }

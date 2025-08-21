@@ -13,6 +13,7 @@ import authRoutes from './routes/auth';
 import usuariosRoutes from './routes/usuarios';
 import regionalesRoutes from './routes/regionales';
 import registrosRoutes from './routes/registros';
+import cargosRoutes from './routes/cargos';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -71,6 +72,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/regionales', regionalesRoutes);
 app.use('/api/registros', registrosRoutes);
+app.use('/api/cargos', cargosRoutes);
 
 // Ruta de health check
 app.get('/api/health', (req, res) => {

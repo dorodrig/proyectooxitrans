@@ -1,0 +1,95 @@
+@use '../abstracts' as *;
+// Estilos para el Panel de Control Maestro
+.control-maestro-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba($oxitrans-red, 0.08) 0%, #fff 60%, rgba($oxitrans-red-light, 0.12) 100%);
+  padding: 3rem 1rem;
+
+  .page-header {
+    max-width: 700px;
+    margin-bottom: 2.5rem;
+    text-align: center;
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: $oxitrans-red;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 8px rgba($oxitrans-red-light, 0.3);
+    }
+    p {
+      font-size: 1.15rem;
+      color: $oxitrans-gray;
+      margin-bottom: 1.5rem;
+    }
+    .divider {
+      height: 4px;
+      width: 100px;
+      background: $oxitrans-red-light;
+      border-radius: 2px;
+      margin: 0 auto 1.5rem auto;
+    }
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    width: 100%;
+    max-width: 900px;
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .card-home {
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 4px 24px rgba($oxitrans-red, 0.08);
+    padding: 2.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 2px solid $oxitrans-red-light;
+    transition: box-shadow 0.2s, transform 0.2s, border 0.2s;
+    cursor: pointer;
+    &:hover {
+      box-shadow: 0 8px 32px rgba($oxitrans-red-dark, 0.18);
+      transform: scale(1.04);
+      border-color: $oxitrans-red;
+      h2 {
+        color: $oxitrans-red-dark;
+      }
+    }
+    .icon {
+      background: rgba($oxitrans-red-light, 0.25);
+      border-radius: 50%;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      svg {
+        color: $oxitrans-red;
+        width: 3.5rem;
+        height: 3.5rem;
+        transition: transform 0.2s;
+      }
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: $oxitrans-red;
+      margin-bottom: 0.5rem;
+      transition: color 0.2s;
+    }
+    p {
+      color: $oxitrans-gray;
+      font-size: 1rem;
+      text-align: center;
+    }
+  }
+}

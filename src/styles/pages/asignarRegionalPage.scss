@@ -1,0 +1,301 @@
+@use '../abstracts' as *;
+.btn-gestionar-regionales {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: linear-gradient(90deg, $oxitrans-red 0%, $oxitrans-red-light 100%);
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.9rem;
+  box-shadow: 0 2px 12px rgba($oxitrans-red, 0.13);
+  padding: 0.7rem 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+  outline: none;
+  .icon-gear {
+    display: flex;
+    align-items: center;
+    svg {
+      vertical-align: middle;
+      stroke: #fff;
+      fill: none;
+      margin-right: 0.1rem;
+      transition: stroke 0.2s;
+    }
+  }
+  &:hover {
+    background: linear-gradient(90deg, darken($oxitrans-red, 8%) 0%, $oxitrans-red 100%);
+    box-shadow: 0 4px 18px rgba($oxitrans-red, 0.18);
+    transform: translateY(-2px) scale(1.04);
+    .icon-gear svg {
+      stroke: $accent-color;
+    }
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+  &:focus {
+    box-shadow: 0 0 0 3px rgba($oxitrans-red, 0.18);
+  }
+}
+// Mover al inicio del archivo
+.regionales-crud {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+  h3 {
+    color: $oxitrans-red;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1rem 0.5rem 1rem;
+    background: $gray-50;
+    border-radius: 1rem;
+    border: 1px solid $gray-200;
+    .form-input {
+      margin-bottom: 0;
+    }
+    .btn {
+      min-width: 110px;
+      margin-right: 0.5rem;
+      margin-bottom: 0;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba($oxitrans-red, 0.08);
+    }
+    .btn.bg-oxitrans-red {
+      background: $oxitrans-red;
+      color: #fff;
+      &:hover {
+        background: darken($oxitrans-red, 8%);
+      }
+    }
+    .btn.bg-gray-300 {
+      background: $gray-300;
+      color: $oxitrans-black;
+    }
+    .btn.bg-yellow-400 {
+      background: $accent-color;
+      color: $oxitrans-black;
+    }
+  }
+  ul {
+    margin-top: 0.5rem;
+    border-radius: 1rem;
+    border: 1px solid $gray-200;
+    background: $gray-50;
+    padding: 0.5rem 0.5rem;
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.7rem 0.5rem;
+      font-size: 1rem;
+      border-bottom: 1px solid $gray-100;
+      &:last-child {
+        border-bottom: none;
+      }
+      .font-semibold {
+        font-weight: 600;
+        color: $oxitrans-black;
+      }
+      .text-gray-500 {
+        color: $gray-500;
+        font-size: 0.95rem;
+        margin-left: 0.5rem;
+      }
+      .btn {
+        font-size: 0.95rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 0.5rem;
+        margin-left: 0.3rem;
+      }
+    }
+  }
+}
+.modal-regionales {
+  position: fixed;
+  inset: 0;
+  background: rgba($oxitrans-black, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  &-content {
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 32px rgba($oxitrans-black, 0.12);
+    padding: 2.5rem 2rem 2rem 2rem;
+    max-width: 420px;
+    width: 100%;
+    position: relative;
+    border: 1.5px solid $gray-200;
+    animation: fadein 0.25s ease;
+  }
+  .modal-close {
+    position: absolute;
+    top: 1.2rem;
+    right: 1.2rem;
+    font-size: 2rem;
+    color: $gray-400;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+    &:hover {
+      color: $oxitrans-red;
+    }
+  }
+}
+
+.regionales-crud {
+  background: none;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+  h3 {
+    color: $oxitrans-red;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    text-align: left;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin-bottom: 1.2rem;
+    .form-input {
+      margin-bottom: 0;
+    }
+    .btn {
+      min-width: 110px;
+      margin-right: 0.5rem;
+      margin-bottom: 0;
+    }
+  }
+  ul {
+    margin-top: 0.5rem;
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.7rem 0.5rem;
+      font-size: 1rem;
+      .font-semibold {
+        font-weight: 600;
+        color: $oxitrans-black;
+      }
+      .text-gray-500 {
+        color: $gray-500;
+        font-size: 0.95rem;
+      }
+      .btn {
+        font-size: 0.95rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 0.5rem;
+        margin-left: 0.3rem;
+      }
+    }
+  }
+}
+
+// Mover al inicio del archivo
+@keyframes fadein {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fadein {
+  animation: fadein 0.25s ease;
+}
+
+.asignar-regional-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 3rem 1rem;
+  background: linear-gradient(135deg, rgba($oxitrans-red, 0.04) 0%, #fff 100%);
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 24px rgba($oxitrans-red, 0.08);
+
+  h1 {
+    color: $oxitrans-red;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+
+  .asignar-regional-usuario {
+    background: none;
+    box-shadow: none;
+    padding: 0;
+    border-radius: 0;
+
+    label {
+      color: $oxitrans-gray;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid $gray-200;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      background: $gray-50;
+      color: $oxitrans-black;
+      transition: border 0.2s;
+      &:focus {
+        border-color: $oxitrans-red;
+        outline: none;
+      }
+    }
+    ul {
+      border: 1.5px solid $gray-200;
+      border-radius: 0.75rem;
+      background: $gray-50;
+      margin-top: 0.5rem;
+      li {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+        &:hover {
+          background: $oxitrans-red-light;
+          color: white;
+        }
+        &.bg-gray-300 {
+          background: $oxitrans-red-light;
+          color: white;
+        }
+      }
+    }
+    .btn-primary {
+      @include button-primary;
+      width: 100%;
+      margin-top: 1.5rem;
+      font-size: 1.1rem;
+      padding: 0.9rem 0;
+      border-radius: 0.75rem;
+    }
+    .text-green-700 {
+      color: $success-color;
+      font-weight: 600;
+      margin-top: 1rem;
+    }
+  }
+}

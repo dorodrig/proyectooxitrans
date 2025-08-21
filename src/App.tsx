@@ -8,6 +8,9 @@ import { lazy, Suspense } from 'react';
 const AdminUsuariosPage = lazy(() => import('./pages/AdminUsuariosPage'));
 const AsignarRolesPage = lazy(() => import('./pages/AsignarRolesPage'));
 const ControlMaestroPage = lazy(() => import('./pages/ControlMaestroPage'));
+const AsignarRegionalPage = lazy(() => import('./pages/AsignarRegionalPage'));
+const RegionalesPage = lazy(() => import('./pages/RegionalesPage'));
+const CargosPage = lazy(() => import('./pages/CargosPage'));
 // La ruta /control-maestro debe ir dentro del return del componente App, no aquí
 import HomePage from './pages/HomePage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
@@ -82,6 +85,36 @@ function App() {
               isAuthenticated ? (
                 <Suspense fallback={<div>Cargando...</div>}>
                   <ControlMaestroPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/admin/asignar-regional"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <AsignarRegionalPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/admin/regionales"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <RegionalesPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/admin/cargos"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <CargosPage />
                 </Suspense>
               ) : <Navigate to="/login" replace />
             }

@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosService } from '../services/usuariosService';
+import { cargosService } from '../services/cargosService';
+interface Cargo {
+  id: string;
+  nombre: string;
+  descripcion?: string;
+}
 import { useAuthStore } from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import type { Usuario } from '../types';
@@ -41,6 +47,20 @@ const AdminUsuariosPage: React.FC = () => {
   });
   // Adaptar para respuesta anidada: { success, data: { usuarios, ... } }
   const usuarios: Usuario[] = data?.data?.usuarios || [];
+
+  // Obtener cargos disponibles
+  const { data: cargosData } = useQuery({ queryKey: ['cargos'], queryFn: cargosService.getAll });
+  const cargos: Cargo[] = cargosData || [];
+
+  // Mutación para asignar cargo
+  const asignarCargoMutation = useMutation({
+    mutationFn: async ({ id, cargo }: { id: string; cargo: string }) => {
+      return usuariosService.asignarCargo(id, cargo);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['usuarios'] });
+    },
+  });
 
   const mutation = useMutation({
     mutationFn: async ({ id, nuevoEstado }: { id: string; nuevoEstado: 'activo' | 'inactivo' }) => {
@@ -148,6 +168,7 @@ const AdminUsuariosPage: React.FC = () => {
               <th>Nombre</th>
               <th>Documento</th>
               <th>Rol</th>
+              <th>Cargo</th>
               <th>Estado</th>
               <th>Acción</th>
             </tr>
@@ -159,6 +180,19 @@ const AdminUsuariosPage: React.FC = () => {
                   <td>{usuario.nombre} {usuario.apellido}</td>
                   <td>{usuario.documento}</td>
                   <td>{usuario.rol}</td>
+                  <td>
+                    <select
+                      value={usuario.cargo || ''}
+                      onChange={e => asignarCargoMutation.mutate({ id: usuario.id, cargo: e.target.value })}
+                      className="form-select"
+                      disabled={asignarCargoMutation.isPending}
+                    >
+                      <option value="">Sin cargo</option>
+                      {cargos.map((cargo: Cargo) => (
+                        <option key={cargo.id} value={cargo.nombre}>{cargo.nombre}</option>
+                      ))}
+                    </select>
+                  </td>
                   <td>{usuario.estado}</td>
                   <td>
                     <button

@@ -13,6 +13,7 @@ const RegionalesPage = lazy(() => import('./pages/RegionalesPage'));
 const CargosPage = lazy(() => import('./pages/CargosPage'));
 // La ruta /control-maestro debe ir dentro del return del componente App, no aquí
 import HomePage from './pages/HomePage';
+import NovedadesPage from './pages/NovedadesPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 
@@ -122,6 +123,12 @@ function App() {
           <Route 
             path="/" 
             element={isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />} 
+          />
+          <Route
+            path="/novedades"
+            element={
+              isAuthenticated ? <NovedadesPage /> : <Navigate to="/login" replace />
+            }
           />
         </Routes>
       </div>

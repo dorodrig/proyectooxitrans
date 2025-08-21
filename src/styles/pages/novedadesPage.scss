@@ -1,0 +1,98 @@
+.novedades-page {
+  max-width: 700px;
+  margin: 2rem auto;
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 32px rgba(200,16,46,0.08), 0 1.5px 6px rgba(0,0,0,0.04);
+  padding: 2.5rem 2rem 2rem 2rem;
+
+  h1 {
+    color: #e91e63;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+  .novedad-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      label {
+        font-weight: 600;
+        color: #e91e63;
+      }
+      input {
+        border: 1.5px solid #e0e0e0;
+        border-radius: 0.5rem;
+        padding: 0.7rem 1rem;
+        font-size: 1rem;
+        background: #fff;
+        transition: border 0.2s;
+        &:focus {
+          border-color: #e91e63;
+          outline: none;
+        }
+      }
+      select {
+        border: 1.5px solid #e0e0e0;
+        border-radius: 0.5rem;
+        padding: 0.7rem 1rem;
+        font-size: 1rem;
+        background: #fce4ec;
+        transition: border 0.2s;
+        &:focus {
+          border-color: #e91e63;
+          outline: none;
+        }
+      }
+      small {
+        color: #888;
+        font-size: 0.95rem;
+      }
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #e91e63 0%, #c8102e 100%);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(200,16,46, 0.08);
+      &:hover:not(:disabled) {
+        background: #c8102e;
+        box-shadow: 0 4px 16px rgba(200,16,46, 0.12);
+      }
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+  }
+  .msg-success {
+    margin-top: 1.5rem;
+    background: #fce4ec;
+    color: #c8102e;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(200,16,46,0.07);
+  }
+    .msg-error {
+      margin-top: 1rem;
+      background: #ffeaea;
+      color: #d32f2f;
+      padding: 0.8rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(211,47,47,0.07);
+    }
+}

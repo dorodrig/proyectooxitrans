@@ -181,17 +181,19 @@ const AdminUsuariosPage: React.FC = () => {
                   <td>{usuario.documento}</td>
                   <td>{usuario.rol}</td>
                   <td>
-                    <select
-                      value={usuario.cargo || ''}
-                      onChange={e => asignarCargoMutation.mutate({ id: usuario.id, cargo: e.target.value })}
-                      className="form-select"
-                      disabled={asignarCargoMutation.isPending}
-                    >
-                      <option value="">Sin cargo</option>
-                      {cargos.map((cargo: Cargo) => (
-                        <option key={cargo.id} value={cargo.nombre}>{cargo.nombre}</option>
-                      ))}
-                    </select>
+                    <div className="lista-cargos-usuario">
+                      <select
+                        value={usuario.cargo || ''}
+                        onChange={e => asignarCargoMutation.mutate({ id: usuario.id, cargo: e.target.value })}
+                        className="cargo-item"
+                        disabled={asignarCargoMutation.isPending}
+                      >
+                        <option value="">Sin cargo</option>
+                        {cargos.map((cargo: Cargo) => (
+                          <option key={cargo.id} value={cargo.nombre}>{cargo.nombre}</option>
+                        ))}
+                      </select>
+                    </div>
                   </td>
                   <td>{usuario.estado}</td>
                   <td>

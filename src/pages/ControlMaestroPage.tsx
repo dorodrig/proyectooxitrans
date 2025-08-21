@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Users, MapPin } from 'lucide-react';
+import { ShieldCheck, MapPin } from 'lucide-react';
 import '../styles/pages/controlMaestroPage.scss';
 
 const ControlMaestroPage: React.FC = () => {
@@ -29,14 +29,6 @@ const ControlMaestroPage: React.FC = () => {
           </div>
           <h2>Gestionar Regionales</h2>
           <p>Crea, edita o elimina regionales de la empresa.</p>
-        </Link>
-        {/* Card: Gestión de Usuarios */}
-        <Link to="/admin/usuarios" className="card-home">
-          <div className="icon">
-            <Users />
-          </div>
-          <h2>Usuarios</h2>
-          <p>Acceso rápido a la administración de usuarios.</p>
         </Link>
         {/* Card: Gestión de Cargos */}
         <Link to="/admin/cargos" className="card-home">

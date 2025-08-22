@@ -121,7 +121,7 @@ const NovedadesPage: React.FC = () => {
         </div>
         <div className="form-group">
           <label>Cantidad de horas</label>
-          <input type="number" value={horas} onChange={e => setHoras(e.target.value)} min={1} max={24} placeholder="Horas" required={fechaInicio === fechaFin} />
+          <input type="number" value={horas} onChange={e => setHoras(e.target.value)} min={1} placeholder="Horas" required={fechaInicio === fechaFin} />
           <small>{fechaInicio && fechaFin && fechaInicio !== fechaFin ? 'Calculado automáticamente (8h/día)' : 'Si es solo un día, ingresa las horas.'}</small>
         </div>
         <button type="submit" className="btn-primary">Registrar Novedad</button>

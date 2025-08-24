@@ -115,15 +115,15 @@ const AsignarRegionalUsuario: React.FC<AsignarRegionalUsuarioProps> = () => {
             </li>
           </ul>
         ) : (
-          usuariosFiltrados.length > 0 && (
+          Array.isArray(usuariosFiltrados) && usuariosFiltrados.length > 0 && (
             <ul className="border rounded mt-2 bg-gray-50">
-              {(usuariosFiltrados as Usuario[]).map((u: Usuario) => (
+              {usuariosFiltrados.map((u) => (
                 <li
-                  key={u.id}
-                  className={`p-2 cursor-pointer hover:bg-gray-200 ${usuarioSeleccionado?.id === u.id ? 'bg-gray-300' : ''}`}
-                  onClick={() => setUsuarioSeleccionado(u)}
+                  key={(u as Usuario).id}
+                  className={`p-2 cursor-pointer hover:bg-gray-200 ${usuarioSeleccionado && (usuarioSeleccionado as Usuario).id === (u as Usuario).id ? 'bg-gray-300' : ''}`}
+                  onClick={() => setUsuarioSeleccionado(u as Usuario)}
                 >
-                  {u.nombre} {u.apellido} - {u.documento}
+                  {(u as Usuario).nombre} {(u as Usuario).apellido} - {(u as Usuario).documento}
                 </li>
               ))}
             </ul>

@@ -1,0 +1,402 @@
+// ===================================
+// 🎭 OXITRANS SPECIAL EFFECTS & MICROINTERACTIONS
+// Efectos especiales para una experiencia premium
+// Sistema moderno usando @use (Sass 1.35+)
+// ===================================
+
+@use '../abstracts' as *;
+
+// 🎪 Animaciones de entrada espectaculares
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -40px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translate3d(-40px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translate3d(40px, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// 🌟 Efectos de hover espectaculares
+@keyframes shimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(220, 38, 38, 0.2), 0 0 10px rgba(220, 38, 38, 0.2), 0 0 15px rgba(220, 38, 38, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.4), 0 0 20px rgba(220, 38, 38, 0.4), 0 0 30px rgba(220, 38, 38, 0.4);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes wobble {
+  0% { transform: translateX(0%); }
+  15% { transform: translateX(-25%) rotate(-5deg); }
+  30% { transform: translateX(20%) rotate(3deg); }
+  45% { transform: translateX(-15%) rotate(-3deg); }
+  60% { transform: translateX(10%) rotate(2deg); }
+  75% { transform: translateX(-5%) rotate(-1deg); }
+  100% { transform: translateX(0%); }
+}
+
+// 🎨 Clases de animación aplicables
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown 0.6s ease-out forwards;
+}
+
+.animate-fade-in-left {
+  animation: fadeInLeft 0.6s ease-out forwards;
+}
+
+.animate-fade-in-right {
+  animation: fadeInRight 0.6s ease-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.5s ease-out forwards;
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.8s ease-out forwards;
+}
+
+// 🎭 Efectos hover premium
+.hover-lift {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.hover-glow {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    animation: glow 1.5s ease-in-out infinite alternate;
+  }
+}
+
+.hover-float {
+  &:hover {
+    animation: float 2s ease-in-out infinite;
+  }
+}
+
+.hover-shimmer {
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    transition: all 0.5s;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
+}
+
+// 🔥 Efectos de botones premium
+.btn-premium {
+  position: relative;
+  overflow: hidden;
+  transform: perspective(1px) translateZ(0);
+  transition: all 0.3s ease;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+  
+  &:hover::before {
+    transform: translateX(100%);
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// 💳 Efectos de tarjetas premium
+.card-premium {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  &:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 
+      0 25px 50px -12px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+    
+    &::before {
+      opacity: 1;
+    }
+  }
+}
+
+// 📊 Efectos de gráficos
+.chart-container {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+      #dc2626, #ef4444, #f59e0b, #10b981, #3b82f6, #6366f1, #8b5cf6, #dc2626
+    );
+    background-size: 400% 400%;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: gradient 15s ease infinite;
+  }
+  
+  &:hover::before {
+    opacity: 0.6;
+  }
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+// 🎯 Indicadores de estado con pulso
+.status-indicator {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0.6;
+    animation: pulse-ring 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+  
+  &.status-success::after {
+    background: rgba(5, 150, 105, 0.3);
+    border: 2px solid #10b981;
+  }
+  
+  &.status-warning::after {
+    background: rgba(217, 119, 6, 0.3);
+    border: 2px solid #f59e0b;
+  }
+  
+  &.status-danger::after {
+    background: rgba(220, 38, 38, 0.3);
+    border: 2px solid #ef4444;
+  }
+  
+  &.status-info::after {
+    background: rgba(8, 145, 178, 0.3);
+    border: 2px solid #06b6d4;
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+// 🌊 Efectos de carga elegantes
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+// 🎪 Efectos de texto premium
+.text-gradient {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+.text-shadow-glow {
+  text-shadow: 
+    0 0 5px rgba(220, 38, 38, 0.5),
+    0 0 10px rgba(220, 38, 38, 0.3),
+    0 0 15px rgba(220, 38, 38, 0.2);
+}
+
+// 🎨 Utilidades de animación con delay
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }
+.animate-delay-500 { animation-delay: 0.5s; }
+.animate-delay-600 { animation-delay: 0.6s; }
+.animate-delay-700 { animation-delay: 0.7s; }
+.animate-delay-800 { animation-delay: 0.8s; }
+
+// 🚀 Performance optimizations
+* {
+  &.animate-fade-in-up,
+  &.animate-fade-in-down,
+  &.animate-fade-in-left,
+  &.animate-fade-in-right,
+  &.animate-scale-in,
+  &.animate-bounce-in {
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+}

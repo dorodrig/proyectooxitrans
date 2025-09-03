@@ -1,0 +1,198 @@
+// ===================================
+// 🎭 OXITRANS PREMIUM MIXINS
+// Mixins avanzados para efectos premium
+// ===================================
+
+@use 'variables-premium' as premium;
+
+// 🎪 Mixin para hover elevado premium
+@mixin premium-hover-lift() {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// 🌟 Mixin para efectos de resplandor
+@mixin premium-glow($color: map-get(premium.$oxitrans-colors, 'primary')) {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 
+      0 0 5px rgba($color, 0.2),
+      0 0 10px rgba($color, 0.2),
+      0 0 15px rgba($color, 0.2),
+      0 0 20px rgba($color, 0.1);
+  }
+}
+
+// 🎨 Mixin para texto degradado
+@mixin premium-gradient-text($gradient: map-get(premium.$oxitrans-gradients, 'primary')) {
+  background: $gradient;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+}
+
+// 💎 Mixin para tarjetas glassmorphism
+@mixin premium-glass-card() {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+// 🎭 Mixin para animaciones de entrada
+@mixin premium-fade-in($direction: 'up', $delay: 0s) {
+  opacity: 0;
+  animation: fadeIn#{capitalize($direction)} 0.6s ease-out #{$delay} forwards;
+}
+
+// 🚀 Mixin para botones premium
+@mixin premium-button() {
+  position: relative;
+  overflow: hidden;
+  transform: perspective(1px) translateZ(0);
+  transition: all 0.3s ease;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.5) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: map-get(premium.$oxitrans-shadows, 'xl');
+    
+    &::before {
+      transform: translateX(100%);
+    }
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// 📊 Mixin para contenedores de gráficos
+@mixin premium-chart-container() {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+      map-get(premium.$oxitrans-colors, 'primary'),
+      map-get(premium.$oxitrans-colors, 'secondary'),
+      map-get(premium.$oxitrans-colors, 'success'),
+      map-get(premium.$oxitrans-colors, 'warning')
+    );
+    background-size: 400% 400%;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    animation: gradientShift 15s ease infinite;
+  }
+  
+  &:hover::before {
+    opacity: 0.6;
+  }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+// 🎯 Mixin para indicadores de estado
+@mixin premium-status-indicator($color: map-get(premium.$oxitrans-colors, 'success')) {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba($color, 0.3);
+    border: 2px solid $color;
+    opacity: 0.6;
+    animation: pulseRing 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+  }
+}
+
+@keyframes pulseRing {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 0;
+  }
+}
+
+// 🌊 Mixin para efectos shimmer
+@mixin premium-shimmer() {
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.4),
+      transparent
+    );
+    transition: all 0.5s;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
+}
+
+// 📱 Mixin para diseño responsive
+@mixin premium-responsive($breakpoint) {
+  @if $breakpoint == 'mobile' {
+    @media (max-width: 767px) {
+      @content;
+    }
+  }
+  @if $breakpoint == 'tablet' {
+    @media (min-width: 768px) and (max-width: 1023px) {
+      @content;
+    }
+  }
+  @if $breakpoint == 'desktop' {
+    @media (min-width: 1024px) {
+      @content;
+    }
+  }
+}

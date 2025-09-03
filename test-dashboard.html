@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dashboard API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Dashboard API</h1>
+    <button onclick="testDepartamentos()">Probar Departamentos</button>
+    <button onclick="testCargos()">Probar Cargos</button>
+    <button onclick="testNovedades()">Probar Novedades</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:3001/api';
+        
+        function showResult(title, data, error = false) {
+            const resultsDiv = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `result ${error ? 'error' : 'success'}`;
+            div.innerHTML = `<h3>${title}</h3><pre>${JSON.stringify(data, null, 2)}</pre>`;
+            resultsDiv.appendChild(div);
+        }
+        
+        async function testDepartamentos() {
+            try {
+                const response = await fetch(`${API_BASE}/usuarios/por-departamento`);
+                const data = await response.json();
+                showResult('📊 Departamentos API', data);
+            } catch (error) {
+                showResult('❌ Error Departamentos', error.message, true);
+            }
+        }
+        
+        async function testCargos() {
+            try {
+                const response = await fetch(`${API_BASE}/usuarios/por-cargo`);
+                const data = await response.json();
+                showResult('💼 Cargos API', data);
+            } catch (error) {
+                showResult('❌ Error Cargos', error.message, true);
+            }
+        }
+        
+        async function testNovedades() {
+            try {
+                const response = await fetch(`${API_BASE}/usuarios/novedades-stats`);
+                const data = await response.json();
+                showResult('🔔 Novedades API', data);
+            } catch (error) {
+                showResult('❌ Error Novedades', error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

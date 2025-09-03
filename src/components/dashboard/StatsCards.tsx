@@ -17,10 +17,24 @@ const labels = [
 ];
 
 const StatsCards: React.FC = () => {
-  const { data: stats, isLoading } = useQuery({
+  const { data: stats, isLoading, error } = useQuery({
     queryKey: ['usuarios-stats'],
     queryFn: dashboardService.getUsuariosStats,
   });
+
+  // Mostrar error si hay problemas
+  if (error) {
+    console.error('Error en StatsCards:', error);
+    return (
+      <div className="row">
+        <div className="col-12">
+          <div className="alert alert-danger">
+            Error al cargar estadísticas: {error.message}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Simulación de datos si el backend aún no responde con todos los valores
   const values = [

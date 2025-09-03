@@ -9,4 +9,16 @@ export const dashboardService = {
     // Ejemplo: agrupación por rol
     return apiClient.get('/usuarios/por-rol');
   },
+  getUsuariosPorDepartamento: async () => {
+    // Agrupación por departamento/regional
+    return apiClient.get('/usuarios/por-departamento');
+  },
+  getUsuariosPorCargo: async () => {
+    // Agrupación por cargo
+    return apiClient.get('/usuarios/por-cargo');
+  },
+  getNovedadesStats: async () => {
+    // Estadísticas de novedades
+    return apiClient.get('/usuarios/novedades-stats');
+  },
 };

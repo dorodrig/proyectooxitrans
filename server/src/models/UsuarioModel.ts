@@ -249,19 +249,19 @@ export class UsuarioModel {
   // Métodos para estadísticas
   static async countAll(): Promise<number> {
     const query = `SELECT COUNT(*) as total FROM usuarios WHERE estado != 'eliminado'`;
-    const results = await executeQuery(query, []) as { total: number }[];
+    const results = await executeQuery(query) as { total: number }[];
     return results[0].total;
   }
 
   static async countByEstado(estado: string): Promise<number> {
-    const query = `SELECT COUNT(*) as total FROM usuarios WHERE estado = ? AND estado != 'eliminado'`;
-    const results = await executeQuery(query, [estado]) as { total: number }[];
+    const query = `SELECT COUNT(*) as total FROM usuarios WHERE estado = '${estado}' AND estado != 'eliminado'`;
+    const results = await executeQuery(query) as { total: number }[];
     return results[0].total;
   }
 
   static async countByRol(rol: string): Promise<number> {
-    const query = `SELECT COUNT(*) as total FROM usuarios WHERE rol = ? AND estado != 'eliminado'`;
-    const results = await executeQuery(query, [rol]) as { total: number }[];
+    const query = `SELECT COUNT(*) as total FROM usuarios WHERE rol = '${rol}' AND estado != 'eliminado'`;
+    const results = await executeQuery(query) as { total: number }[];
     return results[0].total;
   }
 
@@ -272,8 +272,69 @@ export class UsuarioModel {
       WHERE estado != 'eliminado' 
       GROUP BY rol
     `;
-    const results = await executeQuery(query, []) as { rol: string; total: number }[];
+    const results = await executeQuery(query) as { rol: string; total: number }[];
     return results;
+  }
+
+  static async countGroupByDepartamento(): Promise<{ departamento: string; total: number }[]> {
+    const query = `
+      SELECT departamento, COUNT(*) as total 
+      FROM usuarios 
+      WHERE estado != 'eliminado' AND departamento IS NOT NULL AND departamento != ''
+      GROUP BY departamento
+      ORDER BY total DESC
+    `;
+    const results = await executeQuery(query) as { departamento: string; total: number }[];
+    return results;
+  }
+
+  static async countGroupByCargo(): Promise<{ cargo: string; total: number }[]> {
+    const query = `
+      SELECT cargo, COUNT(*) as total 
+      FROM usuarios 
+      WHERE estado != 'eliminado' AND cargo IS NOT NULL AND cargo != ''
+      GROUP BY cargo
+      ORDER BY total DESC
+    `;
+    const results = await executeQuery(query) as { cargo: string; total: number }[];
+    return results;
+  }
+
+  static async getNovedadesStats(): Promise<{
+    totalNovedades: number;
+    novedadesPorTipo: { tipo: string; total: number }[];
+    novedadesPorMes: { mes: string; total: number }[];
+  }> {
+    // Total de novedades
+    const totalQuery = `SELECT COUNT(*) as total FROM novedades`;
+    const totalResult = await executeQuery(totalQuery) as { total: number }[];
+    
+    // Novedades por tipo
+    const tipoQuery = `
+      SELECT tipo, COUNT(*) as total 
+      FROM novedades 
+      GROUP BY tipo
+      ORDER BY total DESC
+    `;
+    const tipoResults = await executeQuery(tipoQuery) as { tipo: string; total: number }[];
+    
+    // Novedades por mes (últimos 6 meses)
+    const mesQuery = `
+      SELECT 
+        DATE_FORMAT(fechaInicio, '%Y-%m') as mes,
+        COUNT(*) as total
+      FROM novedades 
+      WHERE fechaInicio >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+      GROUP BY DATE_FORMAT(fechaInicio, '%Y-%m')
+      ORDER BY mes ASC
+    `;
+    const mesResults = await executeQuery(mesQuery) as { mes: string; total: number }[];
+    
+    return {
+      totalNovedades: totalResult[0].total,
+      novedadesPorTipo: tipoResults,
+      novedadesPorMes: mesResults
+    };
   }
 
   // Métodos de gestión de usuarios

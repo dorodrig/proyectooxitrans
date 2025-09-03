@@ -31,7 +31,15 @@ const updateUserValidation = [
   body('cargo').optional().trim().isLength({ min: 2, max: 100 }).withMessage('Cargo requerido')
 ];
 
-// Rutas
+// Rutas específicas DEBEN ir ANTES que las rutas con parámetros
+// Rutas dashboard (deben ir antes de /:id para evitar conflictos)
+router.get('/stats', UsuariosController.getStats);
+router.get('/por-rol', UsuariosController.getPorRol);
+router.get('/por-departamento', UsuariosController.getPorDepartamento);
+router.get('/por-cargo', UsuariosController.getPorCargo);
+router.get('/novedades-stats', UsuariosController.getNovedadesStats);
+
+// Rutas generales
 router.get('/', UsuariosController.getAll);
 router.get('/search', UsuariosController.search);
 router.get('/departamento/:departamento', UsuariosController.getByDepartamento);
@@ -47,9 +55,5 @@ router.put('/:id/rol', UsuariosController.asignarRol);
 router.put('/:id/cargo', UsuariosController.asignarCargo);
 router.post('/:id/reset-password', UsuariosController.resetPassword);
 router.delete('/:id', UsuariosController.delete);
-
-// Rutas dashboard
-router.get('/stats', (req, res) => UsuariosController.getStats(req, res));
-router.get('/por-rol', (req, res) => UsuariosController.getPorRol(req, res));
 
 export default router;

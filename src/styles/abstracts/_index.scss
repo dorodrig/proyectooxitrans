@@ -1,6 +1,33 @@
 // ====================================
-// ÍNDICE DE ABSTRACTS PARA @use
+// 🎯 OXITRANS MODERN SCSS SYSTEM
+// Índice principal usando @use y @forward (Sass moderna)
 // ====================================
 
 @forward 'variables';
 @forward 'mixins';
+@forward 'variables-premium';
+@forward 'mixins-premium';
+
+// ===================================
+// 🛠️ SISTEMA MODERNO SIN DEPRECACIONES
+// ===================================
+
+@use 'sass:map';
+@use 'variables-premium' as premium;
+
+// Funciones modernas usando sass:map (sin deprecaciones)
+@function color($name) {
+  @return map.get(premium.$oxitrans-colors, $name);
+}
+
+@function gradient($name) {
+  @return map.get(premium.$gradients, $name);
+}
+
+@function shadow($level) {
+  @return map.get(premium.$shadows, $level);
+}
+
+@function transition($type: 'all') {
+  @return map.get(premium.$transitions, $type);
+}

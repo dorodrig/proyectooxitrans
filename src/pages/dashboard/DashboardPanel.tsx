@@ -21,16 +21,20 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend,
 
 const DashboardPanel: React.FC = () => {
   // Consulta de estadísticas de usuarios
-  const { data: stats, isLoading: loadingStats } = useQuery({
+  const { data: stats, isLoading: loadingStats, error: errorStats } = useQuery({
     queryKey: ['usuarios-stats'],
     queryFn: dashboardService.getUsuariosStats,
   });
 
   // Consulta de usuarios por rol
-  const { data: porRol, isLoading: loadingPorRol } = useQuery({
+  const { data: porRol, isLoading: loadingPorRol, error: errorPorRol } = useQuery({
     queryKey: ['usuarios-por-rol'],
     queryFn: dashboardService.getUsuariosPorRol,
   });
+
+  // Log de errores para debugging
+  if (errorStats) console.error('Error Stats:', errorStats);
+  if (errorPorRol) console.error('Error PorRol:', errorPorRol);
 
   return (
     <div className="dashboard">
@@ -46,7 +50,13 @@ const DashboardPanel: React.FC = () => {
           <div className="dashboard__stat-card">
             <div className="card-body">
               <h3 className="stat-label mb-4">Usuarios por Rol</h3>
-              {loadingPorRol ? <p>Cargando...</p> : (
+              {errorPorRol ? (
+                <div className="alert alert-danger">
+                  Error al cargar datos: {errorPorRol.message}
+                </div>
+              ) : loadingPorRol ? (
+                <p>Cargando...</p>
+              ) : (
                 (porRol?.roles?.length && porRol?.cantidades?.length) ? (
                   <Bar
                     data={{
@@ -67,7 +77,13 @@ const DashboardPanel: React.FC = () => {
           <div className="dashboard__stat-card">
             <div className="card-body">
               <h3 className="stat-label mb-4">Usuarios Activos vs Inactivos</h3>
-              {loadingStats ? <p>Cargando...</p> : (
+              {errorStats ? (
+                <div className="alert alert-danger">
+                  Error al cargar datos: {errorStats.message}
+                </div>
+              ) : loadingStats ? (
+                <p>Cargando...</p>
+              ) : (
                 (typeof stats?.activos === 'number' && typeof stats?.inactivos === 'number') ? (
                   <Pie
                     data={{

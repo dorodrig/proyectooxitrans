@@ -4,6 +4,12 @@
 // ====================================
 @use './styles/components/asignarRolUsuario';
 
+// 🎨 Variables Premium para UI/UX avanzado
+@use './styles/abstracts/variables-premium';
+
+// 🎨 Dashboard Avanzado - Estilos Premium
+@use './styles/dashboard/advanced-dashboard';
+
 // Abstracts (variables, mixins, functions)
 @use './styles/abstracts' as *;
 
@@ -21,6 +27,10 @@
 @use './styles/pages/home' as *;
 @use './styles/pages/admin-usuarios' as *;
 @use './styles/pages/asignarRolesPage' as *;
+
+// Efectos especiales y avanzados (Sass moderno)
+@use './styles/dashboard/modern-dashboard';
+@use './styles/effects/special-effects';
 
 /* Tailwind components */
 @tailwind utilities;

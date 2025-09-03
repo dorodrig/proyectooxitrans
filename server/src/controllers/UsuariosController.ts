@@ -29,6 +29,43 @@ export class UsuariosController {
       res.status(500).json({ message: 'Error interno del servidor' });
     }
   }
+
+  // Dashboard: usuarios por departamento (regionales)
+  static async getPorDepartamento(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await UsuarioModel.countGroupByDepartamento();
+      const departamentos = result.map((r: { departamento: string; total: number }) => r.departamento);
+      const cantidades = result.map((r: { departamento: string; total: number }) => r.total);
+      res.json({ departamentos, cantidades });
+    } catch (error) {
+      console.error('Error en getPorDepartamento:', error);
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  }
+
+  // Dashboard: usuarios por cargo
+  static async getPorCargo(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await UsuarioModel.countGroupByCargo();
+      const cargos = result.map((r: { cargo: string; total: number }) => r.cargo);
+      const cantidades = result.map((r: { cargo: string; total: number }) => r.total);
+      res.json({ cargos, cantidades });
+    } catch (error) {
+      console.error('Error en getPorCargo:', error);
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  }
+
+  // Dashboard: estadísticas de novedades
+  static async getNovedadesStats(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await UsuarioModel.getNovedadesStats();
+      res.json(result);
+    } catch (error) {
+      console.error('Error en getNovedadesStats:', error);
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  }
   // Asignar regional y tipo_usuario a un usuario
   static async asignarRegionalYTipo(req: Request, res: Response): Promise<void> {
     try {

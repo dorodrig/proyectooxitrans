@@ -1,0 +1,25 @@
+.app-header {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 0.5rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 64px;
+  .logo {
+    height: 32px;
+  }
+  .search-container {
+    position: relative;
+    input {
+      padding-right: 2rem;
+    }
+    .icon-search {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+    }
+  }
+}

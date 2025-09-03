@@ -48,4 +48,8 @@ router.put('/:id/cargo', UsuariosController.asignarCargo);
 router.post('/:id/reset-password', UsuariosController.resetPassword);
 router.delete('/:id', UsuariosController.delete);
 
+// Rutas dashboard
+router.get('/stats', (req, res) => UsuariosController.getStats(req, res));
+router.get('/por-rol', (req, res) => UsuariosController.getPorRol(req, res));
+
 export default router;

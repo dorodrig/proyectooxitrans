@@ -7,14 +7,39 @@ import dotenv from 'dotenv';
 import path from 'path';
 import rateLimit from 'express-rate-limit';
 
-// Importar configuración y rutas
+// Importar configuración de base de datos
 import { testConnection } from './config/database';
+
+// Importar rutas
 import authRoutes from './routes/auth';
 import usuariosRoutes from './routes/usuarios';
-import regionalesRoutes from './routes/regionales';
 import registrosRoutes from './routes/registros';
 import cargosRoutes from './routes/cargos';
-import novedadesRoutes from './routes/novedades';
+
+// Importar rutas opcionales (verificar existencia)
+import { Router } from 'express';
+
+let regionalesRoutes: Router | null = null;
+let novedadesRoutes: Router | null = null;
+let debugRoutes: Router | null = null;
+
+try {
+  regionalesRoutes = require('./routes/regionales').default;
+} catch {
+  console.warn('⚠️  Rutas de regionales no disponibles');
+}
+
+try {
+  novedadesRoutes = require('./routes/novedades').default;
+} catch {
+  console.warn('⚠️  Rutas de novedades no disponibles');
+}
+
+try {
+  debugRoutes = require('./routes/debug').default;
+} catch {
+  console.warn('⚠️  Rutas de debug no disponibles');
+}
 
 // Cargar variables de entorno
 dotenv.config();
@@ -68,13 +93,24 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../../../dist')));
 }
 
-// Rutas de la API
+// Rutas principales de la API
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuariosRoutes);
-app.use('/api/regionales', regionalesRoutes);
 app.use('/api/registros', registrosRoutes);
 app.use('/api/cargos', cargosRoutes);
-app.use('/api/novedades', novedadesRoutes);
+
+// Rutas opcionales (solo si están disponibles)
+if (regionalesRoutes) {
+  app.use('/api/regionales', regionalesRoutes);
+}
+
+if (novedadesRoutes) {
+  app.use('/api/novedades', novedadesRoutes);
+}
+
+if (debugRoutes) {
+  app.use('/api/debug', debugRoutes);
+}
 
 // Ruta de health check
 app.get('/api/health', (req, res) => {

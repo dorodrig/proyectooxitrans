@@ -1,11 +1,24 @@
-import { executeQuery, executeInsertQuery } from '../config/database';
-import type { Usuario } from '../types';
+import { executeQuery } from '../config/database';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
-interface DbRow {
-  [key: string]: unknown;
-  insertId?: number;
-  affectedRows?: number;
+export interface Usuario {
+  id: string;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string | null;
+  documento: string;
+  tipoDocumento: 'CC' | 'CE' | 'PA';
+  rol: 'admin' | 'empleado' | 'supervisor';
+  estado: 'activo' | 'inactivo' | 'suspendido';
+  fechaIngreso: string;
+  departamento: string;
+  cargo: string;
+  codigoAcceso: string | null;
+  fotoUrl: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface UserRow {
@@ -28,586 +41,451 @@ interface UserRow {
   updated_at: string;
 }
 
+export interface CreateUserData {
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono?: string | null;
+  documento: string;
+  tipo_documento: 'CC' | 'CE' | 'PA';
+  rol: 'admin' | 'empleado' | 'supervisor';
+  estado?: 'activo' | 'inactivo' | 'suspendido';
+  fecha_ingreso: string;
+  departamento: string;
+  cargo: string;
+  codigo_acceso?: string | null;
+  foto_url?: string | null;
+}
+
+interface DatabaseResult {
+  insertId?: number;
+  affectedRows?: number;
+}
+
 export class UsuarioModel {
-  // Asignar regional y tipo_usuario a un usuario
-  static async asignarRegionalYTipo(id: string, regionalId: string, tipoUsuario: 'planta' | 'visita'): Promise<boolean> {
+  static formatUser(row: UserRow): Usuario {
+    return {
+      id: row.id.toString(),
+      nombre: row.nombre,
+      apellido: row.apellido,
+      email: row.email,
+      telefono: row.telefono ?? null,
+      documento: row.documento,
+      tipoDocumento: row.tipo_documento,
+      rol: row.rol,
+      estado: row.estado,
+      fechaIngreso: row.fecha_ingreso,
+      departamento: row.departamento,
+      cargo: row.cargo,
+      codigoAcceso: row.codigo_acceso ?? null,
+      fotoUrl: row.foto_url ?? null,
+      created_at: typeof row.created_at === 'string' ? row.created_at : String(row.created_at),
+      updated_at: typeof row.updated_at === 'string' ? row.updated_at : String(row.updated_at)
+    };
+  }
+
+  static async findById(id: string | number): Promise<Usuario | null> {
+    console.log('[UsuarioModel.findById] Entrada - id:', id, 'tipo:', typeof id);
+    const idNum = typeof id === 'string' ? parseInt(id, 10) : id;
+    console.log('[UsuarioModel.findById] ID convertido:', idNum, 'tipo:', typeof idNum);
+    
     const query = `
-      UPDATE usuarios
-      SET regional_id = ?, tipo_usuario = ?, updated_at = ?
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
+      FROM usuarios
       WHERE id = ? AND estado != 'eliminado'
     `;
-    const result = await executeQuery(query, [regionalId, tipoUsuario, new Date(), id]);
-    const getAffectedRows = (res: unknown): number => {
-      if (Array.isArray(res)) {
-        return typeof res[0]?.affectedRows === 'number' ? res[0].affectedRows : 0;
-      } else if (typeof res === 'object' && res !== null && 'affectedRows' in res) {
-        return typeof (res as { affectedRows?: number }).affectedRows === 'number' ? (res as { affectedRows: number }).affectedRows : 0;
-      }
-      return 0;
-    };
-    return getAffectedRows(result) > 0;
+    
+    console.log('[UsuarioModel.findById] Ejecutando query con parámetros:', [idNum]);
+    const results = await executeQuery(query, [idNum]) as UserRow[];
+    console.log('[UsuarioModel.findById] Resultados query:', results);
+    
+    if (results.length === 0) return null;
+    return this.formatUser(results[0]);
   }
-    // Asignar cargo a un usuario
-    static async asignarCargo(id: string, cargo: string): Promise<boolean> {
-      const query = `
-        UPDATE usuarios
-        SET cargo = ?, updated_at = ?
-        WHERE id = ? AND estado != 'eliminado'
-      `;
-      const result = await executeQuery(query, [cargo, new Date(), id]);
-      const getAffectedRows = (res: unknown): number => {
-        if (Array.isArray(res)) {
-          return typeof res[0]?.affectedRows === 'number' ? res[0].affectedRows : 0;
-        } else if (typeof res === 'object' && res !== null && 'affectedRows' in res) {
-          return typeof (res as { affectedRows?: number }).affectedRows === 'number' ? (res as { affectedRows: number }).affectedRows : 0;
-        }
-        return 0;
-      };
-      return getAffectedRows(result) > 0;
+
+  static async findByEmail(email: string): Promise<Usuario | null> {
+    const query = `
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
+      FROM usuarios
+      WHERE email = ? AND estado != 'eliminado'
+    `;
+    const results = await executeQuery(query, [email]) as UserRow[];
+    if (results.length === 0) return null;
+    return this.formatUser(results[0]);
+  }
+
+  static async findByDocument(documento: string): Promise<Usuario | null> {
+    const query = `
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
+      FROM usuarios
+      WHERE documento = ? AND estado != 'eliminado'
+    `;
+    const results = await executeQuery(query, [documento]) as UserRow[];
+    if (results.length === 0) return null;
+    return this.formatUser(results[0]);
+  }
+
+  static async findByEmailWithPassword(email: string): Promise<(Usuario & { passwordHash: string }) | null> {
+    const query = `
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, password_hash, created_at, updated_at
+      FROM usuarios
+      WHERE email = ? AND estado = 'activo'
+    `;
+    const results = await executeQuery(query, [email]) as (UserRow & { password_hash: string })[];
+    if (results.length === 0) return null;
+    const user = this.formatUser(results[0]);
+    return { ...user, passwordHash: results[0].password_hash };
+  }
+
+  static async findByDocumentWithPassword(documento: string): Promise<(Usuario & { passwordHash: string }) | null> {
+    const query = `
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, password_hash, created_at, updated_at
+      FROM usuarios
+      WHERE documento = ? AND estado = 'activo'
+    `;
+    const results = await executeQuery(query, [documento]) as (UserRow & { password_hash: string })[];
+    if (results.length === 0) return null;
+    const user = this.formatUser(results[0]);
+    return { ...user, passwordHash: results[0].password_hash };
+  }
+
+  static async verifyPassword(password: string, hash: string): Promise<boolean> {
+    return await bcrypt.compare(password, hash);
+  }
+
+  static async updatePassword(id: string, newPassword: string): Promise<boolean> {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const query = `
+      UPDATE usuarios SET password_hash = ?, updated_at = NOW() WHERE id = ? AND estado != 'eliminado'
+    `;
+    const result = await executeQuery(query, [hashedPassword, id]) as DatabaseResult | DatabaseResult[];
+    
+    if (Array.isArray(result)) {
+      return result.length > 0 && (result[0]?.affectedRows || 0) > 0;
     }
-  // Asignar rol a un usuario
-  static async asignarRol(id: string, rol: 'admin' | 'empleado' | 'supervisor'): Promise<boolean> {
-    const query = `
-      UPDATE usuarios
-      SET rol = ?, updated_at = ?
-      WHERE id = ? AND estado != 'eliminado'
-    `;
-    const result = await executeQuery(query, [rol, new Date(), id]);
-    // Helper para extraer affectedRows de cualquier tipo de resultado
-    const getAffectedRows = (res: unknown): number => {
-      if (Array.isArray(res)) {
-        return typeof res[0]?.affectedRows === 'number' ? res[0].affectedRows : 0;
-      } else if (typeof res === 'object' && res !== null && 'affectedRows' in res) {
-        return typeof (res as { affectedRows?: number }).affectedRows === 'number' ? (res as { affectedRows: number }).affectedRows : 0;
-      }
-      return 0;
-    };
-    return getAffectedRows(result) > 0;
+    return (result.affectedRows || 0) > 0;
   }
-  
-  // Crear un nuevo usuario
-  static async create(userData: Omit<Usuario, 'id' | 'created_at' | 'updated_at'>): Promise<string> {
-    const hashedPassword = await bcrypt.hash(userData.documento, 10); // Usamos el documento como password inicial
-    
+
+  static async createWithPassword(userData: CreateUserData, password: string): Promise<string> {
+    const hashedPassword = await bcrypt.hash(password, 10);
     const query = `
-      INSERT INTO usuarios (
-        nombre, apellido, email, telefono, documento, tipo_documento,
-        rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-        foto_url, password_hash
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO usuarios (nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, password_hash, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
     `;
-    
-    const params = [
+    const values = [
       userData.nombre,
       userData.apellido,
       userData.email,
       userData.telefono || null,
       userData.documento,
-      userData.tipoDocumento,
+      userData.tipo_documento,
       userData.rol,
-      userData.estado,
-      userData.fechaIngreso,
+      userData.estado || 'activo',
+      userData.fecha_ingreso,
       userData.departamento,
       userData.cargo,
-      userData.codigoAcceso || null,
-      userData.fotoUrl || null,
+      userData.codigo_acceso || null,
+      userData.foto_url || null,
       hashedPassword
     ];
     
-    const result = await executeQuery(query, params) as DbRow[];
-    return (result[0]?.insertId as number).toString();
-  }
-  
-  // Obtener usuario por ID
-  static async findById(id: string): Promise<Usuario | null> {
-    const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
-             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-             foto_url, created_at, updated_at
-      FROM usuarios 
-      WHERE id = ? AND estado != 'eliminado'
-    `;
+    const result = await executeQuery(query, values) as DatabaseResult | DatabaseResult[];
     
-    const results = await executeQuery(query, [id]) as UserRow[];
-    if (results.length === 0) return null;
-    
-    return this.formatUser(results[0]);
-  }
-  
-  // Obtener usuario por email
-  static async findByEmail(email: string): Promise<Usuario | null> {
-    const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
-             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-             foto_url, created_at, updated_at
-      FROM usuarios 
-      WHERE email = ? AND estado != 'eliminado'
-    `;
-    
-    const results = await executeQuery(query, [email]) as UserRow[];
-    if (results.length === 0) return null;
-    
-    return this.formatUser(results[0]);
-  }
-  
-  // Obtener usuario por documento
-  static async findByDocument(documento: string): Promise<Usuario | null> {
-    const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
-             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-             foto_url, created_at, updated_at
-      FROM usuarios 
-      WHERE documento = ? AND estado != 'eliminado'
-    `;
-    
-    const results = await executeQuery(query, [documento]) as UserRow[];
-    if (results.length === 0) return null;
-    
-    return this.formatUser(results[0]);
-  }
-  
-  // Obtener usuario para login (incluye password)
-  static async findByEmailWithPassword(email: string): Promise<(Usuario & { passwordHash: string }) | null> {
-    const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
-             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-             foto_url, password_hash, created_at, updated_at
-      FROM usuarios 
-      WHERE email = ? AND estado = 'activo'
-    `;
-    
-    const results = await executeQuery(query, [email]) as (UserRow & { password_hash: string })[];
-    if (results.length === 0) return null;
-    
-    const user = this.formatUser(results[0]);
-    return {
-      ...user,
-      passwordHash: results[0].password_hash
-    };
+    if (Array.isArray(result)) {
+      return result[0]?.insertId?.toString() || '0';
+    }
+    return result.insertId?.toString() || '0';
   }
 
-  // Obtener usuario para login por documento (incluye password)
-  static async findByDocumentWithPassword(documento: string): Promise<(Usuario & { passwordHash: string }) | null> {
+  static async createPasswordResetToken(userId: number): Promise<string> {
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 3600000);
+    
     const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
-             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-             foto_url, password_hash, created_at, updated_at
-      FROM usuarios 
-      WHERE documento = ? AND estado = 'activo'
+      INSERT INTO password_reset_tokens (user_id, token, expires_at, created_at)
+      VALUES (?, ?, ?, NOW())
+      ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at), created_at = NOW()
     `;
-    
-    const results = await executeQuery(query, [documento]) as (UserRow & { password_hash: string })[];
-    if (results.length === 0) return null;
-    
-    const user = this.formatUser(results[0]);
-    return {
-      ...user,
-      passwordHash: results[0].password_hash
-    };
+    await executeQuery(query, [userId, token, expiresAt]);
+    return token;
   }
-  
-  // Obtener todos los usuarios con paginación
-  static async findAll(page: number = 1, limit: number = 10): Promise<{ users: Usuario[], total: number }> {
-    const offset = (page - 1) * limit;
-    
-    // Query para obtener usuarios
-    const usersQuery = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
-             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-             foto_url, created_at, updated_at
-      FROM usuarios 
-      WHERE estado != 'eliminado'
-      ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
+
+  static async verifyPasswordResetToken(token: string): Promise<{ valid: boolean; userId?: number }> {
+    const query = `
+      SELECT user_id, expires_at
+      FROM password_reset_tokens
+      WHERE token = ? AND expires_at > NOW() AND used = 0
     `;
+    const results = await executeQuery(query, [token]) as { user_id: number; expires_at: string }[];
     
-    // Query para contar total
-    const countQuery = `
-      SELECT COUNT(*) as total 
-      FROM usuarios 
-      WHERE estado != 'eliminado'
-    `;
+    if (results.length === 0) {
+      return { valid: false };
+    }
     
-    const [users, countResult] = await Promise.all([
-      executeQuery(usersQuery, [limit, offset]) as Promise<UserRow[]>,
-      executeQuery(countQuery) as Promise<Array<{ total: number }>>
-    ]);
-    
-    return {
-      users: users.map(user => this.formatUser(user)),
-      total: countResult[0].total
-    };
+    return { valid: true, userId: results[0].user_id };
   }
-  
-  // Obtener usuarios con paginación
-  static async findAllPaginated(page: number, limit: number, search: string = ''): Promise<{usuarios: Usuario[], total: number}> {
-    const safeLimit = Number.isFinite(Number(limit)) && !isNaN(Number(limit)) ? Number(limit) : 10;
-    const safePage = Number.isFinite(Number(page)) && !isNaN(Number(page)) ? Number(page) : 1;
-    const offset = (safePage - 1) * safeLimit;
 
-    let whereClause = "WHERE estado != 'eliminado'";
-    const params: (string | number)[] = [];
-
-    if (search && search.trim() !== '') {
-      whereClause += " AND (nombre LIKE ? OR apellido LIKE ? OR email LIKE ? OR documento LIKE ?)";
-      const searchParam = `%${search}%`;
-      params.push(searchParam, searchParam, searchParam, searchParam);
+  static async resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
+    const verification = await this.verifyPasswordResetToken(token);
+    if (!verification.valid || !verification.userId) {
+      return false;
     }
 
-    // Query para obtener usuarios
-    const usersQuery = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
-             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-             foto_url, created_at, updated_at
-      FROM usuarios 
-      ${whereClause}
-      ORDER BY created_at DESC
-      LIMIT ${safeLimit} OFFSET ${offset}
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    const updatePasswordQuery = `
+      UPDATE usuarios SET password_hash = ?, updated_at = NOW() WHERE id = ?
     `;
-
-    // Query para contar total
-    const countQuery = `
-      SELECT COUNT(*) as total
-      FROM usuarios 
-      ${whereClause}
+    await executeQuery(updatePasswordQuery, [hashedPassword, verification.userId]);
+    
+    const markTokenUsedQuery = `
+      UPDATE password_reset_tokens SET used = 1 WHERE token = ?
     `;
-
-    // Siempre pasar limit y offset como números al final del array de parámetros
-    // Debug: log de query final
-    console.log('[findAllPaginated] Query ejecutada:', usersQuery);
-    console.log('[findAllPaginated] Params:', params);
-
-    const [usuarios, countResult] = await Promise.all([
-      executeQuery(usersQuery, params) as Promise<UserRow[]>,
-      executeQuery(countQuery, params) as Promise<Array<{ total: number }>>
-    ]);
-
-    return {
-      usuarios: usuarios.map((user: UserRow) => this.formatUser(user)),
-      total: countResult[0].total
-    };
+    await executeQuery(markTokenUsedQuery, [token]);
+    
+    return true;
   }
-  
-  // Buscar usuarios por criterios
+
+  // Métodos para estadísticas
+  static async countAll(): Promise<number> {
+    const query = `SELECT COUNT(*) as total FROM usuarios WHERE estado != 'eliminado'`;
+    const results = await executeQuery(query, []) as { total: number }[];
+    return results[0].total;
+  }
+
+  static async countByEstado(estado: string): Promise<number> {
+    const query = `SELECT COUNT(*) as total FROM usuarios WHERE estado = ? AND estado != 'eliminado'`;
+    const results = await executeQuery(query, [estado]) as { total: number }[];
+    return results[0].total;
+  }
+
+  static async countByRol(rol: string): Promise<number> {
+    const query = `SELECT COUNT(*) as total FROM usuarios WHERE rol = ? AND estado != 'eliminado'`;
+    const results = await executeQuery(query, [rol]) as { total: number }[];
+    return results[0].total;
+  }
+
+  static async countGroupByRol(): Promise<{ rol: string; total: number }[]> {
+    const query = `
+      SELECT rol, COUNT(*) as total 
+      FROM usuarios 
+      WHERE estado != 'eliminado' 
+      GROUP BY rol
+    `;
+    const results = await executeQuery(query, []) as { rol: string; total: number }[];
+    return results;
+  }
+
+  // Métodos de gestión de usuarios
+  static async asignarRegionalYTipo(id: string, regionalId: string, tipoUsuario: string): Promise<boolean> {
+    const query = `
+      UPDATE usuarios 
+      SET departamento = ?, cargo = ?, updated_at = NOW() 
+      WHERE id = ? AND estado != 'eliminado'
+    `;
+    const result = await executeQuery(query, [regionalId, tipoUsuario, id]) as DatabaseResult | DatabaseResult[];
+    
+    if (Array.isArray(result)) {
+      return result.length > 0 && (result[0]?.affectedRows || 0) > 0;
+    }
+    return (result.affectedRows || 0) > 0;
+  }
+
+  static async asignarCargo(id: string, cargo: string): Promise<boolean> {
+    const query = `
+      UPDATE usuarios 
+      SET cargo = ?, updated_at = NOW() 
+      WHERE id = ? AND estado != 'eliminado'
+    `;
+    const result = await executeQuery(query, [cargo, id]) as DatabaseResult | DatabaseResult[];
+    
+    if (Array.isArray(result)) {
+      return result.length > 0 && (result[0]?.affectedRows || 0) > 0;
+    }
+    return (result.affectedRows || 0) > 0;
+  }
+
+  static async asignarRol(id: string, rol: string): Promise<boolean> {
+    const query = `
+      UPDATE usuarios 
+      SET rol = ?, updated_at = NOW() 
+      WHERE id = ? AND estado != 'eliminado'
+    `;
+    const result = await executeQuery(query, [rol, id]) as DatabaseResult | DatabaseResult[];
+    
+    if (Array.isArray(result)) {
+      return result.length > 0 && (result[0]?.affectedRows || 0) > 0;
+    }
+    return (result.affectedRows || 0) > 0;
+  }
+
+  // Métodos de paginación y búsqueda
+  static async findAllPaginated(page: number, limit: number, search?: string): Promise<{ usuarios: Usuario[]; total: number }> {
+    const offset = (page - 1) * limit;
+    
+    let whereClause = "WHERE estado != 'eliminado'";
+    
+    if (search && search.trim()) {
+      // Escapar el término de búsqueda para evitar inyección SQL
+      const searchTerm = search.trim().replace(/'/g, "''");
+      whereClause += ` AND (nombre LIKE '%${searchTerm}%' OR apellido LIKE '%${searchTerm}%' OR documento LIKE '%${searchTerm}%' OR email LIKE '%${searchTerm}%')`;
+    }
+
+    const countQuery = `SELECT COUNT(*) as total FROM usuarios ${whereClause}`;
+    const countResults = await executeQuery(countQuery) as { total: number }[];
+    const total = countResults[0].total;
+
+    const dataQuery = `
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
+      FROM usuarios 
+      ${whereClause}
+      ORDER BY created_at DESC 
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+    const dataResults = await executeQuery(dataQuery) as UserRow[];
+    const usuarios = dataResults.map(row => this.formatUser(row));
+
+    return { usuarios, total };
+  }
+
+  static async create(userData: CreateUserData): Promise<string> {
+    const query = `
+      INSERT INTO usuarios (nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    `;
+    const values = [
+      userData.nombre,
+      userData.apellido,
+      userData.email,
+      userData.telefono || null,
+      userData.documento,
+      userData.tipo_documento,
+      userData.rol,
+      userData.estado || 'activo',
+      userData.fecha_ingreso,
+      userData.departamento,
+      userData.cargo,
+      userData.codigo_acceso || null,
+      userData.foto_url || null
+    ];
+    
+    const result = await executeQuery(query, values) as DatabaseResult | DatabaseResult[];
+    
+    if (Array.isArray(result)) {
+      return result[0]?.insertId?.toString() || '0';
+    }
+    return result.insertId?.toString() || '0';
+  }
+
+  static async update(id: string, userData: Partial<CreateUserData>): Promise<boolean> {
+    const fields: string[] = [];
+    const values: unknown[] = [];
+
+    Object.entries(userData).forEach(([key, value]) => {
+      if (value !== undefined) {
+        fields.push(`${key} = ?`);
+        values.push(value);
+      }
+    });
+
+    if (fields.length === 0) return false;
+
+    fields.push('updated_at = NOW()');
+    values.push(id);
+
+    const query = `UPDATE usuarios SET ${fields.join(', ')} WHERE id = ? AND estado != 'eliminado'`;
+    const result = await executeQuery(query, values) as DatabaseResult | DatabaseResult[];
+    
+    if (Array.isArray(result)) {
+      return result.length > 0 && (result[0]?.affectedRows || 0) > 0;
+    }
+    return (result.affectedRows || 0) > 0;
+  }
+
+  static async delete(id: string): Promise<boolean> {
+    const query = `UPDATE usuarios SET estado = 'eliminado', updated_at = NOW() WHERE id = ?`;
+    const result = await executeQuery(query, [id]) as DatabaseResult | DatabaseResult[];
+    
+    if (Array.isArray(result)) {
+      return result.length > 0 && (result[0]?.affectedRows || 0) > 0;
+    }
+    return (result.affectedRows || 0) > 0;
+  }
+
+  static async updateStatus(id: string, estado: string): Promise<boolean> {
+    const query = `
+      UPDATE usuarios 
+      SET estado = ?, updated_at = NOW() 
+      WHERE id = ? AND estado != 'eliminado'
+    `;
+    const result = await executeQuery(query, [estado, id]) as DatabaseResult | DatabaseResult[];
+    
+    if (Array.isArray(result)) {
+      return result.length > 0 && (result[0]?.affectedRows || 0) > 0;
+    }
+    return (result.affectedRows || 0) > 0;
+  }
+
   static async search(criteria: Record<string, string>): Promise<Usuario[]> {
     let whereClause = "WHERE estado != 'eliminado'";
     const params: string[] = [];
-    
+
     if (criteria.nombre) {
-      whereClause += " AND nombre LIKE ?";
-      params.push(`%${criteria.nombre}%`);
+      whereClause += " AND (nombre LIKE ? OR apellido LIKE ?)";
+      params.push(`%${criteria.nombre}%`, `%${criteria.nombre}%`);
     }
-    
-    if (criteria.departamento) {
-      whereClause += " AND departamento = ?";
-      params.push(criteria.departamento);
+    if (criteria.email) {
+      whereClause += " AND email LIKE ?";
+      params.push(`%${criteria.email}%`);
     }
-    
-    if (criteria.cargo) {
-      whereClause += " AND cargo = ?";
-      params.push(criteria.cargo);
+    if (criteria.documento) {
+      whereClause += " AND documento LIKE ?";
+      params.push(`%${criteria.documento}%`);
     }
-    
     if (criteria.rol) {
       whereClause += " AND rol = ?";
       params.push(criteria.rol);
     }
-    
     if (criteria.estado) {
       whereClause += " AND estado = ?";
       params.push(criteria.estado);
     }
-    
+    if (criteria.departamento) {
+      whereClause += " AND departamento = ?";
+      params.push(criteria.departamento);
+    }
+
     const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
-             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-             foto_url, created_at, updated_at
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
       FROM usuarios 
       ${whereClause}
       ORDER BY nombre, apellido
     `;
-    
     const results = await executeQuery(query, params) as UserRow[];
-    return results.map(user => this.formatUser(user));
-  }
-  
-  // Obtener usuarios por departamento
-  static async findByDepartamento(departamento: string): Promise<Usuario[]> {
-    const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento,
-             rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-             foto_url, created_at, updated_at
-      FROM usuarios 
-      WHERE departamento = ? AND estado = 'activo'
-      ORDER BY nombre, apellido
-    `;
-    
-    const results = await executeQuery(query, [departamento]) as UserRow[];
-    return results.map(user => this.formatUser(user));
-  }
-  
-  // Actualizar usuario
-  static async update(id: string, userData: Partial<Omit<Usuario, 'id' | 'created_at' | 'updated_at'>>): Promise<boolean> {
-    const fields: string[] = [];
-    const values: unknown[] = [];
-    
-    // Construir query dinámicamente
-    Object.entries(userData).forEach(([key, value]) => {
-      if (value !== undefined) {
-        const dbField = this.mapFieldToDb(key);
-        fields.push(`${dbField} = ?`);
-        values.push(value);
-      }
-    });
-    
-    if (fields.length === 0) return false;
-    
-    values.push(new Date()); // updated_at
-    values.push(id);
-    
-    const query = `
-      UPDATE usuarios 
-      SET ${fields.join(', ')}, updated_at = ?
-      WHERE id = ?
-    `;
-    
-    const result = await executeQuery(query, values) as DbRow[];
-    return (result[0]?.affectedRows as number) > 0;
-  }
-  
-  // Eliminar usuario (soft delete)
-  static async delete(id: string): Promise<boolean> {
-    const query = `
-      UPDATE usuarios 
-      SET estado = 'eliminado', updated_at = ?
-      WHERE id = ?
-    `;
-    
-    const result = await executeQuery(query, [new Date(), id]) as DbRow[];
-    return (result[0]?.affectedRows as number) > 0;
-  }
-  
-  // Verificar password
-  static async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
-    return bcrypt.compare(plainPassword, hashedPassword);
-  }
-  
-  // Formatear usuario de DB a interfaz
-  private static formatUser(dbUser: UserRow): Usuario {
-    return {
-      id: dbUser.id.toString(),
-      nombre: dbUser.nombre,
-      apellido: dbUser.apellido,
-      email: dbUser.email,
-      telefono: dbUser.telefono || undefined,
-      documento: dbUser.documento,
-      tipoDocumento: dbUser.tipo_documento,
-      rol: dbUser.rol,
-      estado: dbUser.estado,
-      fechaIngreso: new Date(dbUser.fecha_ingreso),
-      departamento: dbUser.departamento,
-      cargo: dbUser.cargo,
-      codigoAcceso: dbUser.codigo_acceso || undefined,
-      fotoUrl: dbUser.foto_url || undefined,
-      created_at: new Date(dbUser.created_at),
-      updated_at: new Date(dbUser.updated_at)
-    };
-  }
-  
-  // Mapear campos de interfaz a DB
-  private static mapFieldToDb(field: string): string {
-    const fieldMap: Record<string, string> = {
-      'tipoDocumento': 'tipo_documento',
-      'fechaIngreso': 'fecha_ingreso',
-      'codigoAcceso': 'codigo_acceso',
-      'fotoUrl': 'foto_url'
-    };
-    
-    return fieldMap[field] || field;
+    return results.map(row => this.formatUser(row));
   }
 
-  // Actualizar estado del usuario
-  static async updateStatus(id: string, estado: string): Promise<boolean> {
+  static async findByDepartamento(departamento: string): Promise<Usuario[]> {
     const query = `
-      UPDATE usuarios 
-      SET estado = ?, updated_at = ?
-      WHERE id = ?
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
+      FROM usuarios 
+      WHERE departamento = ? AND estado != 'eliminado'
+      ORDER BY nombre, apellido
     `;
-    
-    const result = await executeQuery(query, [estado, new Date(), id]) as DbRow[];
-    return (result[0]?.affectedRows as number) > 0;
+    const results = await executeQuery(query, [departamento]) as UserRow[];
+    return results.map(row => this.formatUser(row));
   }
-  
-  // Resetear contraseña del usuario
-  static async resetPassword(id: string): Promise<string | null> {
-    // Generar nueva contraseña temporal
+
+  static async resetPassword(id: string): Promise<string> {
     const tempPassword = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
     
     const query = `
       UPDATE usuarios 
-      SET password_hash = ?, updated_at = ?
+      SET password_hash = ?, updated_at = NOW() 
       WHERE id = ? AND estado != 'eliminado'
     `;
-    
-    const result = await executeQuery(query, [hashedPassword, new Date(), id]) as DbRow[];
-    
-    if ((result[0]?.affectedRows as number) > 0) {
-      return tempPassword;
-    }
-    
-    return null;
-  }
-
-  // Actualizar contraseña del usuario
-  static async updatePassword(id: string, newPassword: string): Promise<boolean> {
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    
-    const query = `
-      UPDATE usuarios 
-      SET password_hash = ?, updated_at = ?
-      WHERE id = ? AND estado != 'eliminado'
-    `;
-    
-    const result = await executeQuery(query, [hashedPassword, new Date(), id]) as DbRow[];
-    return (result[0]?.affectedRows as number) > 0;
-  }
-
-  // Crear usuario con contraseña personalizada (para registro)
-  static async createWithPassword(
-    userData: Omit<Usuario, 'id' | 'created_at' | 'updated_at'>, 
-    password: string
-  ): Promise<string> {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const query = `
-      INSERT INTO usuarios (
-        nombre, apellido, email, telefono, documento, tipo_documento,
-        rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso,
-        foto_url, password_hash
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    
-    const params = [
-      userData.nombre,
-      userData.apellido,
-      userData.email,
-      userData.telefono || null,
-      userData.documento,
-      userData.tipoDocumento,
-      userData.rol,
-      userData.estado,
-      userData.fechaIngreso,
-      userData.departamento,
-      userData.cargo,
-      userData.codigoAcceso || null,
-      userData.fotoUrl || null,
-      hashedPassword
-    ];
-
-    const result = await executeInsertQuery(query, params);
-    
-    // Para INSERT, result tiene la propiedad insertId directamente
-    if (result && result.insertId) {
-      return result.insertId.toString();
-    }
-    
-    throw new Error('Error al crear el usuario');
-  }
-
-  // ====================================
-  // MÉTODOS PARA RESTABLECIMIENTO DE CONTRASEÑA
-  // ====================================
-
-  // Crear token de recuperación de contraseña (por ID de usuario)
-  static async createPasswordResetToken(userId: number): Promise<string> {
-    // Generar token único
-    const crypto = await import('crypto');
-    const token = crypto.randomBytes(32).toString('hex');
-    
-    // Token expira en 1 hora
-    const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
-
-    const query = `
-      INSERT INTO password_reset_tokens (usuario_id, token, expires_at)
-      VALUES (?, ?, ?)
-    `;
-
-    await executeInsertQuery(query, [userId, token, expiresAt]);
-    return token;
-  }
-
-  // Verificar token de recuperación
-  static async verifyPasswordResetToken(token: string): Promise<{ valid: boolean; userId?: string }> {
-    const query = `
-      SELECT usuario_id, expires_at, usado
-      FROM password_reset_tokens
-      WHERE token = ? AND usado = FALSE
-    `;
-
-    const results = await executeQuery(query, [token]) as Array<{
-      usuario_id: number;
-      expires_at: Date;
-      usado: boolean;
-    }>;
-
-    if (results.length === 0) {
-      return { valid: false };
-    }
-
-    const tokenData = results[0];
-    const now = new Date();
-    const expiresAt = new Date(tokenData.expires_at);
-
-    if (now > expiresAt) {
-      return { valid: false };
-    }
-
-    return { valid: true, userId: tokenData.usuario_id.toString() };
-  }
-
-  // Restablecer contraseña usando token
-  static async resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
-    const tokenVerification = await this.verifyPasswordResetToken(token);
-    
-    if (!tokenVerification.valid || !tokenVerification.userId) {
-      return false;
-    }
-
-    // Hash de la nueva contraseña
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // Actualizar contraseña
-    const updatePasswordQuery = `
-      UPDATE usuarios 
-      SET password_hash = ?, updated_at = NOW()
-      WHERE id = ?
-    `;
-
-    // Marcar token como usado
-    const markTokenUsedQuery = `
-      UPDATE password_reset_tokens 
-      SET usado = TRUE, used_at = NOW()
-      WHERE token = ?
-    `;
-
-    try {
-      await executeInsertQuery(updatePasswordQuery, [hashedPassword, tokenVerification.userId]);
-      await executeInsertQuery(markTokenUsedQuery, [token]);
-      return true;
-    } catch (error) {
-      console.error('Error al restablecer contraseña:', error);
-      return false;
-    }
-  }
-
-  // Limpiar tokens expirados (para mantenimiento)
-  static async cleanExpiredTokens(): Promise<void> {
-    const query = `
-      DELETE FROM password_reset_tokens 
-      WHERE expires_at < NOW() OR usado = TRUE
-    `;
-    
-    await executeInsertQuery(query, []);
+    await executeQuery(query, [hashedPassword, id]);
+    return tempPassword;
   }
 }

@@ -1,4 +1,20 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+
+import { Capacitor } from '@capacitor/core';
+
+function getApiBaseUrl() {
+  // Si está en móvil y en desarrollo, usar IP local
+  if (Capacitor.isNativePlatform() && import.meta.env.MODE === 'development') {
+    return 'http://192.168.1.21:3001/api'; // IP local del PC
+  }
+  // En web, usar localhost
+  if (!Capacitor.isNativePlatform() && import.meta.env.MODE === 'development') {
+    return 'http://localhost:3001/api';
+  }
+  // En producción, usar variable de entorno
+  return import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 // Configuración base para fetch
 const fetchConfig = {

@@ -1,17 +1,18 @@
+
+
 import React from 'react';
-import { useAuthStore } from '../stores/authStore';
-import { 
-  Users, 
-  Clock, 
-  Calendar, 
-  TrendingUp, 
-  AlertTriangle,
+import Header from '../components/ui/Header';
+import {
+  Users,
   CheckCircle2,
-  LogOut
+  Clock,
+  AlertTriangle,
+  Calendar,
+  TrendingUp
 } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
-  const { usuario, logout } = useAuthStore();
+  // ...existing code...
 
   const estadisticas = {
     totalEmpleados: 156,
@@ -22,25 +23,7 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="dashboard">
-      {/* Header */}
-      <header className="dashboard__header">
-        <div className="container">
-          <div className="header-content">
-            <h1 className="header-title">
-              Control de Acceso - OXITRANS S.A.S
-            </h1>
-            <div className="header-actions">
-              <span className="user-info">
-                Bienvenido, {usuario?.nombre} {usuario?.apellido}
-              </span>
-              <button onClick={logout} className="logout-btn">
-                <LogOut />
-                Salir
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main content */}
       <main className="dashboard__main">

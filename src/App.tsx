@@ -3,7 +3,8 @@ import { useEffect } from 'react';
 import { useAuthStore } from './stores/authStore';
 import { LoginPage } from './pages/LoginPage';
 import { RegistroPage } from './pages/RegistroPage';
-import { DashboardPage } from './pages/DashboardPage';
+// ...existing code...
+import DashboardPanel from './pages/dashboard/DashboardPanel';
 import { lazy, Suspense } from 'react';
 const AdminUsuariosPage = lazy(() => import('./pages/AdminUsuariosPage'));
 const AsignarRolesPage = lazy(() => import('./pages/AsignarRolesPage'));
@@ -57,7 +58,7 @@ function App() {
           <Route 
             path="/dashboard" 
             element={
-              isAuthenticated ? <DashboardPage /> : <Navigate to="/login" replace />
+              isAuthenticated ? <DashboardPanel /> : <Navigate to="/login" replace />
             } 
           />
           <Route

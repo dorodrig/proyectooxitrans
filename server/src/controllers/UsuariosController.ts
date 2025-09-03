@@ -3,6 +3,32 @@ import { UsuarioModel } from '../models/UsuarioModel';
 import { validationResult } from 'express-validator';
 
 export class UsuariosController {
+  // Dashboard: estadísticas generales
+  static async getStats(req: Request, res: Response): Promise<void> {
+    try {
+      const total = await UsuarioModel.countAll();
+      const activos = await UsuarioModel.countByEstado('activo');
+      const inactivos = await UsuarioModel.countByEstado('inactivo');
+      const supervisores = await UsuarioModel.countByRol('supervisor');
+      res.json({ total, activos, inactivos, supervisores });
+    } catch (error) {
+      console.error('Error en getStats:', error);
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  }
+
+  // Dashboard: usuarios por rol
+  static async getPorRol(req: Request, res: Response): Promise<void> {
+    try {
+      const result = await UsuarioModel.countGroupByRol();
+  const roles = result.map((r: { rol: string; total: number }) => r.rol);
+  const cantidades = result.map((r: { rol: string; total: number }) => r.total);
+      res.json({ roles, cantidades });
+    } catch (error) {
+      console.error('Error en getPorRol:', error);
+      res.status(500).json({ message: 'Error interno del servidor' });
+    }
+  }
   // Asignar regional y tipo_usuario a un usuario
   static async asignarRegionalYTipo(req: Request, res: Response): Promise<void> {
     try {

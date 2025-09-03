@@ -1,0 +1,40 @@
+table.dataTable {
+  margin-bottom: 5px !important;
+  border: 1px solid #C6CEEE;
+}
+
+table.dataTable td.highlight {
+  background: #484e5f;
+}
+
+.page-link {
+  color: #afb7c9;
+  border-color: #aed4d4;
+}
+
+.page-link:hover {
+  background-color: #334eb4;
+  color: #ffffff;
+  border-color: #334eb4;
+}
+
+.page-link.active,
+.active>.page-link {
+  background-color: #ffffff;
+  border: 1px solid #aed4d4;
+  color: #297372;
+}
+
+.page-link.disabled,
+.disabled>.page-link {
+  border-color: #aed4d4;
+  background-color: #e5f3f3;
+}
+
+div.dataTables_wrapper div.dataTables_info {
+  display: inline-block;
+}
+
+div.dataTables_wrapper div.dataTables_paginate {
+  float: right;
+}

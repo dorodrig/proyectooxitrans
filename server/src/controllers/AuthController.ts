@@ -1,14 +1,18 @@
 import { Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { UsuarioModel } from '../models/UsuarioModel';
+import { UsuarioModel, CreateUserData } from '../models/UsuarioModel';
+import { Usuario } from '../types';
 
-// Extender Request para incluir usuario autenticado
-interface AuthenticatedRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    rol: string;
-  };
+interface AuthRequest extends Request {
+  user?: Usuario;
+}
+
+interface JwtPayload {
+  userId: string;
+  documento: string;
+  rol: string;
+  iat?: number;
+  exp?: number;
 }
 
 export class AuthController {
@@ -27,12 +31,21 @@ export class AuthController {
         return;
       }
       
-      // Buscar usuario
+      // Buscar usuario por documento con contraseña
       const user = await UsuarioModel.findByDocumentWithPassword(documento);
       if (!user) {
         res.status(401).json({
           success: false,
           message: 'Credenciales inválidas'
+        });
+        return;
+      }
+      
+      // Verificar que el usuario esté activo
+      if (user.estado !== 'activo') {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario inactivo o suspendido. Contacte al administrador.'
         });
         return;
       }
@@ -49,22 +62,30 @@ export class AuthController {
       
       // Generar JWT
       const jwtSecret = process.env.JWT_SECRET || 'secret';
-      
-      const payload = { 
-        userId: user.id, 
-        documento: user.documento, 
-        rol: user.rol 
+      const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
+
+      const payload = {
+        userId: user.id,
+        documento: user.documento,
+        rol: user.rol
       };
+
+      // Usar la forma más explícita para evitar conflictos de tipos
+      const token = jwt.sign(
+        payload,
+        jwtSecret,
+        { 
+          expiresIn: expiresIn
+        } as jwt.SignOptions
+      );
       
-      const token = jwt.sign(payload, jwtSecret, { expiresIn: '24h' });
-      
-      // Remover password del usuario y destructurar correctamente
+      // Remover password del usuario  
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { passwordHash, ...userWithoutPassword } = user;
       
       res.json({
         success: true,
-        message: 'Login exitoso',
+        message: 'Inicio de sesión exitoso',
         data: {
           user: userWithoutPassword,
           token
@@ -83,7 +104,8 @@ export class AuthController {
   // Verificar token
   static async verifyToken(req: Request, res: Response): Promise<void> {
     try {
-      const token = req.headers.authorization?.replace('Bearer ', '');
+      const authHeader = req.headers.authorization;
+      const token = authHeader?.replace('Bearer ', '');
       
       if (!token) {
         res.status(401).json({
@@ -93,14 +115,10 @@ export class AuthController {
         return;
       }
       
-      interface JwtPayload {
-        userId: string;
-        documento: string;
-        rol: string;
-        iat?: number;
-        exp?: number;
-      }
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret') as JwtPayload;
+      const jwtSecret = process.env.JWT_SECRET || 'secret';
+      const decoded = jwt.verify(token, jwtSecret) as JwtPayload;
+      
+      // Buscar usuario actual en la base de datos
       const user = await UsuarioModel.findById(decoded.userId);
       
       if (!user) {
@@ -111,33 +129,81 @@ export class AuthController {
         return;
       }
       
+      // Verificar que el usuario sigue activo
+      if (user.estado !== 'activo') {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario inactivo o suspendido'
+        });
+        return;
+      }
+      
       res.json({
         success: true,
+        message: 'Token válido',
         data: { user }
       });
       
     } catch (error) {
-      res.status(401).json({
+      console.error('Error verificando token:', error);
+      
+      if (error instanceof jwt.JsonWebTokenError) {
+        res.status(401).json({
+          success: false,
+          message: 'Token inválido'
+        });
+        return;
+      }
+      
+      if (error instanceof jwt.TokenExpiredError) {
+        res.status(401).json({
+          success: false,
+          message: 'Token expirado'
+        });
+        return;
+      }
+      
+      res.status(500).json({
         success: false,
-        message: 'Token inválido : ' + error
+        message: 'Error interno del servidor'
       });
     }
   }
   
   // Cambiar contraseña
-  static async changePassword(req: AuthenticatedRequest, res: Response): Promise<void> {
+  static async changePassword(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const { currentPassword, newPassword } = req.body;
+      const { currentPassword, newPassword, confirmPassword } = req.body;
       
-      if (!currentPassword || !newPassword) {
+      // Validar datos requeridos
+      if (!currentPassword || !newPassword || !confirmPassword) {
         res.status(400).json({
           success: false,
-          message: 'Contraseña actual y nueva son requeridas'
+          message: 'Contraseña actual, nueva contraseña y confirmación son requeridas'
         });
         return;
       }
       
-      if (!req.user?.email) {
+      // Validar que las contraseñas nuevas coincidan
+      if (newPassword !== confirmPassword) {
+        res.status(400).json({
+          success: false,
+          message: 'La nueva contraseña y la confirmación no coinciden'
+        });
+        return;
+      }
+      
+      // Validar longitud de la nueva contraseña
+      if (newPassword.length < 6) {
+        res.status(400).json({
+          success: false,
+          message: 'La nueva contraseña debe tener al menos 6 caracteres'
+        });
+        return;
+      }
+      
+      // Verificar que el usuario esté autenticado
+      if (!req.user?.id) {
         res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
@@ -145,7 +211,8 @@ export class AuthController {
         return;
       }
       
-      const user = await UsuarioModel.findByEmailWithPassword(req.user.email);
+      // Buscar usuario con contraseña
+      const user = await UsuarioModel.findById(req.user.id);
       if (!user) {
         res.status(404).json({
           success: false,
@@ -154,11 +221,22 @@ export class AuthController {
         return;
       }
       
-      const isValidPassword = await UsuarioModel.verifyPassword(currentPassword, user.passwordHash);
+      // Obtener usuario con contraseña para verificación
+      const userWithPassword = await UsuarioModel.findByDocumentWithPassword(user.documento);
+      if (!userWithPassword) {
+        res.status(404).json({
+          success: false,
+          message: 'Error al verificar credenciales'
+        });
+        return;
+      }
+      
+      // Verificar contraseña actual
+      const isValidPassword = await UsuarioModel.verifyPassword(currentPassword, userWithPassword.passwordHash);
       if (!isValidPassword) {
         res.status(400).json({
           success: false,
-          message: 'Contraseña actual incorrecta'
+          message: 'La contraseña actual es incorrecta'
         });
         return;
       }
@@ -201,26 +279,29 @@ export class AuthController {
         departamento,
         cargo,
         password,
+        confirmPassword,
         fecha_ingreso
       } = req.body;
 
       // Validar datos requeridos
       const requiredFields = {
-        nombre,
-        apellido,
-        email,
-        documento,
-        tipo_documento,
-        departamento,
-        cargo,
-        password
+        nombre: 'Nombre',
+        apellido: 'Apellido',
+        email: 'Email',
+        documento: 'Documento',
+        tipo_documento: 'Tipo de documento',
+        departamento: 'Departamento',
+        cargo: 'Cargo',
+        password: 'Contraseña',
+        confirmPassword: 'Confirmación de contraseña'
       };
 
-      for (const [field, value] of Object.entries(requiredFields)) {
-        if (!value) {
+      for (const [field, label] of Object.entries(requiredFields)) {
+        const value = req.body[field];
+        if (!value || (typeof value === 'string' && value.trim() === '')) {
           res.status(400).json({
             success: false,
-            message: `El campo ${field} es requerido`
+            message: `El campo ${label} es requerido`
           });
           return;
         }
@@ -236,51 +317,81 @@ export class AuthController {
         return;
       }
 
-      // Verificar si ya existe un usuario con el mismo email o documento
+      // Validar tipo de documento
+      if (!['CC', 'CE', 'PA'].includes(tipo_documento)) {
+        res.status(400).json({
+          success: false,
+          message: 'Tipo de documento inválido'
+        });
+        return;
+      }
+
+      // Validar contraseñas
+      if (password.length < 6) {
+        res.status(400).json({
+          success: false,
+          message: 'La contraseña debe tener al menos 6 caracteres'
+        });
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        res.status(400).json({
+          success: false,
+          message: 'Las contraseñas no coinciden'
+        });
+        return;
+      }
+
+      // Verificar si ya existe un usuario con el mismo email
       const existingUser = await UsuarioModel.findByEmail(email);
       if (existingUser) {
-        res.status(400).json({
+        res.status(409).json({
           success: false,
-          message: 'Ya existe un usuario con este email'
+          message: 'Ya existe un usuario registrado con este email'
         });
         return;
       }
 
+      // Verificar si ya existe un usuario con el mismo documento
       const existingDocument = await UsuarioModel.findByDocument(documento);
       if (existingDocument) {
-        res.status(400).json({
+        res.status(409).json({
           success: false,
-          message: 'Ya existe un usuario con este documento'
+          message: 'Ya existe un usuario registrado con este documento'
         });
         return;
       }
 
-      // Crear nuevo usuario con estado "inactivo"
-      const userData = {
-        nombre,
-        apellido,
-        email,
-        telefono: telefono || undefined,
-        documento,
-        tipoDocumento: tipo_documento,
+      // Crear datos del usuario
+      const userData: CreateUserData = {
+        nombre: nombre.trim(),
+        apellido: apellido.trim(),
+        email: email.toLowerCase().trim(),
+        telefono: telefono?.trim() || null,
+        documento: documento.trim(),
+        tipo_documento,
         rol: 'empleado' as const,
-        estado: 'inactivo' as const, // IMPORTANTE: El usuario se crea inactivo
-        fechaIngreso: new Date(fecha_ingreso || new Date().toISOString().split('T')[0]),
-        departamento,
-        cargo,
-        codigoAcceso: undefined,
-        fotoUrl: undefined
+        estado: 'inactivo' as const, // Los registros necesitan aprobación
+        fecha_ingreso: fecha_ingreso || new Date().toISOString().split('T')[0],
+        departamento: departamento.trim(),
+        cargo: cargo.trim(),
+        codigo_acceso: null,
+        foto_url: null
       };
 
+      // Crear usuario con contraseña
       const userId = await UsuarioModel.createWithPassword(userData, password);
 
       res.status(201).json({
         success: true,
-        message: 'Usuario registrado exitosamente. Su cuenta será revisada por un administrador.',
+        message: 'Registro exitoso. Su cuenta será revisada por un administrador antes de ser activada.',
         data: {
           id: userId,
-          email: email,
-          estado: 'inactivo'
+          email: userData.email,
+          nombre: userData.nombre,
+          apellido: userData.apellido,
+          estado: userData.estado
         }
       });
 
@@ -290,7 +401,7 @@ export class AuthController {
       // Manejar errores específicos de base de datos
       if (error instanceof Error) {
         if (error.message.includes('Duplicate entry')) {
-          res.status(400).json({
+          res.status(409).json({
             success: false,
             message: 'El email o documento ya están registrados'
           });
@@ -309,12 +420,12 @@ export class AuthController {
   // RESTABLECIMIENTO DE CONTRASEÑA
   // ====================================
 
-  // Solicitar restablecimiento de contraseña (simplificado por documento)
+  // Solicitar restablecimiento de contraseña
   static async requestPasswordReset(req: Request, res: Response): Promise<void> {
     try {
       const { documento } = req.body;
 
-      if (!documento) {
+      if (!documento || typeof documento !== 'string' || documento.trim() === '') {
         res.status(400).json({
           success: false,
           message: 'El número de documento es requerido'
@@ -323,30 +434,41 @@ export class AuthController {
       }
 
       // Verificar si el usuario existe
-      const usuario = await UsuarioModel.findByDocument(documento);
+      const usuario = await UsuarioModel.findByDocument(documento.trim());
       
       if (!usuario) {
-        // Por seguridad, respondemos con el mismo mensaje aunque no exista
+        // Por seguridad, respondemos exitosamente aunque no exista
         res.status(200).json({
           success: true,
-          message: 'Si el documento existe, podrás restablecer tu contraseña',
+          message: 'Si el documento está registrado, podrás restablecer tu contraseña',
           documentExists: false
         });
         return;
       }
 
-      // Si el usuario existe, generamos un token temporal
+      // Verificar que el usuario esté activo
+      if (usuario.estado !== 'activo') {
+        res.status(400).json({
+          success: false,
+          message: 'La cuenta no está activa. Contacte al administrador.'
+        });
+        return;
+      }
+
+      // Generar token de restablecimiento
       const resetToken = await UsuarioModel.createPasswordResetToken(Number(usuario.id));
       
       res.status(200).json({
         success: true,
-        message: 'Documento verificado correctamente',
-        documentExists: true,
-        resetToken,
-        usuario: {
-          nombre: usuario.nombre,
-          apellido: usuario.apellido,
-          documento: usuario.documento
+        message: 'Token de restablecimiento generado correctamente',
+        data: {
+          documentExists: true,
+          resetToken,
+          usuario: {
+            nombre: usuario.nombre,
+            apellido: usuario.apellido,
+            documento: usuario.documento
+          }
         }
       });
 
@@ -364,7 +486,7 @@ export class AuthController {
     try {
       const { token } = req.params;
 
-      if (!token) {
+      if (!token || typeof token !== 'string') {
         res.status(400).json({
           success: false,
           message: 'Token requerido'
@@ -384,7 +506,11 @@ export class AuthController {
 
       res.status(200).json({
         success: true,
-        message: 'Token válido'
+        message: 'Token válido',
+        data: {
+          valid: true,
+          userId: verification.userId
+        }
       });
 
     } catch (error) {

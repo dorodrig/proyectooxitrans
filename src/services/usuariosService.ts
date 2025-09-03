@@ -1,18 +1,8 @@
-// Asignar cargo a un usuario
-async function asignarCargo(id: string, cargo: string) {
-  return apiClient.put(`/usuarios/${id}/cargo`, { cargo });
-}
-// Asignar regional y tipo de usuario a un usuario final
-async function asignarRegionalYTipo(id: string, regionalId: string, tipoUsuario: 'planta' | 'visita') {
-  return apiClient.put(`/usuarios/${id}/regional`, { regionalId, tipoUsuario });
-}
 import type { Rol } from '../types';
 import { apiClient } from './apiClient';
 import type { Usuario } from '../types';
 
-async function asignarRol(id: string, nuevoRol: Rol) {
-  return apiClient.put(`/usuarios/${id}/rol`, { rol: nuevoRol });
-}
+// Interfaces para tipado
 interface CreateUserData {
   nombre: string;
   apellido: string;
@@ -30,7 +20,6 @@ interface UpdateUserData extends Partial<CreateUserData> {
   id: string;
 }
 
-
 // Estructura real de la respuesta del backend
 interface UsuariosResponseBackend {
   success: boolean;
@@ -41,6 +30,19 @@ interface UsuariosResponseBackend {
     limit: number;
     totalPages?: number;
   };
+}
+
+// Funciones auxiliares
+async function asignarCargo(id: string, cargo: string) {
+  return apiClient.put(`/usuarios/${id}/cargo`, { cargo });
+}
+
+async function asignarRegionalYTipo(id: string, regionalId: string, tipoUsuario: 'planta' | 'visita') {
+  return apiClient.put(`/usuarios/${id}/regional`, { regionalId, tipoUsuario });
+}
+
+async function asignarRol(id: string, nuevoRol: Rol) {
+  return apiClient.put(`/usuarios/${id}/rol`, { rol: nuevoRol });
 }
 
 export const usuariosService = {

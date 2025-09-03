@@ -316,5 +316,25 @@ benchmark/
 # Carpetas de desarrollo y backup
 Desarrollo JS/
 
+# Archivos de prueba y desarrollo
+server/test*.js
+server/check_*.js
+server/set_*.js
+server/verify_*.js
+server/fix_*.js
+
+# Archivos compilados del servidor
+server/dist/
+
+# ====================================
+# ARCHIVOS DE PRUEBA Y TESTING
+# ====================================
+# Archivos temporales de testing
+test_*.js
+*_test.js
+*.test.temp
+testing/
+test-scripts/
+
 # Agregar aquí archivos específicos del proyecto OXITRANS
 # que no deben subirse al repositorio

@@ -1,0 +1,24 @@
+{
+  "name": "Control de Acceso OXITRANS",
+  "short_name": "OXITRANS Access",
+  "description": "Sistema de Control de Acceso de Empleados para OXITRANS S.A.S",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1e40af",
+  "theme_color": "#1e40af",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "es"
+}

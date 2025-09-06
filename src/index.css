@@ -1,36 +1,381 @@
-// ====================================
-// ARCHIVO PRINCIPAL DE ESTILOS
-// OXITRANS S.A.S - Control de Acceso
-// ====================================
+/* ====================================
+   ARCHIVO PRINCIPAL DE ESTILOS
+   OXITRANS S.A.S - Control de Acceso
+   Template Premium Integration
+   ==================================== */
 
-// Abstracts (variables, mixins, functions)
-@import './styles/abstracts/variables';
-@import './styles/abstracts/mixins';
+/* Importar estilos principales SCSS */
+@import './styles/main.scss';
 
-// Base (reset, typography, etc.)
-@import './styles/base/reset';
-
-// Components (botones, cards, forms, etc.)
-@import './styles/components/base';
-
-// Pages (estilos específicos de páginas)
-@import './styles/pages/login';
-@import './styles/pages/dashboard';tailwind components; */
+/* Tailwind CSS */
+@tailwind base;
+@tailwind components;
 @tailwind utilities;
+
+/* Fuentes del template premium */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
+  
+  /* Variables del template premium */
+  --primary-color: #3b82f6;
+  --success-color: #10b981;
+  --danger-color: #ef4444;
+  --warning-color: #f59e0b;
+  --info-color: #06b6d4;
+  --dark-color: #1f2937;
+  --light-color: #f8fafc;
+  
+  /* Sidebar */
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  
+  /* Espaciado */
+  --header-height: 70px;
+  --content-padding: 1.5rem;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+/* Reset y base */
+* {
+  box-sizing: border-box;
 }
+
 body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
+  background-color: #f8fafc;
+  color: #1f2937;
+}
+
+a {
+  font-weight: 500;
+  color: var(--primary-color);
+  text-decoration: inherit;
+}
+
+/* Layout del Dashboard */
+.app-wrapper {
+  min-height: 100vh !important;
+  display: flex !important;
+  background-color: #f8fafc !important;
+}
+
+.app-content-wrapper {
+  flex: 1 !important;
+  min-width: 0 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.app-content-area {
+  padding: 1.5rem !important;
+  min-height: calc(100vh - 70px) !important;
+  background-color: #f8fafc !important;
+  flex: 1 !important;
+}
+
+/* Page title */
+.page-title h1 {
+  color: #1f2937 !important;
+  font-size: 1.875rem !important;
+  font-weight: 700 !important;
+  margin: 0 0 0.5rem 0 !important;
+}
+
+.page-title p {
+  color: #6b7280 !important;
+  font-size: 1rem !important;
+  margin: 0 !important;
+}
+
+/* Header */
+.app-header {
+  height: var(--header-height);
+  border-bottom: 1px solid #e5e7eb;
+  background: white;
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  z-index: 1000;
+}
+
+.menu-toggle {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .menu-toggle {
+    display: block;
+  }
+}
+
+/* Cards y componentes */
+.card-stats {
+  background: white !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+  transition: all 0.3s ease !important;
+  padding: 1.5rem !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.card-stats:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Sidebar específico */
+.sidebar-wrapper {
+  background: white !important;
+  border-right: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.sidebar-wrapper .app-brand {
+  padding: 1.5rem !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.sidebar-wrapper .logo-icon {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%) !important;
+  color: white !important;
+  border-radius: 8px !important;
+  width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: 700 !important;
+}
+
+.sidebar-wrapper .brand-text span {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+}
+
+.sidebar-wrapper .brand-text p {
+  font-size: 0.75rem !important;
+  color: #6b7280 !important;
+  margin: 0 !important;
+}
+
+.sidebar-wrapper .sidebar-menu a {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.75rem !important;
+  padding: 0.75rem 1rem !important;
+  margin: 0.25rem 0 !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+  color: #374151 !important;
+}
+
+.sidebar-wrapper .sidebar-menu a:hover {
+  background-color: #f3f4f6 !important;
+  color: #1f2937 !important;
+}
+
+.sidebar-wrapper .sidebar-menu a.bg-blue-50 {
+  background-color: #eff6ff !important;
+  color: #2563eb !important;
+  border-right: 3px solid #2563eb !important;
+}
+
+/* Header específico */
+.app-header {
+  background: white !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 0 1.5rem !important;
+  height: 70px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+/* StatCards mejoradas */
+.stat-card {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.3s ease !important;
+}
+
+.stat-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-2px) !important;
+}
+
+.stat-value {
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  color: #1f2937 !important;
+  margin: 0.5rem 0 !important;
+}
+
+.stat-title {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  color: #6b7280 !important;
+  margin: 0 !important;
+}
+
+.stat-change {
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+}
+
+.stat-change.positive {
+  color: #10b981 !important;
+}
+
+.stat-change.negative {
+  color: #ef4444 !important;
+}
+
+/* Overview cards */
+.overview-card {
+  background: white !important;
+  border-radius: 12px !important;
+  padding: 1.5rem !important;
+  border: 1px solid #e5e7eb !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.chart-container {
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+  padding: 1.5rem !important;
+  height: 320px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Progress bars mejoradas */
+.progress-bar {
+  height: 6px !important;
+  border-radius: 3px !important;
+  overflow: hidden !important;
+  background-color: #e5e7eb !important;
+  margin: 0.5rem 0 !important;
+}
+
+.progress-fill {
+  height: 100% !important;
+  transition: width 0.5s ease !important;
+  border-radius: 3px !important;
+}
+
+/* Layout responsivo */
+.dashboard-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+  gap: 1.5rem !important;
+  margin-bottom: 2rem !important;
+}
+
+@media (min-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+.chart-container {
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* Progress bars */
+.progress-bar {
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  background-color: #e5e7eb;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 0.5s ease;
+  border-radius: 3px;
+}
+
+/* Iconos */
+.icon-users:before { content: "👥"; }
+.icon-clock:before { content: "🕒"; }
+.icon-log-in:before { content: "📊"; }
+.icon-alert-triangle:before { content: "⚠️"; }
+.icon-user-plus:before { content: "➕"; }
+.icon-file-text:before { content: "📄"; }
+.icon-settings:before { content: "⚙️"; }
+.icon-menu:before { content: "☰"; }
+.icon-search:before { content: "🔍"; }
+.icon-bell:before { content: "🔔"; }
+.icon-message-circle:before { content: "💬"; }
+.icon-user:before { content: "👤"; }
+.icon-chevron-down:before { content: "⌄"; }
+.icon-home:before { content: "🏠"; }
+.icon-shield:before { content: "🛡️"; }
+.icon-bar-chart:before { content: "📊"; }
+.icon-database:before { content: "🗃️"; }
+.icon-chevron-right:before { content: "›"; }
+.icon-x:before { content: "✕"; }
+.icon-notes:before { content: "📝"; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .app-content-area {
+    padding: 1rem;
+  }
+  
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+/* Utilidades */
+.container-fluid {
+  width: 100%;
+  max-width: none;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  line-height: 1.2;
 }

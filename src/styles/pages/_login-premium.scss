@@ -1,0 +1,333 @@
+// ===================================
+// 🎨 OXITRANS LOGIN PREMIUM STYLES
+// Basado en las plantillas compradas por el cliente
+// ===================================
+
+@use 'sass:color';
+@use '../abstracts' as *;
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+// 🎨 Variables del tema premium
+:root {
+  --bs-primary: #297372;
+  --bs-secondary: #ababae;
+  --bs-danger: #ff3239;
+  --bs-success: #17b04f;
+  --bs-info: #0d6ed2;
+  --bs-warning: #f6c115;
+  --bs-light: #f4f4f9;
+  --bs-dark: #303030;
+  --bs-gray-300: #c3c3c7;
+  --bs-gray-600: #7a7a7d;
+  --bs-body-color: #202020;
+  --bs-white: #ffffff;
+  --bs-border-radius: 10px;
+}
+
+// 🌟 Fuentes de iconos
+@font-face {
+  font-family: 'icomoon';
+  src: url('/assets/fonts/icomoon/icomoon.eot?i9f3vw');
+  src: url('/assets/fonts/icomoon/icomoon.eot?i9f3vw#iefix') format('embedded-opentype'),
+    url('/assets/fonts/icomoon/icomoon.ttf?i9f3vw') format('truetype'),
+    url('/assets/fonts/icomoon/icomoon.woff?i9f3vw') format('woff'),
+    url('/assets/fonts/icomoon/icomoon.svg?i9f3vw#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
+  font-display: block;
+}
+
+[class^="icon-"], [class*=" icon-"] {
+  font-family: 'icomoon' !important;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-eye-off:before {
+  content: "\e9ca";
+}
+
+.icon-eye:before {
+  content: "\e9ce";
+}
+
+// 🎭 Background del login
+.login-bg {
+  background: var(--bs-white) url('/assets/images/login-bg.svg') no-repeat;
+  background-size: cover;
+  background-position: bottom left;
+  background-attachment: fixed;
+  min-height: 100vh;
+  font-family: 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+// 🏗️ Wrapper principal de autenticación
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 100vh;
+  padding: 2rem;
+  
+  @media (max-width: 991.98px) {
+    justify-content: center;
+  }
+}
+
+// 📦 Caja de autenticación
+.auth-box {
+  border: 1px solid var(--bs-gray-600);
+  border-radius: var(--bs-border-radius);
+  padding: 1.5rem;
+  margin: 2rem 0;
+  min-width: 340px;
+  max-width: 340px;
+  background: var(--bs-white);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  
+  @media (max-width: 991.98px) {
+    background: var(--bs-white);
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  }
+}
+
+// 🎨 Logo de autenticación
+.auth-logo {
+  display: inline-flex;
+  margin-bottom: 1.5rem;
+  
+  img {
+    max-width: 180px;
+    max-height: 48px;
+    object-fit: contain;
+  }
+}
+
+// 📝 Estilos de formulario
+.login-form {
+  .form-label {
+    color: var(--bs-body-color);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    
+    .text-danger {
+      color: var(--bs-danger) !important;
+    }
+  }
+  
+  .form-control {
+    border: 1px solid var(--bs-gray-300);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    background-color: var(--bs-white);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    
+    &:focus {
+      border-color: var(--bs-primary);
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(41, 115, 114, 0.25);
+    }
+    
+    &::placeholder {
+      color: var(--bs-gray-600);
+      opacity: 1;
+    }
+  }
+  
+  .input-group {
+    .btn {
+      border: 1px solid var(--bs-gray-300);
+      border-left: none;
+      background-color: transparent;
+      color: var(--bs-gray-600);
+      
+      &:hover {
+        background-color: var(--bs-light);
+        border-color: var(--bs-gray-300);
+        color: var(--bs-body-color);
+      }
+      
+      &:focus {
+        box-shadow: none;
+        border-color: var(--bs-primary);
+      }
+    }
+  }
+  
+  .mb-3 {
+    margin-bottom: 1rem;
+  }
+  
+  .mb-2 {
+    margin-bottom: 0.5rem;
+  }
+  
+  .mb-4 {
+    margin-bottom: 1.5rem;
+  }
+}
+
+// 🔗 Enlaces
+.text-decoration-underline {
+  text-decoration: underline !important;
+  color: var(--bs-primary);
+  font-size: 0.875rem;
+  
+  &:hover {
+    color: color.adjust(#297372, $lightness: -10%);
+  }
+}
+
+// 🎯 Botones
+.btn {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.15s ease-in-out;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
+  &.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    color: var(--bs-white);
+    
+    &:hover {
+      background-color: color.adjust(#297372, $lightness: -10%);
+      border-color: color.adjust(#297372, $lightness: -10%);
+      color: var(--bs-white);
+    }
+    
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(41, 115, 114, 0.5);
+    }
+  }
+  
+  &.btn-outline-dark {
+    background-color: transparent;
+    border-color: var(--bs-dark);
+    color: var(--bs-dark);
+    
+    &:hover {
+      background-color: var(--bs-dark);
+      border-color: var(--bs-dark);
+      color: var(--bs-white);
+    }
+    
+    &:focus {
+      box-shadow: 0 0 0 0.2rem rgba(48, 48, 48, 0.5);
+    }
+  }
+}
+
+// 🎪 Utilidades de Bootstrap
+.d-flex {
+  display: flex !important;
+}
+
+.justify-content-end {
+  justify-content: flex-end !important;
+}
+
+.d-grid {
+  display: grid !important;
+}
+
+.gap-2 {
+  gap: 0.5rem !important;
+}
+
+.text-danger {
+  color: var(--bs-danger) !important;
+}
+
+// 📱 Responsive
+@media (max-width: 576px) {
+  .auth-box {
+    min-width: 280px;
+    max-width: 280px;
+    padding: 1rem;
+  }
+  
+  .auth-wrapper {
+    padding: 1rem;
+  }
+}
+
+// 🎭 Animaciones de entrada
+.login-container {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// 🌟 Efectos adicionales
+.auth-box {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--bs-primary), var(--bs-info), var(--bs-success));
+    border-radius: var(--bs-border-radius) var(--bs-border-radius) 0 0;
+  }
+}
+
+// 🎨 Título del login
+.login-title {
+  color: var(--bs-body-color);
+  font-weight: 600;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+// 🔄 Loading state para botones
+.btn.loading {
+  position: relative;
+  color: transparent;
+  
+  &::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

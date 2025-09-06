@@ -1,0 +1,22 @@
+// ===================================
+// 🎨 OXITRANS MAIN STYLES
+// Archivo principal de estilos SCSS
+// ===================================
+
+// 📚 Abstracts (variables, mixins, functions)
+@forward 'abstracts';
+
+// 🧱 Base (reset, typography, utilities)
+@forward 'base';
+
+// 🧩 Components (botones, cards, forms, etc.)
+@forward 'components';
+
+// 📄 Pages (estilos específicos de páginas)
+@forward 'pages';
+
+// 🎨 Dashboard (estilos del dashboard)
+@forward 'dashboard';
+
+// ✨ Effects (animaciones y efectos especiales)
+@forward 'effects';

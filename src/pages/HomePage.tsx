@@ -1,43 +1,320 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { UserCog } from 'lucide-react';
-import DashboardCard from '../components/dashboard/DashboardCard';
+import React, { useState } from 'react';
+import HeaderNew from '../components/dashboard/HeaderNew';
+import SidebarNew from '../components/dashboard/SidebarNew';
+import StatCardNew from '../components/dashboard/StatCardNew';
+import OverviewCardNew from '../components/dashboard/OverviewCardNew';
+import SalesMetricNew from '../components/dashboard/SalesMetricNew';
+import RecentActivityNew from '../components/dashboard/RecentActivityNew';
+import AccessChart from '../components/dashboard/AccessChart';
 
 const HomePage: React.FC = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
-    <div className="home-page min-h-screen flex flex-col items-center justify-center bg-gray-50 py-8">
-      <h1 className="text-3xl font-bold mb-8 text-oxitrans-red">Bienvenido a OXITRANS Control de Acceso</h1>
-  <div className="grid grid-cols-1 md:grid-cols-4 gap-8 w-full max-w-5xl">
-  {/* Card de Dashboard */}
-  <DashboardCard />
+    <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+      {/* Sidebar */}
+      <SidebarNew isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      
+      {/* Main Content con margen para el sidebar */}
+      <div style={{ 
+        marginLeft: '16rem', // Espacio para sidebar fijo
+        display: 'flex', 
+        flexDirection: 'column', 
+        minWidth: 0 
+      }}>
+        {/* Header */}
+        <HeaderNew onToggleSidebar={toggleSidebar} />
+          
+          {/* Dashboard Content */}
+          <div style={{ 
+            padding: '1.5rem',
+            minHeight: 'calc(100vh - 70px)',
+            backgroundColor: '#f8fafc'
+          }}>
+            <div style={{ width: '100%', maxWidth: 'none' }}>
+              {/* Dashboard Title */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h1 style={{ 
+                  fontSize: '1.875rem', 
+                  fontWeight: '700', 
+                  color: '#1f2937',
+                  margin: '0 0 0.5rem 0'
+                }}>
+                  Dashboard OXITRANS
+                </h1>
+                <p style={{ 
+                  color: '#6b7280', 
+                  margin: 0 
+                }}>
+                  Sistema de Control de Acceso - Monitoreo en Tiempo Real
+                </p>
+              </div>
 
-  {/* Card de Administración de Usuarios */}
-        <Link to="/admin/usuarios" className="card-home bg-white rounded-xl shadow-lg p-8 flex flex-col items-center hover:shadow-2xl transition group border border-gray-200">
-          <div className="bg-oxitrans-red/10 rounded-full p-4 mb-4">
-            <UserCog className="text-oxitrans-red w-10 h-10 group-hover:scale-110 transition" />
-          </div>
-          <h2 className="text-xl font-semibold mb-2 text-gray-800">Administrar Usuarios</h2>
-          <p className="text-gray-500 text-center">Activa, desactiva o busca usuarios registrados en el sistema.</p>
-        </Link>
+            {/* Stats Cards */}
+            <div 
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '1.5rem',
+                marginBottom: '2rem'
+              }}
+            >
+              <StatCardNew
+                title="Accesos Hoy"
+                value="847"
+                change="+12.5%"
+                changeType="positive"
+                icon="🔑"
+                color="primary"
+              />
+              <StatCardNew
+                title="Personal Activo"
+                value="234"
+                change="-2.1%"
+                changeType="negative"
+                icon="👥"
+                color="success"
+              />
+              <StatCardNew
+                title="Visitantes"
+                value="45"
+                change="+18.2%"
+                changeType="positive"
+                icon="👤"
+                color="warning"
+              />
+              <StatCardNew
+                title="Alertas Activas"
+                value="3"
+                change="-25.0%"
+                changeType="negative"
+                icon="⚠️"
+                color="danger"
+              />
+            </div>
 
-        {/* Card de Control Maestro */}
-        <Link to="/control-maestro" className="card-home bg-white rounded-xl shadow-lg p-8 flex flex-col items-center hover:shadow-2xl transition group border border-blue-200">
-          <div className="bg-blue-100 rounded-full p-4 mb-4 flex items-center justify-center">
-            <i className="icon-settings text-blue-600" style={{fontSize: 40}}></i>
-          </div>
-          <h2 className="text-xl font-semibold mb-2 text-gray-800">Control Maestro</h2>
-          <p className="text-gray-500 text-center">Accede a la gestión de regionales, tipos de usuario y asignaciones avanzadas.</p>
-        </Link>
+            {/* Main Content Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '2fr 1fr',
+              gap: '1.5rem',
+              marginBottom: '2rem'
+            }}>
+              {/* Chart Section */}
+              <OverviewCardNew
+                title="Patrón de Accesos"
+                subtitle="Análisis de tráfico por horas del día"
+              >
+                <AccessChart />
+              </OverviewCardNew>
 
-        {/* Card de Novedades */}
-        <Link to="/novedades" className="card-home bg-white rounded-xl shadow-lg p-8 flex flex-col items-center hover:shadow-2xl transition group border border-pink-200">
-          <div className="bg-pink-100 rounded-full p-4 mb-4 flex items-center justify-center">
-            <i className="icon-notes text-pink-500" style={{fontSize: 40}}></i>
+              {/* Quick Stats */}
+              <OverviewCardNew
+                title="Resumen por Área"
+                subtitle="Distribución de accesos por zona"
+              >
+                <div style={{ marginTop: '1rem' }}>
+                  <SalesMetricNew
+                    category="Oficinas Administrativas"
+                    amount="342 accesos"
+                    percentage={78}
+                    color="bg-blue-500"
+                  />
+                  <SalesMetricNew
+                    category="Área de Producción"
+                    amount="289 accesos"
+                    percentage={65}
+                    color="bg-green-500"
+                  />
+                  <SalesMetricNew
+                    category="Almacén"
+                    amount="156 accesos"
+                    percentage={35}
+                    color="bg-yellow-500"
+                  />
+                  <SalesMetricNew
+                    category="Estacionamiento"
+                    amount="124 accesos"
+                    percentage={28}
+                    color="bg-purple-500"
+                  />
+                  <SalesMetricNew
+                    category="Área Restringida"
+                    amount="23 accesos"
+                    percentage={5}
+                    color="bg-red-500"
+                  />
+                </div>
+              </OverviewCardNew>
+            </div>
+
+            {/* Bottom Section */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '1.5rem'
+            }}>
+              {/* Recent Activity */}
+              <RecentActivityNew />
+
+              {/* System Status */}
+              <OverviewCardNew
+                title="Estado del Sistema"
+                subtitle="Monitoreo de dispositivos y servicios"
+              >
+                <div style={{ marginTop: '1rem' }}>
+                  {/* System Status Items */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.75rem',
+                      backgroundColor: '#f0fdf4',
+                      borderRadius: '8px',
+                      border: '1px solid #bbf7d0'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#10b981'
+                        }} />
+                        <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#065f46' }}>
+                          Servidores Principales
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#059669' }}>Operativo</span>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.75rem',
+                      backgroundColor: '#f0fdf4',
+                      borderRadius: '8px',
+                      border: '1px solid #bbf7d0'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#10b981'
+                        }} />
+                        <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#065f46' }}>
+                          Lectores de Tarjetas
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#059669' }}>12/12 Activos</span>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.75rem',
+                      backgroundColor: '#fffbeb',
+                      borderRadius: '8px',
+                      border: '1px solid #fed7aa'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#f59e0b'
+                        }} />
+                        <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#92400e' }}>
+                          Cámaras de Seguridad
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#d97706' }}>7/8 Activas</span>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.75rem',
+                      backgroundColor: '#f0fdf4',
+                      borderRadius: '8px',
+                      border: '1px solid #bbf7d0'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{
+                          width: '8px',
+                          height: '8px',
+                          borderRadius: '50%',
+                          backgroundColor: '#10b981'
+                        }} />
+                        <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#065f46' }}>
+                          Base de Datos
+                        </span>
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: '#059669' }}>Conectada</span>
+                    </div>
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div style={{
+                    marginTop: '1.5rem',
+                    paddingTop: '1rem',
+                    borderTop: '1px solid #e5e7eb'
+                  }}>
+                    <h4 style={{
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      color: '#374151',
+                      marginBottom: '0.75rem'
+                    }}>
+                      Acciones Rápidas
+                    </h4>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <button style={{
+                        padding: '0.5rem 0.75rem',
+                        fontSize: '0.75rem',
+                        fontWeight: '500',
+                        color: '#3b82f6',
+                        backgroundColor: '#eff6ff',
+                        border: '1px solid #dbeafe',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dbeafe'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#eff6ff'}>
+                        🔄 Reiniciar Sistema
+                      </button>
+                      <button style={{
+                        padding: '0.5rem 0.75rem',
+                        fontSize: '0.75rem',
+                        fontWeight: '500',
+                        color: '#059669',
+                        backgroundColor: '#ecfdf5',
+                        border: '1px solid #bbf7d0',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#bbf7d0'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ecfdf5'}>
+                        📊 Ver Reportes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </OverviewCardNew>
+            </div>
           </div>
-          <h2 className="text-xl font-semibold mb-2 text-gray-800">Agregar Novedades</h2>
-          <p className="text-gray-500 text-center">Registra incapacidades, ausentismos, permisos y licencias para los empleados.</p>
-        </Link>
+        </div>
       </div>
     </div>
   );

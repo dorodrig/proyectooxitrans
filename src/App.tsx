@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useEffect } from 'react';
 import { useAuthStore } from './stores/authStore';
 import { LoginPage } from './pages/LoginPage';
+import PremiumLoginPage from './pages/PremiumLoginPage';
 import { RegistroPage } from './pages/RegistroPage';
 // ...existing code...
 import { DashboardPage } from './pages/DashboardPage';
@@ -39,6 +40,12 @@ function App() {
         <Routes>
           <Route 
             path="/login" 
+            element={
+              isAuthenticated ? <Navigate to="/" replace /> : <PremiumLoginPage />
+            } 
+          />
+          <Route 
+            path="/login-old" 
             element={
               isAuthenticated ? <Navigate to="/" replace /> : <LoginPage />
             } 

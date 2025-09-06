@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuthStore } from './stores/authStore';
 import { LoginPage } from './pages/LoginPage';
 import PremiumLoginPage from './pages/PremiumLoginPage';
@@ -18,6 +19,16 @@ import HomePage from './pages/HomePage';
 import NovedadesPage from './pages/NovedadesPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
+// Crear instancia de QueryClient
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutos
+    },
+  },
+});
 
 function App() {
   const { isAuthenticated, initializeAuth, isLoading } = useAuthStore();
@@ -35,8 +46,9 @@ function App() {
   }
 
   return (
-    <Router>
-      <div className="App">
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <div className="App">
         <Routes>
           <Route 
             path="/login" 
@@ -141,6 +153,7 @@ function App() {
         </Routes>
       </div>
     </Router>
+    </QueryClientProvider>
   );
 }
 

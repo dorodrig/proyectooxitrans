@@ -106,11 +106,6 @@ export const registrosService = {
     return apiClient.get(`/registros/estadisticas?${params}`);
   },
 
-  // Obtener empleados presentes actualmente
-  getEmpleadosPresentes: async (): Promise<Usuario[]> => {
-    return apiClient.get('/registros/presentes');
-  },
-
   // Obtener reporte de asistencia
   getReporteAsistencia: async (startDate: string, endDate: string, departamento?: string): Promise<unknown[]> => {
     const params = new URLSearchParams({

@@ -7,9 +7,14 @@ import OverviewCardNew from '../components/dashboard/OverviewCardNew';
 import SalesMetricNew from '../components/dashboard/SalesMetricNew';
 import RecentActivityNew from '../components/dashboard/RecentActivityNew';
 import AccessChart from '../components/dashboard/AccessChart';
+import { useEstadisticasAcceso, useEmpleadosPresentes } from '../hooks/useDashboardData';
 
 const HomePage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // Hooks para datos reales
+  const { data: estadisticas, isLoading: loadingStats } = useEstadisticasAcceso();
+  const { data: empleadosPresentes, isLoading: loadingPresentes } = useEmpleadosPresentes();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -66,7 +71,7 @@ const HomePage: React.FC = () => {
             >
               <StatCardNew
                 title="Accesos Hoy"
-                value="847"
+                value={loadingStats ? "..." : (estadisticas?.registrosHoy || 0)}
                 change="+12.5%"
                 changeType="positive"
                 icon="🔑"
@@ -74,23 +79,23 @@ const HomePage: React.FC = () => {
               />
               <StatCardNew
                 title="Personal Activo"
-                value="234"
+                value={loadingStats ? "..." : (estadisticas?.empleadosActivos || 0)}
                 change="-2.1%"
                 changeType="negative"
                 icon="👥"
                 color="success"
               />
               <StatCardNew
-                title="Visitantes"
-                value="45"
+                title="Presentes Ahora"
+                value={loadingPresentes ? "..." : (empleadosPresentes?.length || 0)}
                 change="+18.2%"
                 changeType="positive"
-                icon="👤"
-                color="warning"
+                icon="🏢"
+                color="info"
               />
               <StatCardNew
-                title="Alertas Activas"
-                value="3"
+                title="Tardanzas Hoy"
+                value={loadingStats ? "..." : (estadisticas?.tardanzasHoy || 0)}
                 change="-25.0%"
                 changeType="negative"
                 icon="⚠️"

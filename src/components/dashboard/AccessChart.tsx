@@ -1,29 +1,46 @@
 import React from 'react';
+import { useAccesosPorHora } from '../../hooks/useDashboardData';
 
 /**
  * 📊 GRÁFICO DE ACCESOS POR HORA
  * Visualización de patrones de acceso durante el día
  */
 const AccessChart: React.FC = () => {
-  // Datos simulados de accesos por hora
-  const hourlyData = [
-    { hour: '6:00', accesses: 12, label: '6 AM' },
-    { hour: '7:00', accesses: 45, label: '7 AM' },
-    { hour: '8:00', accesses: 78, label: '8 AM' },
-    { hour: '9:00', accesses: 65, label: '9 AM' },
-    { hour: '10:00', accesses: 34, label: '10 AM' },
-    { hour: '11:00', accesses: 28, label: '11 AM' },
-    { hour: '12:00', accesses: 56, label: '12 PM' },
-    { hour: '13:00', accesses: 67, label: '1 PM' },
-    { hour: '14:00', accesses: 43, label: '2 PM' },
-    { hour: '15:00', accesses: 38, label: '3 PM' },
-    { hour: '16:00', accesses: 29, label: '4 PM' },
-    { hour: '17:00', accesses: 52, label: '5 PM' },
-    { hour: '18:00', accesses: 71, label: '6 PM' },
-    { hour: '19:00', accesses: 23, label: '7 PM' }
-  ];
+  const { data: hourlyData = [], isLoading, error } = useAccesosPorHora();
 
-  const maxAccesses = Math.max(...hourlyData.map(d => d.accesses));
+  // Mostrar estado de carga
+  if (isLoading) {
+    return (
+      <div style={{ 
+        width: '100%', 
+        padding: '2rem', 
+        textAlign: 'center',
+        color: '#6b7280'
+      }}>
+        <div style={{ marginBottom: '1rem' }}>⏳</div>
+        Cargando datos de acceso...
+      </div>
+    );
+  }
+
+  // Mostrar error
+  if (error) {
+    return (
+      <div style={{ 
+        width: '100%', 
+        padding: '2rem', 
+        textAlign: 'center',
+        color: '#ef4444',
+        backgroundColor: '#fef2f2',
+        borderRadius: '8px'
+      }}>
+        <div style={{ marginBottom: '1rem' }}>⚠️</div>
+        Error al cargar datos de acceso
+      </div>
+    );
+  }
+
+  const maxAccesses = Math.max(...hourlyData.map(d => d.accesses), 1); // Evitar división por 0
 
   return (
     <div style={{ width: '100%' }}>

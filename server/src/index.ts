@@ -137,6 +137,25 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Ruta de bienvenida para backend
+app.get('/', (req, res) => {
+  res.json({
+    success: true,
+    message: '🚀 OXITRANS S.A.S - Sistema de Control de Acceso API',
+    version: '1.0.0',
+    status: 'online',
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: '/api/health',
+      auth: '/api/auth',
+      usuarios: '/api/usuarios',
+      registros: '/api/registros',
+      cargos: '/api/cargos'
+    },
+    documentation: 'API REST para el sistema de control de acceso'
+  });
+});
+
 // Servir frontend en producción
 if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {

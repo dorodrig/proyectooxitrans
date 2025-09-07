@@ -58,9 +58,9 @@ export const RegistroPage: React.FC = () => {
   const validateForm = (): boolean => {
     setError('');
 
-    // Validar campos requeridos
+    // Validar campos requeridos (excluyendo telefono y confirmPassword)
     for (const [key, value] of Object.entries(formData)) {
-      if (!value && key !== 'telefono') { // telefono es opcional
+      if (!value && key !== 'telefono' && key !== 'confirmPassword') {
         setError(`El campo ${key.replace('_', ' ')} es requerido`);
         return false;
       }

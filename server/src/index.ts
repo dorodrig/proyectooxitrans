@@ -75,8 +75,23 @@ const globalLimiter = rateLimit({
 app.use(globalLimiter);
 
 // CORS
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000', 
+  'https://dorodrig.github.io'
+];
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Permitir requests sin origin (mobile apps, Postman, etc)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization']

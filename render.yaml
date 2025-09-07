@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: oxitrans-backend
+    runtime: node
+    buildCommand: cd server && npm install && npm run build
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_HOST
+        value: database-oxitrans.cjokqqsqayan.us-east-2.rds.amazonaws.com
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        value: admin
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: oxitrans-db
+          property: password
+      - key: DB_NAME
+        value: control_acceso_oxitrans
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      - key: CORS_ORIGIN
+        value: https://dorodrig.github.io
+      - key: COMPANY_NAME
+        value: OXITRANS S.A.S
+      - key: COMPANY_EMAIL
+        value: admin@oxitrans.com
+      - key: TIMEZONE
+        value: America/Bogota

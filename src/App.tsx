@@ -47,7 +47,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
+      <Router basename="/proyectooxitrans">
         <div className="App">
         <Routes>
           <Route 

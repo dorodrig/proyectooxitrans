@@ -5,19 +5,30 @@ import { useAuthStore } from './stores/authStore';
 import { LoginPage } from './pages/LoginPage';
 import PremiumLoginPage from './pages/PremiumLoginPage';
 import { RegistroPage } from './pages/RegistroPage';
-// ...existing code...
 import { DashboardPage } from './pages/DashboardPage';
 import { lazy, Suspense } from 'react';
+
+// Lazy load admin pages
 const AdminUsuariosPage = lazy(() => import('./pages/AdminUsuariosPage'));
 const AsignarRolesPage = lazy(() => import('./pages/AsignarRolesPage'));
 const ControlMaestroPage = lazy(() => import('./pages/ControlMaestroPage'));
 const AsignarRegionalPage = lazy(() => import('./pages/AsignarRegionalPage'));
 const RegionalesPage = lazy(() => import('./pages/RegionalesPage'));
 const CargosPage = lazy(() => import('./pages/CargosPage'));
-// La ruta /control-maestro debe ir dentro del return del componente App, no aquí
+
+// Lazy load access control pages
+const AccesoPage = lazy(() => import('./pages/AccesoPage'));
+const VisitantesPage = lazy(() => import('./pages/VisitantesPage'));
+const ReportesPage = lazy(() => import('./pages/ReportesPage'));
+const LogsPage = lazy(() => import('./pages/LogsPage'));
+const AlertasPage = lazy(() => import('./pages/AlertasPage'));
+const ConfiguracionPage = lazy(() => import('./pages/ConfiguracionPage'));
+
+// Main pages
 import HomePage from './pages/HomePage';
 import NovedadesPage from './pages/NovedadesPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 // Crear instancia de QueryClient
 const queryClient = new QueryClient({
@@ -148,6 +159,76 @@ function App() {
             path="/novedades"
             element={
               isAuthenticated ? <NovedadesPage /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route 
+            path="/reset-password" 
+            element={
+              isAuthenticated ? <Navigate to="/" replace /> : <ResetPasswordPage />
+            } 
+          />
+          
+          {/* Control de Acceso Routes */}
+          <Route
+            path="/acceso"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <AccesoPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/visitantes"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <VisitantesPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/reportes"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <ReportesPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/logs"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <LogsPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          
+          {/* Sistema Routes */}
+          <Route
+            path="/alertas"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <AlertasPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/configuracion"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <ConfiguracionPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
             }
           />
         </Routes>

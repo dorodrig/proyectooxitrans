@@ -1,14 +1,14 @@
 import React from 'react';
 import { useActividadReciente } from '../../hooks/useDashboardData';
 
-interface ActivityItem {
-  id: string;
-  empleado: string;
-  accion: string;
-  hora: string;
-  departamento: string;
-  tipo: 'entrada' | 'salida';
-}
+// interface ActivityItem {
+//   id: string;
+//   empleado: string;
+//   accion: string;
+//   hora: string;
+//   departamento: string;
+//   tipo: 'entrada' | 'salida';
+// }
 
 /**
  * 📋 ACTIVIDAD RECIENTE PREMIUM

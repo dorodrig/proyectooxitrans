@@ -21,7 +21,7 @@ interface FormErrors {
  */
 const PremiumLoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login, loading, error } = useAuthStore();
+  const { login, isLoading, error } = useAuthStore();
   
   const [formData, setFormData] = useState<FormData>({
     documento: '',
@@ -83,10 +83,8 @@ const PremiumLoginPage: React.FC = () => {
     }
 
     try {
-      const success = await login(formData.documento, formData.password);
-      if (success) {
-        navigate('/dashboard');
-      }
+      await login(formData.documento, formData.password);
+      navigate('/dashboard');
     } catch (err) {
       console.error('Error en login:', err);
     }
@@ -196,10 +194,10 @@ const PremiumLoginPage: React.FC = () => {
               <div className="d-grid gap-2">
                 <button
                   type="submit"
-                  className={`btn btn-primary ${loading ? 'loading' : ''}`}
-                  disabled={loading}
+                  className={`btn btn-primary ${isLoading ? 'loading' : ''}`}
+                  disabled={isLoading}
                 >
-                  {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+                  {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
                 </button>
                 
                 <button

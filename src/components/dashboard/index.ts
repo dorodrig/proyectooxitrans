@@ -1,8 +1,8 @@
 // 🎯 EXPORTACIONES DASHBOARD PREMIUM
 // Archivo de exportación centralizada para componentes del dashboard
 
-export { default as Header } from './Header';
-export { default as Sidebar } from './Sidebar';
+// export { default as Header } from './Header';
+// export { default as Sidebar } from './Sidebar';
 export { default as StatCard } from './StatCard';
 export { default as OverviewCard } from './OverviewCard';
 export { default as SalesMetric } from './SalesMetric';

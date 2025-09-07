@@ -2,7 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { registrosService } from '../services/registrosService';
 import { dashboardService } from '../services/dashboardService';
-import type { RegistroAcceso, Usuario } from '../types';
+// import type { RegistroAcceso, Usuario } from '../types';
 
 /**
  * 📊 Hook para obtener estadísticas generales del dashboard
@@ -43,13 +43,14 @@ export const useRegistrosHoy = () => {
         // Validar que la respuesta sea un array
         if (Array.isArray(data)) {
           return data;
-        } else if (data && typeof data === 'object' && 'data' in data && Array.isArray(data.data)) {
-          // Si la respuesta viene envuelta en un objeto con propiedad data
-          return data.data;
-        } else {
-          console.warn('La respuesta no es un array:', data);
-          return [];
+        } else if (data && typeof data === 'object' && 'data' in data) {
+          const dataWrapper = data as { data?: unknown };
+          if (Array.isArray(dataWrapper.data)) {
+            return dataWrapper.data;
+          }
         }
+        console.warn('La respuesta no es un array:', data);
+        return [];
       } catch (error) {
         console.warn('Error obteniendo registros, usando datos de fallback:', error);
         // Generar datos mock para evitar errores

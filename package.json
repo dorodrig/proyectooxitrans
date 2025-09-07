@@ -1,6 +1,7 @@
 {
   "name": "control-acceso-oxitrans",
   "private": true,
+  "homepage": "https://dorodrig.github.io/proyectooxitrans",
   "version": "1.0.0",
   "type": "module",
   "description": "Sistema de Control de Acceso de Empleados para OXITRANS S.A.S",
@@ -19,7 +20,9 @@
     "mobile:build": "npm run build && npx cap sync",
     "mobile:android": "npx cap open android",
     "mobile:ios": "npx cap open ios",
-    "pwa:build": "npm run build && npx workbox generateSW"
+    "pwa:build": "npm run build && npx workbox generateSW",
+    "predeploy": "npm run build:fullstack",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.0",

@@ -260,7 +260,6 @@ storybook-static/
 # ====================================
 .vercel
 .netlify/
-.github/workflows/deploy.yml
 
 # Terraform
 *.tfstate

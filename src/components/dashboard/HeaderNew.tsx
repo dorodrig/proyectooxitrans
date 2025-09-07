@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useAuthStore } from '../../stores/authStore';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -17,6 +19,33 @@ const Header: React.FC<HeaderProps> = ({
   onToggleSidebar, 
   user = { name: 'Usuario OXITRANS', role: 'Admin', initials: 'UO' } 
 }) => {
+  const [showDropdown, setShowDropdown] = useState(false);
+  const { logout } = useAuthStore();
+  const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    }
+  };
+
+  // Cerrar dropdown al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   return (
     <div style={{
       background: 'white',
@@ -197,9 +226,10 @@ const Header: React.FC<HeaderProps> = ({
           </span>
         </button>
 
-        {/* User Profile Mejorado */}
-        <div style={{ marginLeft: '0.75rem' }}>
+        {/* User Profile con Dropdown */}
+        <div ref={dropdownRef} style={{ marginLeft: '0.75rem', position: 'relative' }}>
           <button
+            onClick={() => setShowDropdown(!showDropdown)}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -262,9 +292,107 @@ const Header: React.FC<HeaderProps> = ({
               fontSize: '0.875rem',
               marginLeft: '0.25rem'
             }}>
-              ▼
+              {showDropdown ? '▲' : '▼'}
             </div>
           </button>
+
+          {/* Dropdown Menu */}
+          {showDropdown && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              right: '0',
+              marginTop: '0.5rem',
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb',
+              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              minWidth: '200px',
+              zIndex: 1000
+            }}>
+              <div style={{ padding: '0.5rem' }}>
+                {/* Profile Option */}
+                <button
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    color: '#374151',
+                    textAlign: 'left',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <span style={{ fontSize: '1rem' }}>👤</span>
+                  Mi Perfil
+                </button>
+
+                {/* Settings Option */}
+                <button
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    color: '#374151',
+                    textAlign: 'left',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <span style={{ fontSize: '1rem' }}>⚙️</span>
+                  Configuración
+                </button>
+
+                {/* Divider */}
+                <div style={{
+                  height: '1px',
+                  backgroundColor: '#e5e7eb',
+                  margin: '0.5rem 0'
+                }} />
+
+                {/* Logout Button */}
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.75rem',
+                    padding: '0.75rem',
+                    borderRadius: '6px',
+                    border: 'none',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    color: '#dc2626',
+                    textAlign: 'left',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                >
+                  <span style={{ fontSize: '1rem' }}>🚪</span>
+                  Cerrar Sesión
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

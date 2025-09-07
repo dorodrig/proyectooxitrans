@@ -8,6 +8,7 @@ import SalesMetricNew from '../components/dashboard/SalesMetricNew';
 import RecentActivityNew from '../components/dashboard/RecentActivityNew';
 import AccessChart from '../components/dashboard/AccessChart';
 import { useEstadisticasAcceso, useEmpleadosPresentes } from '../hooks/useDashboardData';
+import { useAuthStore } from '../stores/authStore';
 
 const HomePage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -15,6 +16,20 @@ const HomePage: React.FC = () => {
   // Hooks para datos reales
   const { data: estadisticas, isLoading: loadingStats } = useEstadisticasAcceso();
   const { data: empleadosPresentes, isLoading: loadingPresentes } = useEmpleadosPresentes();
+  
+  // Obtener datos del usuario autenticado
+  const { usuario } = useAuthStore();
+  
+  // Preparar datos del usuario para el header
+  const userForHeader = usuario ? {
+    name: `${usuario.nombre} ${usuario.apellido}`,
+    role: usuario.cargo || 'Usuario',
+    initials: `${usuario.nombre.charAt(0)}${usuario.apellido.charAt(0)}`.toUpperCase()
+  } : {
+    name: 'Usuario OXITRANS',
+    role: 'Admin',
+    initials: 'UO'
+  };
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -33,7 +48,7 @@ const HomePage: React.FC = () => {
         minWidth: 0 
       }}>
         {/* Header */}
-        <HeaderNew onToggleSidebar={toggleSidebar} />
+        <HeaderNew onToggleSidebar={toggleSidebar} user={userForHeader} />
           
           {/* Dashboard Content */}
           <div style={{ 

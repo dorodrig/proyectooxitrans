@@ -21,8 +21,10 @@
     "mobile:android": "npx cap open android",
     "mobile:ios": "npx cap open ios",
     "pwa:build": "npm run build && npx workbox generateSW",
-    "predeploy": "npm run build:fullstack",
-    "deploy": "gh-pages -d dist"
+    "predeploy": "npm run build",
+    "deploy": "node deploy-windows.mjs",
+    "deploy:gh-pages": "gh-pages -d dist --dotfiles --dest . --add",
+    "deploy:github-actions": "git add . && git commit -m \"Deploy: Update for GitHub Actions\" && git push origin main"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.0",

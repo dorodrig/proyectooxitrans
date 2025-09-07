@@ -22,9 +22,11 @@ export interface Usuario {
 }
 
 // Extender la interfaz Request de Express con module augmentation
-declare module 'express-serve-static-core' {
-  interface Request {
-    user?: Usuario;
+declare global {
+  namespace Express {
+    interface Request {
+      user?: Usuario;
+    }
   }
 }
 

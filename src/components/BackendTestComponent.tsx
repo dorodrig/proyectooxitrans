@@ -20,14 +20,14 @@ export const BackendTestComponent: React.FC = () => {
       const healthData = await healthResponse.json();
       results.push({
         test: 'Health Check',
-        status: healthResponse.ok ? 'SUCCESS' : 'FAILED',
+        status: healthResponse.ok ? 'SUCCESS' as const : 'FAILED' as const,
         data: healthData
       });
     } catch (error) {
       results.push({
         test: 'Health Check',
-        status: 'ERROR',
-        data: error.message
+        status: 'ERROR' as const,
+        data: error instanceof Error ? error.message : String(error)
       });
     }
 
@@ -37,14 +37,14 @@ export const BackendTestComponent: React.FC = () => {
       const cargosData = await cargosResponse.json();
       results.push({
         test: 'Cargos Endpoint',
-        status: cargosResponse.ok ? 'SUCCESS' : 'FAILED',
+        status: cargosResponse.ok ? 'SUCCESS' as const : 'FAILED' as const,
         data: cargosData
       });
     } catch (error) {
       results.push({
         test: 'Cargos Endpoint',
-        status: 'ERROR',
-        data: error.message
+        status: 'ERROR' as const,
+        data: error instanceof Error ? error.message : String(error)
       });
     }
 
@@ -54,14 +54,14 @@ export const BackendTestComponent: React.FC = () => {
       const regionalesData = await regionalesResponse.json();
       results.push({
         test: 'Regionales Endpoint',
-        status: regionalesResponse.ok ? 'SUCCESS' : 'FAILED',
+        status: regionalesResponse.ok ? 'SUCCESS' as const : 'FAILED' as const,
         data: regionalesData
       });
     } catch (error) {
       results.push({
         test: 'Regionales Endpoint',
-        status: 'ERROR',
-        data: error.message
+        status: 'ERROR' as const,
+        data: error instanceof Error ? error.message : String(error)
       });
     }
 

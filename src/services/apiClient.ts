@@ -6,12 +6,23 @@ function getApiBaseUrl() {
   if (Capacitor.isNativePlatform() && import.meta.env.MODE === 'development') {
     return 'http://192.168.1.21:3001/api'; // IP local del PC
   }
-  // En web, usar localhost
+  // En web, usar localhost para desarrollo
   if (!Capacitor.isNativePlatform() && import.meta.env.MODE === 'development') {
     return 'http://localhost:3001/api';
   }
+  
   // En producción, usar variable de entorno
-  return import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // Fallback para GitHub Pages
+  if (typeof window !== 'undefined' && window.location.hostname === 'dorodrig.github.io') {
+    return 'https://oxitrans-backend.onrender.com/api';
+  }
+  
+  // Fallback por defecto
+  return 'http://localhost:3001/api';
 }
 
 const API_BASE_URL = getApiBaseUrl();

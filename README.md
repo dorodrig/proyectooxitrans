@@ -1,5 +1,7 @@
 # 🏢 Sistema de Control de Acceso - OXITRANS S.A.S
 
+> **Status**: ✅ Desplegado en Producción - Frontend: GitHub Pages | Backend: Render.com
+
 <div align="center">
   <img src="https://img.shields.io/badge/Version-1.0.0-blue.svg" alt="Version" />
   <img src="https://img.shields.io/badge/React-18.0+-61DAFB.svg" alt="React" />

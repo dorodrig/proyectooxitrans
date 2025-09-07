@@ -202,7 +202,7 @@ export class UsuarioModel {
     const expiresAt = new Date(Date.now() + 3600000);
     
     const query = `
-      INSERT INTO password_reset_tokens (user_id, token, expires_at, created_at)
+      INSERT INTO password_reset_tokens (usuario_id, token, expires_at, created_at)
       VALUES (?, ?, ?, NOW())
       ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at), created_at = NOW()
     `;
@@ -212,17 +212,17 @@ export class UsuarioModel {
 
   static async verifyPasswordResetToken(token: string): Promise<{ valid: boolean; userId?: number }> {
     const query = `
-      SELECT user_id, expires_at
+      SELECT usuario_id, expires_at
       FROM password_reset_tokens
-      WHERE token = ? AND expires_at > NOW() AND used = 0
+      WHERE token = ? AND expires_at > NOW() AND usado = 0
     `;
-    const results = await executeQuery(query, [token]) as { user_id: number; expires_at: string }[];
+    const results = await executeQuery(query, [token]) as { usuario_id: number; expires_at: string }[];
     
     if (results.length === 0) {
       return { valid: false };
     }
     
-    return { valid: true, userId: results[0].user_id };
+    return { valid: true, userId: results[0].usuario_id };
   }
 
   static async resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
@@ -239,7 +239,7 @@ export class UsuarioModel {
     await executeQuery(updatePasswordQuery, [hashedPassword, verification.userId]);
     
     const markTokenUsedQuery = `
-      UPDATE password_reset_tokens SET used = 1 WHERE token = ?
+      UPDATE password_reset_tokens SET usado = 1 WHERE token = ?
     `;
     await executeQuery(markTokenUsedQuery, [token]);
     

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import { BackendTestComponent } from '../components/BackendTestComponent';
 import '../styles/pages/_login-premium.scss';
 
 interface FormData {
@@ -211,6 +212,10 @@ const PremiumLoginPage: React.FC = () => {
             </form>
           </div>
         </div>
+        
+        {/* Componente temporal de test de backend */}
+        <BackendTestComponent />
+        
       </div>
     </div>
   );

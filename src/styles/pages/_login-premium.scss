@@ -24,8 +24,7 @@
   --bs-border-radius: 10px;
 }
 
-// 🌟 Fuentes de iconos (comentado temporalmente para deployment)
-/*
+// 🌟 Fuentes de iconos
 @font-face {
   font-family: 'icomoon';
   src: url('/assets/fonts/icomoon/icomoon.eot?i9f3vw');
@@ -37,10 +36,9 @@
   font-style: normal;
   font-display: block;
 }
-*/
 
 [class^="icon-"], [class*=" icon-"] {
-  /* font-family: 'icomoon' !important; */
+  font-family: 'icomoon' !important;
   font-style: normal;
   font-weight: normal;
   font-variant: normal;
@@ -58,9 +56,9 @@
   content: "\e9ce";
 }
 
-// 🎭 Background del login (comentado temporalmente para deployment)
+// 🎭 Background del login
 .login-bg {
-  background: var(--bs-white); /* url('/assets/images/login-bg.svg') no-repeat; */
+  background: var(--bs-white) url('/assets/images/login-bg.svg') no-repeat;
   background-size: cover;
   background-position: bottom left;
   background-attachment: fixed;

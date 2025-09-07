@@ -279,7 +279,6 @@ export class AuthController {
         departamento,
         cargo,
         password,
-        confirmPassword,
         fecha_ingreso
       } = req.body;
 
@@ -292,8 +291,8 @@ export class AuthController {
         tipo_documento: 'Tipo de documento',
         departamento: 'Departamento',
         cargo: 'Cargo',
-        password: 'Contraseña',
-        confirmPassword: 'Confirmación de contraseña'
+        password: 'Contraseña'
+        // confirmPassword se valida por separado ya que no se envía al backend
       };
 
       for (const [field, label] of Object.entries(requiredFields)) {
@@ -331,14 +330,6 @@ export class AuthController {
         res.status(400).json({
           success: false,
           message: 'La contraseña debe tener al menos 6 caracteres'
-        });
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        res.status(400).json({
-          success: false,
-          message: 'Las contraseñas no coinciden'
         });
         return;
       }

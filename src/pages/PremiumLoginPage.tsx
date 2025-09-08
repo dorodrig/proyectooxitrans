@@ -105,12 +105,14 @@ const PremiumLoginPage: React.FC = () => {
           <div className="auth-box">
             {/* Logo de OXITRANS */}
             <div className="auth-logo">
-              <img 
+              {/* <img 
                 src="/assets/images/logo-dark.svg" 
                 alt="OXITRANS S.A.S"
                 className="img-fluid"
-              />
+              /> */}
+              <h2 className="login-title">OXITRANS S.A.S</h2>
             </div>
+
 
             {/* Título */}
             <h2 className="login-title">Iniciar Sesión</h2>

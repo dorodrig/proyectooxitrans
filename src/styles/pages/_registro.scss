@@ -1,42 +1,47 @@
 // ====================================
-// 📝 REGISTRO PAGE STYLES
+// 🎨 REGISTRO PAGE STYLES - PREMIUM DESIGN
 // OXITRANS S.A.S - Control de Acceso
+// Diseño unificado con login premium
 // ====================================
 
+@use 'sass:color';
 @use '../abstracts' as *;
 
 .registro-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: var(--bs-white) url('/assets/images/login-bg.svg') no-repeat;
+  background-size: cover;
+  background-position: bottom left;
+  background-attachment: fixed;
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: $spacing-lg;
-  font-family: 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  justify-content: flex-end;
+  padding: 2rem;
+  font-family: $font-family-primary;
+
+  @include mobile {
+    justify-content: center;
+  }
 
   &__container {
-    background: rgba(white, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: $border-radius-xl;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: $spacing-2xl;
-    width: 100%;
-    max-width: 800px;
+    @include auth-box;
+    min-width: 500px;
+    max-width: 500px;
     max-height: 90vh;
     overflow-y: auto;
 
-    @include mobile-only {
-      padding: $spacing-xl;
-      margin: $spacing-lg;
-      max-width: calc(100vw - #{$spacing-lg * 2});
+    @include mobile {
+      min-width: 340px;
+      max-width: 340px;
+      background: var(--bs-white);
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     }
   }
 
   // Header
   &__header {
     text-align: center;
-    margin-bottom: $spacing-2xl;
+    margin-bottom: 2rem;
     position: relative;
   }
 
@@ -46,14 +51,15 @@
     top: 0;
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
-    color: #297372; // Color corporativo OXITRANS verde
+    gap: 0.5rem;
+    color: var(--bs-primary);
     text-decoration: none;
     font-weight: 500;
-    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    transition: all 0.15s ease-in-out;
 
     &:hover {
-      color: #1a5757;
+      color: #{color.adjust(#297372, $lightness: -10%)};
       text-decoration: underline;
     }
   }
@@ -62,38 +68,27 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: $spacing-md;
-    margin-bottom: $spacing-lg;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 
     svg {
       width: 3rem;
       height: 3rem;
-      color: #297372;
+      color: var(--bs-primary);
     }
   }
 
   &__title {
-    font-size: 2.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
-    color: #333;
-    margin-bottom: $spacing-sm;
-    background: linear-gradient(135deg, #297372 0%, #1a5757 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: linear-gradient(135deg, #1a5757 0%, #0f3a3a 100%);
-      background-clip: text;
-      -webkit-background-clip: text;
-      box-shadow: 0 8px 25px rgba(41, 115, 114, 0.2);
-    }
+    color: var(--bs-body-color);
+    margin-bottom: 0.5rem;
+    font-family: $font-family-primary;
   }
 
   &__subtitle {
-    color: #666;
-    font-size: 1.1rem;
+    color: var(--bs-gray-600);
+    font-size: 0.875rem;
     margin-bottom: 0;
   }
 
@@ -104,26 +99,36 @@
     gap: $spacing-xl;
     margin-bottom: $spacing-xl;
 
-    @include mobile-only {
+    margin-bottom: 1rem;
+  }
+
+  // Formulario
+  &__form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+
+    @include mobile {
       grid-template-columns: 1fr;
-      gap: $spacing-lg;
+      gap: 1rem;
     }
   }
 
   &__form-section {
     &-title {
-      font-size: 1.3rem;
+      font-size: 1.125rem;
       font-weight: 600;
-      color: #333;
-      margin-bottom: $spacing-lg;
-      padding-bottom: $spacing-sm;
-      border-bottom: 2px solid #e1e5e9;
+      color: var(--bs-body-color);
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--bs-gray-300);
+      grid-column: 1 / -1;
     }
   }
 
   // Input Groups
   &__input-group {
-    margin-bottom: $spacing-lg;
+    margin-bottom: 1rem;
 
     &--full-width {
       grid-column: 1 / -1;
@@ -132,50 +137,27 @@
 
   &__label {
     display: block;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: $spacing-sm;
-    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--bs-body-color);
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
 
     &--required::after {
       content: ' *';
-      color: #dc3545;
+      color: var(--bs-danger);
     }
   }
 
   &__input,
   &__select {
-    width: 100%;
-    padding: $spacing-md;
-    border: 2px solid #e1e5e9;
-    border-radius: $border-radius-md;
-    font-size: 1rem;
-    background: white;
-    color: #333;
-    transition: all 0.3s ease;
-    font-family: inherit;
-
-    &:focus {
-      outline: none;
-      border-color: #297372;
-      box-shadow: 0 0 0 3px rgba(41, 115, 114, 0.1);
-    }
-
-    &:hover {
-      border-color: #b8c5c6;
-    }
-
-    &::placeholder {
-      color: #adb5bd;
-    }
+    @include input-base;
 
     &--error {
-      border-color: #dc3545;
+      border-color: var(--bs-danger);
       background-color: #fff5f5;
 
       &:focus {
-        border-color: #dc3545;
-        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+        border-color: var(--bs-danger);
       }
     }
   }
@@ -185,15 +167,15 @@
 
     &-wrapper {
       position: absolute;
-      right: $spacing-md;
+      right: 1rem;
       top: 50%;
       transform: translateY(-50%);
       cursor: pointer;
-      color: #666;
-      transition: color 0.3s ease;
+      color: var(--bs-gray-600);
+      transition: color 0.15s ease-in-out;
 
       &:hover {
-        color: #297372;
+        color: var(--bs-primary);
       }
     }
 
@@ -222,51 +204,44 @@
   &__success {
     background: #d4edda;
     color: #155724;
-    padding: $spacing-lg;
-    border-radius: $border-radius-md;
-    margin-bottom: $spacing-lg;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
     text-align: center;
     border: 1px solid #c3e6cb;
 
     &-title {
       font-weight: 600;
-      margin-bottom: $spacing-sm;
+      margin-bottom: 0.5rem;
     }
 
     &-message {
-      margin-bottom: $spacing-sm;
+      margin-bottom: 0.5rem;
     }
   }
 
   // Actions
   &__actions {
     display: flex;
-    gap: $spacing-md;
+    gap: 1rem;
     justify-content: center;
-    margin-top: $spacing-xl;
+    margin-top: 2rem;
+    grid-column: 1 / -1;
 
-    @include mobile-only {
+    @include mobile {
       flex-direction: column;
     }
   }
 
   &__submit-btn {
-    background: linear-gradient(135deg, #297372 0%, #1a5757 100%);
-    color: white;
-    border: none;
-    padding: $spacing-md $spacing-xl;
-    border-radius: $border-radius-md;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    gap: $spacing-sm;
-    text-decoration: none;
+    @include button-primary;
     min-width: 200px;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(41, 115, 114, 0.2);
+    gap: 0.5rem;
+
+    @include mobile {
+      width: 100%;
+    }
 
     &:hover:not(:disabled) {
       background: linear-gradient(135deg, #1a5757 0%, #0f3a3a 100%);
@@ -275,10 +250,7 @@
     }
 
     &:disabled {
-      background: #adb5bd;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
+      @include loading-state;
     }
 
     svg {
@@ -288,26 +260,13 @@
   }
 
   &__cancel-btn {
-    background: transparent;
-    color: #666;
-    border: 2px solid #e1e5e9;
-    padding: $spacing-md $spacing-xl;
-    border-radius: $border-radius-md;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
+    @include button-secondary;
     min-width: 200px;
-    display: flex;
-    align-items: center;
     justify-content: center;
-    gap: $spacing-sm;
+    gap: 0.5rem;
 
-    &:hover {
-      background: #f8f9fa;
-      border-color: #297372;
-      color: #297372;
+    @include mobile {
+      width: 100%;
     }
 
     svg {
@@ -316,66 +275,32 @@
     }
   }
 
-  // Loading state
-  &__loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: $spacing-sm;
-    color: #666;
-    font-size: 1.1rem;
+  // Error message
+  &__error {
+    background: #fee;
+    color: var(--bs-danger);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    text-align: center;
+    border: 1px solid #fcc;
+    font-size: 0.875rem;
+  }
 
-    &-spinner {
-      width: 1.5rem;
-      height: 1.5rem;
-      border: 2px solid #e1e5e9;
-      border-top: 2px solid #297372;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+  // Field error
+  &__field-error {
+    color: var(--bs-danger);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
   }
 }
 
-// Animations
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-// Additional spacing for form sections
-.registro-page__form-section + .registro-page__form-section {
-  border-top: 1px solid #e1e5e9;
-  padding-top: $spacing-xl;
-}
-
-// Focus management
-.registro-page__input:focus + .registro-page__error,
-.registro-page__select:focus + .registro-page__error {
-  opacity: 0.7;
-}
-
-// Responsive improvements
-@media (max-width: 768px) {
-  .registro-page {
-    padding: $spacing-md;
-
-    &__container {
-      padding: $spacing-lg;
-      max-height: 95vh;
-    }
-
-    &__title {
-      font-size: 2rem;
-    }
-
-    &__actions {
-      gap: $spacing-sm;
-    }
-
-    &__submit-btn,
-    &__cancel-btn {
-      min-width: auto;
-      width: 100%;
-    }
-  }
+// Spinner para loading
+.loading-spinner {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid #e1e5e9;
+  border-top: 2px solid #297372;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }

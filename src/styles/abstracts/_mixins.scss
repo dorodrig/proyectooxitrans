@@ -1,151 +1,287 @@
 @use 'sass:color';
-
 @use './variables' as *;
+
 // ====================================
-// MIXINS OXITRANS S.A.S
+// 🎨 MIXINS PREMIUM OXITRANS S.A.S
+// Basado en el diseño unificado
 // ====================================
 
-// Mixin para centrar elementos
+// 🎯 Mixin para centrar elementos
 @mixin center-flex {
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-// Mixin para botones
+// 🔘 Mixins para botones premium
 @mixin button-base {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: $btn-padding;
+  font-size: $btn-font-size;
+  font-weight: $btn-font-weight;
+  border-radius: $btn-border-radius;
   border: none;
-  border-radius: $border-radius-md;
-  font-weight: $font-weight-medium;
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  transition: $btn-transition;
   text-decoration: none;
+  outline: none;
   
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+  
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(41, 115, 114, 0.2);
+  }
 }
 
 @mixin button-primary {
   @include button-base;
-  background-color: $primary-color;
-  color: white;
+  background-color: var(--bs-primary);
+  color: var(--bs-white);
+  border: 1px solid var(--bs-primary);
   
   &:hover:not(:disabled) {
-    background-color: color.adjust($primary-color, $lightness: -10%);
+    background-color: #{color.adjust(#297372, $lightness: -10%)};
+    border-color: #{color.adjust(#297372, $lightness: -10%)};
   }
   
   &:active {
-    background-color: color.adjust($primary-color, $lightness: -15%);
+    background-color: #{color.adjust(#297372, $lightness: -15%)};
+    border-color: #{color.adjust(#297372, $lightness: -15%)};
   }
 }
 
 @mixin button-secondary {
   @include button-base;
-  background-color: $gray-200;
-  color: $gray-800;
+  background-color: transparent;
+  color: var(--bs-gray-600);
+  border: 1px solid var(--bs-gray-300);
   
   &:hover:not(:disabled) {
-    background-color: $gray-300;
+    background-color: var(--bs-light);
+    border-color: var(--bs-gray-300);
+    color: var(--bs-body-color);
+  }
+  
+  &:active {
+    background-color: var(--bs-gray-300);
   }
 }
 
-// Mixin para inputs
+@mixin button-danger {
+  @include button-base;
+  background-color: var(--bs-danger);
+  color: var(--bs-white);
+  border: 1px solid var(--bs-danger);
+  
+  &:hover:not(:disabled) {
+    background-color: #{color.adjust(#ff3239, $lightness: -10%)};
+    border-color: #{color.adjust(#ff3239, $lightness: -10%)};
+  }
+}
+
+// 📝 Mixins para formularios premium
 @mixin input-base {
   width: 100%;
-  padding: $spacing-sm $spacing-md;
-  border: 1px solid $gray-300;
-  border-radius: $border-radius-md;
-  font-size: $font-size-base;
+  padding: $form-control-padding;
+  font-size: $form-control-font-size;
   font-family: $font-family-primary;
-  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  border: 1px solid $form-control-border-color;
+  border-radius: $form-control-border-radius;
+  transition: all 0.15s ease-in-out;
+  background-color: var(--bs-white);
+  color: var(--bs-body-color);
   
   &:focus {
     outline: none;
-    border-color: $primary-color;
-    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    border-color: $form-control-focus-border-color;
+    box-shadow: $form-control-focus-box-shadow;
   }
   
   &::placeholder {
-    color: $gray-400;
+    color: var(--bs-gray-600);
   }
   
-  &:disabled {
-    background-color: $gray-100;
-    cursor: not-allowed;
+  &.is-invalid {
+    border-color: var(--bs-danger);
   }
 }
 
-// Mixin para cards
-@mixin card {
-  background-color: white;
-  border-radius: $border-radius-lg;
+// 📦 Mixins para contenedores premium
+@mixin card-premium {
+  background: $component-bg;
+  border: 1px solid $component-border;
+  border-radius: $component-border-radius;
+  padding: $component-padding;
+  margin: $component-margin;
   box-shadow: $shadow-md;
-  overflow: hidden;
 }
 
-// Mixin para gradientes corporativos OXITRANS
-@mixin gradient-primary {
-  background: linear-gradient(135deg, $oxitrans-red, $oxitrans-red-dark);
+@mixin auth-box {
+  border: 1px solid var(--bs-gray-600);
+  border-radius: var(--bs-border-radius);
+  padding: 1.5rem;
+  margin: 2rem 0;
+  min-width: 340px;
+  max-width: 340px;
+  background: var(--bs-white);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
-@mixin gradient-secondary {
-  background: linear-gradient(135deg, $oxitrans-gray, $oxitrans-black);
-}
-
-@mixin gradient-light {
-  background: linear-gradient(135deg, $oxitrans-red-light, $oxitrans-red);
-}
-
-// Mixin para texto truncado
-@mixin text-truncate {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-// Mixin para animaciones de loading
-@mixin loading-spinner {
-  border: 2px solid $gray-200;
-  border-top: 2px solid $primary-color;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-// Mixins responsive
-@mixin mobile-only {
-  @media (max-width: #{$breakpoint-sm - 1px}) {
-    @content;
-  }
-}
-
-@mixin tablet-up {
-  @media (min-width: $breakpoint-md) {
-    @content;
-  }
-}
-
-@mixin desktop-up {
-  @media (min-width: $breakpoint-lg) {
-    @content;
-  }
-}
-
-// Mixin para hover states
+// 🎨 Mixins para estados y efectos
 @mixin hover-lift {
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   
   &:hover {
     transform: translateY(-2px);
     box-shadow: $shadow-lg;
+  }
+}
+
+@mixin loading-state {
+  position: relative;
+  color: transparent;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid currentColor;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: loading-spin 1s linear infinite;
+  }
+}
+
+@keyframes loading-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+// 📱 Mixins para responsive
+@mixin mobile {
+  @media (max-width: 768px) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (min-width: 769px) and (max-width: 1024px) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: 1025px) {
+    @content;
+  }
+}
+
+// 🌈 Mixins para gradientes premium
+@mixin gradient-primary {
+  background: linear-gradient(135deg, var(--bs-primary), #{color.adjust(#297372, $lightness: -15%)});
+}
+
+@mixin gradient-secondary {
+  background: linear-gradient(135deg, var(--bs-secondary), var(--bs-dark));
+}
+
+@mixin gradient-danger {
+  background: linear-gradient(135deg, var(--bs-danger), #{color.adjust(#ff3239, $lightness: -15%)});
+}
+
+// 🔧 Mixins de utilidades
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+@mixin hover-lift {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow-lg;
+  }
+}
+
+// 📱 MIXINS RESPONSIVE
+@mixin mobile-only {
+  @media (max-width: 767.98px) {
+    @content;
+  }
+}
+
+@mixin tablet-only {
+  @media (min-width: 768px) and (max-width: 991.98px) {
+    @content;
+  }
+}
+
+@mixin desktop-only {
+  @media (min-width: 992px) {
+    @content;
+  }
+}
+
+@mixin mobile-tablet {
+  @media (max-width: 991.98px) {
+    @content;
+  }
+}
+
+@mixin tablet-desktop {
+  @media (min-width: 768px) {
+    @content;
+  }
+}
+
+// 🔄 MIXIN LOADING SPINNER
+@mixin loading-spinner {
+  border: 2px solid rgba(var(--bs-primary-rgb), 0.1);
+  border-left-color: var(--bs-primary);
+  border-radius: 50%;
+  animation: loading-spin 1s linear infinite;
+}
+
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// 🃏 MIXIN CARD
+@mixin card {
+  background-color: var(--bs-white);
+  border: 1px solid var(--bs-border-color);
+  border-radius: $border-radius-default;
+  box-shadow: $shadow-sm;
+  padding: $spacing-lg;
+  transition: box-shadow 0.2s ease-in-out;
+  
+  &:hover {
+    box-shadow: $shadow-md;
   }
 }

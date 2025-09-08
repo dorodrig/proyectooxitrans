@@ -1,43 +1,70 @@
 // ====================================
-// VARIABLES OXITRANS S.A.S
+// 🎨 OXITRANS S.A.S - SISTEMA DE DISEÑO UNIFICADO
+// Basado en el diseño premium implementado
 // ====================================
 
-// Colores corporativos OXITRANS
-$oxitrans-red: #dc2626;        // Rojo principal del logo
-$oxitrans-red-dark: #b91c1c;   // Rojo más oscuro
-$oxitrans-red-light: #f87171;  // Rojo más claro
-$oxitrans-gray: #374151;       // Gris corporativo
-$oxitrans-gray-light: #6b7280; // Gris claro
-$oxitrans-black: #111827;      // Negro del logo
+// 🎯 PALETA DE COLORES PRINCIPAL (Premium Style)
+:root {
+  --bs-primary: #297372;
+  --bs-secondary: #ababae;
+  --bs-danger: #ff3239;
+  --bs-success: #17b04f;
+  --bs-info: #0d6ed2;
+  --bs-warning: #f6c115;
+  --bs-light: #f4f4f9;
+  --bs-dark: #303030;
+  --bs-gray-300: #c3c3c7;
+  --bs-gray-600: #7a7a7d;
+  --bs-body-color: #202020;
+  --bs-white: #ffffff;
+  --bs-border-radius: 10px;
+}
 
-// Colores principales basados en identidad OXITRANS
-$primary-color: $oxitrans-red;
-$secondary-color: $oxitrans-red-light;
-$accent-color: #fbbf24;        // Mantener amarillo para alertas/avisos
-$dark-color: $oxitrans-black;
-$light-color: #f8fafc;
+// 🏢 Colores corporativos OXITRANS (Actualizados)
+$oxitrans-primary: #297372;        // Verde principal corporativo
+$oxitrans-primary-dark: #1f5a59;   // Verde más oscuro
+$oxitrans-primary-light: #3d9895;  // Verde más claro
+$oxitrans-secondary: #ababae;      // Gris secundario
+$oxitrans-danger: #ff3239;         // Rojo para errores/alertas
+$oxitrans-dark: #303030;           // Negro corporativo
+$oxitrans-light: #f4f4f9;          // Blanco/gris muy claro
 
-// Colores del sistema
-$success-color: #10b981;
-$warning-color: #f59e0b;
-$error-color: #dc2626;         // Usar el rojo corporativo para errores
-$info-color: $oxitrans-red;    // Información en rojo corporativo
+// 🔄 COMPATIBILIDAD: Variables antiguas (para migración gradual)
+$oxitrans-red: $oxitrans-primary;
+$oxitrans-red-dark: $oxitrans-primary-dark; 
+$oxitrans-red-light: $oxitrans-primary-light;
+$oxitrans-gray: #7a7a7d;
+$oxitrans-gray-light: #ababae;
+$oxitrans-black: $oxitrans-dark;
+$accent-color: $oxitrans-primary-light;    // Color de acento
+$text-muted: #6c757d;                      // Texto secundario
+$border-radius-default: 6px;               // Radio de borde por defecto
 
-// Colores grises
+// 🎨 Colores del sistema unificado
+$primary-color: $oxitrans-primary;
+$secondary-color: $oxitrans-secondary;
+$success-color: #17b04f;
+$warning-color: #f6c115;
+$error-color: $oxitrans-danger;
+$info-color: #0d6ed2;
+$dark-color: $oxitrans-dark;
+$light-color: $oxitrans-light;
+
+// 🌈 Paleta de grises premium
 $gray-50: #f9fafb;
-$gray-100: #f3f4f6;
+$gray-100: $oxitrans-light;        // #f4f4f9
 $gray-200: #e5e7eb;
-$gray-300: #d1d5db;
+$gray-300: #c3c3c7;               // Gris corporativo
 $gray-400: #9ca3af;
 $gray-500: #6b7280;
-$gray-600: #4b5563;
+$gray-600: #7a7a7d;               // Gris corporativo
 $gray-700: #374151;
 $gray-800: #1f2937;
-$gray-900: #111827;
+$gray-900: $oxitrans-dark;         // #303030
 
-// Tipografía
-$font-family-primary: 'Inter', system-ui, sans-serif;
-$font-family-secondary: 'Roboto', sans-serif;
+// 🔤 Tipografía premium
+$font-family-primary: 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+$font-family-secondary: 'Inter', system-ui, sans-serif;
 
 $font-size-xs: 0.75rem;    // 12px
 $font-size-sm: 0.875rem;   // 14px
@@ -54,7 +81,7 @@ $font-weight-medium: 500;
 $font-weight-semibold: 600;
 $font-weight-bold: 700;
 
-// Espaciado
+// 📏 Espaciado premium
 $spacing-xs: 0.25rem;   // 4px
 $spacing-sm: 0.5rem;    // 8px
 $spacing-md: 1rem;      // 16px
@@ -63,18 +90,40 @@ $spacing-xl: 2rem;      // 32px
 $spacing-2xl: 3rem;     // 48px
 $spacing-3xl: 4rem;     // 64px
 
-// Bordes
-$border-radius-sm: 0.25rem;   // 4px
-$border-radius-md: 0.375rem;  // 6px
-$border-radius-lg: 0.5rem;    // 8px
-$border-radius-xl: 0.75rem;   // 12px
+// 🔲 Bordes y radio premium
+$border-radius-sm: 4px;
+$border-radius-md: 6px;
+$border-radius-lg: 8px;
+$border-radius-xl: 10px;    // Radio principal del diseño premium
 $border-radius-full: 9999px;
 
-// Sombras
+// 🌟 Sombras premium
 $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 $shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+// 🎛️ Variables de componentes premium
+$component-bg: var(--bs-white);
+$component-border: var(--bs-gray-300);
+$component-border-radius: var(--bs-border-radius);
+$component-padding: 0.75rem 1rem;
+$component-margin: 1rem;
+
+// 🔘 Botones premium
+$btn-padding: 0.75rem 1rem;
+$btn-font-size: 0.9rem;
+$btn-font-weight: 500;
+$btn-border-radius: 6px;
+$btn-transition: all 0.15s ease-in-out;
+
+// 📝 Formularios premium
+$form-control-padding: 0.75rem 1rem;
+$form-control-font-size: 0.9rem;
+$form-control-border-radius: 6px;
+$form-control-border-color: var(--bs-gray-300);
+$form-control-focus-border-color: var(--bs-primary);
+$form-control-focus-box-shadow: none;
 
 // Breakpoints responsivos
 $breakpoint-sm: 640px;

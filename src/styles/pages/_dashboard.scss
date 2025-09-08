@@ -1,25 +1,28 @@
 @use 'sass:color';
 // ====================================
-// PÁGINA DEL DASHBOARD
+// 🎨 PÁGINA DEL DASHBOARD - PREMIUM DESIGN
+// OXITRANS S.A.S - Diseño Unificado
 // ====================================
 
 @use '../abstracts' as *;
+
 .dashboard {
   min-height: 100vh;
-  background-color: $gray-50;
+  background-color: var(--bs-light);
+  font-family: $font-family-primary;
   
   &__header {
-    background-color: white;
-    box-shadow: $shadow-sm;
-    border-bottom: 1px solid $gray-200;
+    background-color: var(--bs-white);
+    box-shadow: $shadow-md;
+    border-bottom: 1px solid var(--bs-gray-300);
     
     .container {
       max-width: 1280px;
       margin: 0 auto;
-      padding: 0 $spacing-lg;
+      padding: 0 1.5rem;
       
-      @include mobile-only {
-        padding: 0 $spacing-md;
+      @include mobile {
+        padding: 0 1rem;
       }
     }
     
@@ -29,21 +32,21 @@
       align-items: center;
       height: 64px;
       
-      @include mobile-only {
+      @include mobile {
         flex-direction: column;
         height: auto;
-        padding: $spacing-md 0;
-        gap: $spacing-md;
+        padding: 1rem 0;
+        gap: 1rem;
       }
     }
     
     .header-title {
       font-size: $font-size-xl;
       font-weight: $font-weight-semibold;
-      color: $gray-900;
+      color: var(--bs-body-color);
       margin: 0;
       
-      @include mobile-only {
+      @include mobile {
         font-size: $font-size-lg;
         text-align: center;
       }

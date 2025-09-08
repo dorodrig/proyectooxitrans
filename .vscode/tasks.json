@@ -12,6 +12,70 @@
 			"group": "build",
 			"isBackground": true,
 			"problemMatcher": []
+		},
+		{
+			"label": "Run API Tests",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/fetch-test.mjs"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Complete API Tests",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/complete-test.mjs"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run Complete API Tests v2",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/complete-test.mjs"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Run CRUD API Tests",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/crud-test.mjs"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Test Regionales",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/regionales-test.mjs"
+			],
+			"group": "test"
+		},
+		{
+			"label": "Build Verificación Final",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"build"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Verificación Final Producción",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/production-check.mjs"
+			],
+			"group": "test"
 		}
 	]
 }

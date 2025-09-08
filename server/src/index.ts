@@ -15,37 +15,13 @@ import authRoutes from './routes/auth';
 import usuariosRoutes from './routes/usuarios';
 import registrosRoutes from './routes/registros';
 import cargosRoutes from './routes/cargos';
-
-// Importar rutas opcionales (verificar existencia)
-import { Router } from 'express';
-
-let regionalesRoutes: Router | null = null;
-let novedadesRoutes: Router | null = null;
-let debugRoutes: Router | null = null;
-
-try {
-  regionalesRoutes = require('./routes/regionales').default;
-} catch {
-  console.warn('⚠️  Rutas de regionales no disponibles');
-}
-
-try {
-  novedadesRoutes = require('./routes/novedades').default;
-} catch {
-  console.warn('⚠️  Rutas de novedades no disponibles');
-}
-
-try {
-  debugRoutes = require('./routes/debug').default;
-} catch {
-  console.warn('⚠️  Rutas de debug no disponibles');
-}
+import regionalesRoutes from './routes/regionales';
 
 // Cargar variables de entorno
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 // Middleware de seguridad
 app.use(helmet({
@@ -109,23 +85,12 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Rutas principales de la API
+// Rutas principales
 app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/registros', registrosRoutes);
 app.use('/api/cargos', cargosRoutes);
-
-// Rutas opcionales (solo si están disponibles)
-if (regionalesRoutes) {
-  app.use('/api/regionales', regionalesRoutes);
-}
-
-if (novedadesRoutes) {
-  app.use('/api/novedades', novedadesRoutes);
-}
-
-if (debugRoutes) {
-  app.use('/api/debug', debugRoutes);
-}
+app.use('/api/regionales', regionalesRoutes);
 
 // Ruta de health check
 app.get('/api/health', (req, res) => {
@@ -146,11 +111,11 @@ app.get('/', (req, res) => {
     status: 'online',
     timestamp: new Date().toISOString(),
     endpoints: {
-      health: '/api/health',
       auth: '/api/auth',
       usuarios: '/api/usuarios',
       registros: '/api/registros',
-      cargos: '/api/cargos'
+      cargos: '/api/cargos',
+      regionales: '/api/regionales'
     },
     documentation: 'API REST para el sistema de control de acceso'
   });

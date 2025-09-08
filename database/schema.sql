@@ -29,15 +29,18 @@ CREATE TABLE usuarios (
     codigo_acceso VARCHAR(50) UNIQUE,
     foto_url VARCHAR(500),
     password_hash VARCHAR(255) NOT NULL,
+    regional_id INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
+    FOREIGN KEY (regional_id) REFERENCES regionales(id) ON DELETE SET NULL,
     INDEX idx_email (email),
     INDEX idx_documento (documento),
     INDEX idx_codigo_acceso (codigo_acceso),
     INDEX idx_estado (estado),
     INDEX idx_rol (rol),
-    INDEX idx_departamento (departamento)
+    INDEX idx_departamento (departamento),
+    INDEX idx_regional_id (regional_id)
 );
 
 -- ====================================
@@ -59,6 +62,21 @@ CREATE TABLE registros_acceso (
     INDEX idx_tipo (tipo),
     INDEX idx_timestamp (timestamp),
     INDEX idx_fecha (DATE(timestamp))
+);
+
+-- ====================================
+-- TABLA DE REGIONALES
+-- ====================================
+CREATE TABLE regionales (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    descripcion TEXT,
+    latitud DECIMAL(10, 8),
+    longitud DECIMAL(11, 8),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_nombre (nombre)
 );
 
 -- ====================================
@@ -359,6 +377,21 @@ CREATE TABLE password_reset_tokens (
 -- ====================================
 
 -- Mostrar tablas creadas
+-- ====================================
+-- DATOS INICIALES DE REGIONALES
+-- ====================================
+INSERT INTO regionales (nombre, descripcion, latitud, longitud) VALUES
+('bogotá', 'Regional principal en Bogotá D.C.', 4.60971, -74.08175),
+('medellín', 'Regional Antioquia - Medellín', 6.25184, -75.56359),
+('cali', 'Regional Valle del Cauca - Cali', 3.43722, -76.5225),
+('barranquilla', 'Regional Atlántico - Barranquilla', 10.96854, -74.78132),
+('cartagena', 'Regional Bolívar - Cartagena', 10.39972, -75.51444),
+('bucaramanga', 'Regional Santander - Bucaramanga', 7.11392, -73.1198);
+
+-- ====================================
+-- VERIFICACIONES FINALES
+-- ====================================
+
 SHOW TABLES;
 
 -- Mostrar usuario administrador creado
@@ -369,6 +402,10 @@ WHERE rol = 'admin';
 -- Mostrar configuración de empresa
 SELECT nombre, nit, email, hora_inicio_jornada, hora_fin_jornada 
 FROM empresa;
+
+-- Mostrar regionales creadas
+SELECT id, nombre, descripcion, latitud, longitud
+FROM regionales;
 
 -- ====================================
 -- SCRIPT COMPLETADO

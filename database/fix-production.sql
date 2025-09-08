@@ -44,7 +44,8 @@ WHERE DATE(ra.timestamp) = CURDATE();
 -- TRIGGER SIMPLIFICADO PARA CÓDIGO DE ACCESO
 -- ====================================
 
-DELIMITER //
+-- Crear trigger sin DEFINER específico (usa el usuario actual)
+DROP TRIGGER IF EXISTS generar_codigo_acceso;
 
 CREATE TRIGGER generar_codigo_acceso
     BEFORE INSERT ON usuarios
@@ -59,9 +60,7 @@ BEGIN
             LPAD((SELECT COUNT(*) + 1 FROM usuarios), 3, '0')
         );
     END IF;
-END //
-
-DELIMITER ;
+END;
 
 -- ====================================
 -- VERIFICAR PERMISOS

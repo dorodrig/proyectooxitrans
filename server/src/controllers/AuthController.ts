@@ -269,6 +269,12 @@ export class AuthController {
   // Registro de empleados
   static async registro(req: Request, res: Response): Promise<void> {
     try {
+      // Verificar si se está enviando confirmPassword por error
+      if ('confirmPassword' in req.body) {
+        console.warn('⚠️ Se detectó confirmPassword en el body - esto no debería suceder');
+        delete req.body.confirmPassword; // Eliminarlo si llegara a existir
+      }
+
       const {
         nombre,
         apellido,

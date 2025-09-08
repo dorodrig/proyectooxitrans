@@ -168,6 +168,10 @@ export class UsuarioModel {
 
   static async createWithPassword(userData: CreateUserData, password: string): Promise<string> {
     const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Generar código de acceso manualmente para evitar problemas con triggers
+    const codigoAcceso = userData.codigo_acceso || `OX${new Date().getFullYear()}${userData.documento.slice(-4).padStart(4, '0')}${Date.now().toString().slice(-3)}`;
+    
     const query = `
       INSERT INTO usuarios (nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, password_hash, created_at, updated_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
@@ -184,7 +188,7 @@ export class UsuarioModel {
       userData.fecha_ingreso,
       userData.departamento,
       userData.cargo,
-      userData.codigo_acceso || null,
+      codigoAcceso,
       userData.foto_url || null,
       hashedPassword
     ];

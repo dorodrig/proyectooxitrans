@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosService } from '../services/usuariosService';
+import { regionalesService } from '../services/regionalesService';
 import type { Usuario, Regional, TipoUsuario } from '../types';
 
 
@@ -83,9 +84,7 @@ const AsignarRegionalUsuario: React.FC<AsignarRegionalUsuarioProps> = () => {
   const { data: regionalesData = [] } = useQuery<Regional[]>({
     queryKey: ['regionales'],
     queryFn: async () => {
-      const res = await fetch('/api/regionales');
-      const json = await res.json();
-      return json.data || [];
+      return await regionalesService.getAll();
     },
   });
 

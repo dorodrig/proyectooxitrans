@@ -47,23 +47,56 @@ WHERE DATE(ra.timestamp) = CURDATE();
 -- Crear trigger sin DEFINER específico (usa el usuario actual)
 DROP TRIGGER IF EXISTS generar_codigo_acceso;
 
+-- OPCIÓN 1: Trigger simple (usa un número aleatorio si hay problemas con COUNT)
+DELIMITER //
+
 CREATE TRIGGER generar_codigo_acceso
     BEFORE INSERT ON usuarios
     FOR EACH ROW
-BEGIN
+BEGIN    
     -- Solo generar código si no se proporciona uno
     IF NEW.codigo_acceso IS NULL OR NEW.codigo_acceso = '' THEN
+        -- Generar código usando timestamp para evitar conflictos
         SET NEW.codigo_acceso = CONCAT(
             'OX',
             YEAR(CURDATE()),
             LPAD(SUBSTRING(NEW.documento, -4), 4, '0'),
-            LPAD((SELECT COUNT(*) + 1 FROM usuarios), 3, '0')
+            LPAD(UNIX_TIMESTAMP() % 1000, 3, '0')
         );
     END IF;
-END;
+END//
+
+DELIMITER ;
 
 -- ====================================
--- VERIFICAR PERMISOS
+-- PROCEDIMIENTO ALTERNATIVO PARA GENERAR CÓDIGOS
+-- ====================================
+
+DELIMITER //
+
+CREATE PROCEDURE GenerarCodigoAcceso(
+    IN p_documento VARCHAR(20),
+    OUT p_codigo VARCHAR(20)
+)
+BEGIN
+    DECLARE user_count INT DEFAULT 0;
+    
+    -- Obtener conteo actual
+    SELECT COUNT(*) INTO user_count FROM usuarios;
+    
+    -- Generar código único
+    SET p_codigo = CONCAT(
+        'OX',
+        YEAR(CURDATE()),
+        LPAD(SUBSTRING(p_documento, -4), 4, '0'),
+        LPAD((user_count + 1), 3, '0')
+    );
+END//
+
+DELIMITER ;
+
+-- ====================================
+-- VERIFICAR PERMISOS Y HACER PRUEBAS
 -- ====================================
 
 -- Mostrar información del usuario actual
@@ -76,3 +109,25 @@ SHOW TABLES LIKE 'password_reset_tokens';
 
 -- Verificar estructura básica
 DESCRIBE usuarios;
+
+-- Verificar que el trigger se creó correctamente
+SHOW TRIGGERS LIKE 'usuarios';
+
+-- Verificar que las vistas funcionan
+SELECT COUNT(*) as 'Usuarios Activos' FROM usuarios_activos;
+
+-- ====================================
+-- TEST DEL SISTEMA (OPCIONAL)
+-- ====================================
+
+-- Puedes probar el trigger insertando un usuario de prueba:
+-- INSERT INTO usuarios (nombre, apellido, email, documento, tipo_documento, rol, estado, password_hash) 
+-- VALUES ('Test', 'User', 'test@test.com', '12345678', 'CC', 'empleado', 'activo', 'test_hash');
+-- 
+-- Luego verificar que se generó el código:
+-- SELECT codigo_acceso FROM usuarios WHERE email = 'test@test.com';
+-- 
+-- Y eliminar el usuario de prueba:
+-- DELETE FROM usuarios WHERE email = 'test@test.com';
+
+SELECT 'Script ejecutado exitosamente' as 'Resultado';

@@ -516,22 +516,13 @@ export class AuthController {
   // Restablecer contraseña
   static async resetPassword(req: Request, res: Response): Promise<void> {
     try {
-      const { token, password, confirmPassword } = req.body;
+      const { token, password } = req.body;
 
       // Validar datos requeridos
-      if (!token || !password || !confirmPassword) {
+      if (!token || !password) {
         res.status(400).json({
           success: false,
-          message: 'Token, contraseña y confirmación son requeridos'
-        });
-        return;
-      }
-
-      // Validar que las contraseñas coincidan
-      if (password !== confirmPassword) {
-        res.status(400).json({
-          success: false,
-          message: 'Las contraseñas no coinciden'
+          message: 'Token y contraseña son requeridos'
         });
         return;
       }

@@ -138,8 +138,7 @@ export const authService = {
   resetPassword: async (token: string, newPassword: string): Promise<void> => {
     return apiClient.post('/auth/reset-password', {
       token,
-      password: newPassword,
-      confirmPassword: newPassword,
+      password: newPassword
     });
   },
 

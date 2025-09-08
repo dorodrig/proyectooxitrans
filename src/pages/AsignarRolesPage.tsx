@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosService } from '../services/usuariosService';
 import type { Usuario, Rol } from '../types';
 import { useNavigate } from 'react-router-dom';
+import NavigationBar from '../components/common/NavigationBar';
 
 const ROLES: Rol[] = ['admin', 'empleado', 'supervisor'];
 
@@ -54,6 +55,13 @@ const AsignarRolesPage: React.FC = () => {
 
   return (
     <div className="asignar-roles-page">
+      <NavigationBar 
+        title="Asignar Roles a Usuarios"
+        showBackButton={true}
+        showHomeButton={true}
+        showBreadcrumb={true}
+        showRefreshButton={true}
+      />
       <div className="asignar-roles-container">
         <h1>Asignar Roles a Usuarios</h1>
         <form onSubmit={handleSearch} className="search-form">

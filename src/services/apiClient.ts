@@ -2,6 +2,17 @@
 import { Capacitor } from '@capacitor/core';
 
 function getApiBaseUrl() {
+  // Debug en desarrollo para verificar configuración
+  if (import.meta.env.DEV) {
+    console.log('[apiClient] Configuración de entorno:', {
+      NODE_ENV: import.meta.env.NODE_ENV,
+      MODE: import.meta.env.MODE,
+      VITE_API_URL: import.meta.env.VITE_API_URL,
+      hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
+      isNative: Capacitor.isNativePlatform()
+    });
+  }
+
   // Si está en móvil y en desarrollo, usar IP local
   if (Capacitor.isNativePlatform() && import.meta.env.MODE === 'development') {
     return 'http://192.168.1.21:3001/api'; // IP local del PC

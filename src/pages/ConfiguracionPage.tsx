@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import HeaderNew from '../components/dashboard/HeaderNew';
 import SidebarNew from '../components/dashboard/SidebarNew';
+import NavigationBar from '../components/common/NavigationBar';
 import OverviewCardNew from '../components/dashboard/OverviewCardNew';
 import { useAuthStore } from '../stores/authStore';
 import { Settings, Shield, Database, Bell, Users, Building2, Save, RefreshCw } from 'lucide-react';
@@ -503,23 +504,8 @@ const ConfiguracionPage: React.FC = () => {
           minHeight: 'calc(100vh - 70px)',
           backgroundColor: '#f8fafc'
         }}>
-          {/* Page Title */}
-          <div style={{ marginBottom: '2rem' }}>
-            <h1 style={{ 
-              fontSize: '1.875rem', 
-              fontWeight: '700', 
-              color: '#1f2937',
-              margin: '0 0 0.5rem 0'
-            }}>
-              Configuración del Sistema
-            </h1>
-            <p style={{ 
-              color: '#6b7280', 
-              margin: 0 
-            }}>
-              Administra la configuración general, seguridad y preferencias del sistema
-            </p>
-          </div>
+          {/* Navigation Bar */}
+          <NavigationBar title="Configuración del Sistema" />
 
           {/* Configuration Tabs */}
           <div style={{ display: 'flex', gap: '2rem' }}>

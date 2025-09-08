@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import NavigationBar from '../components/common/NavigationBar';
 import '../styles/pages/novedadesPage.scss';
 import { useQuery } from '@tanstack/react-query';
 import { usuariosService } from '../services/usuariosService';
@@ -83,6 +84,7 @@ const NovedadesPage: React.FC = () => {
 
   return (
     <div className="novedades-page">
+      <NavigationBar title="Registro de Novedades" />
       <h1 className="text-2xl font-bold mb-4 text-pink-600">Agregar Novedades a Usuarios</h1>
       <form className="novedad-form" onSubmit={handleSubmit}>
         {errorMsg && <div className="msg-error">{errorMsg}</div>}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import NavigationBar from '../components/common/NavigationBar';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosService } from '../services/usuariosService';
 import { cargosService } from '../services/cargosService';
@@ -128,6 +129,7 @@ const AdminUsuariosPage: React.FC = () => {
 
   return (
     <div className="admin-usuarios-page">
+      <NavigationBar title="Administración de Usuarios" />
       <h1 className="text-2xl font-bold mb-4">Administración de Usuarios</h1>
       {sessionExpired && (
         <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">

@@ -1,6 +1,6 @@
 
-
 import React from 'react';
+import NavigationBar from '../components/common/NavigationBar';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, MapPin } from 'lucide-react';
 import '../styles/pages/controlMaestroPage.scss';
@@ -8,6 +8,7 @@ import '../styles/pages/controlMaestroPage.scss';
 const ControlMaestroPage: React.FC = () => {
   return (
     <div className="control-maestro-page">
+      <NavigationBar title="Panel de Control Maestro" />
       <div className="page-header">
         <h1>Panel de Control Maestro</h1>
         <p>Administra regionales, tipos de usuario y asignaciones avanzadas para empleados y visitantes de OXITRANS S.A.S.</p>

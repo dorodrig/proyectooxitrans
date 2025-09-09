@@ -408,6 +408,25 @@ SELECT id, nombre, descripcion, latitud, longitud
 FROM regionales;
 
 -- ====================================
+-- TABLA DE NOVEDADES
+-- ====================================
+CREATE TABLE novedades (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    usuarioId INT NOT NULL,
+    tipo ENUM('incapacidad', 'ausentismo', 'permiso', 'no_remunerado', 'lic_maternidad', 'lic_paternidad', 'dia_familia') NOT NULL,
+    fechaInicio DATE NOT NULL,
+    fechaFin DATE NOT NULL,
+    horas INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (usuarioId) REFERENCES usuarios(id) ON DELETE CASCADE,
+    INDEX idx_usuario (usuarioId),
+    INDEX idx_tipo (tipo),
+    INDEX idx_fechas (fechaInicio, fechaFin)
+);
+
+-- ====================================
 -- SCRIPT COMPLETADO
 -- ====================================
 SELECT 'Base de datos OXITRANS Control de Acceso creada exitosamente' AS resultado;

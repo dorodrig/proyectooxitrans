@@ -16,6 +16,7 @@ import usuariosRoutes from './routes/usuarios';
 import registrosRoutes from './routes/registros';
 import cargosRoutes from './routes/cargos';
 import regionalesRoutes from './routes/regionales';
+import novedadesRoutes from './routes/novedades';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -91,6 +92,7 @@ app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/registros', registrosRoutes);
 app.use('/api/cargos', cargosRoutes);
 app.use('/api/regionales', regionalesRoutes);
+app.use('/api/novedades', novedadesRoutes);
 
 // Ruta de health check
 app.get('/api/health', (req, res) => {
@@ -115,7 +117,8 @@ app.get('/', (req, res) => {
       usuarios: '/api/usuarios',
       registros: '/api/registros',
       cargos: '/api/cargos',
-      regionales: '/api/regionales'
+      regionales: '/api/regionales',
+      novedades: '/api/novedades'
     },
     documentation: 'API REST para el sistema de control de acceso'
   });

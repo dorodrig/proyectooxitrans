@@ -5,7 +5,6 @@ import { useAuthStore } from './stores/authStore';
 import { LoginPage } from './pages/LoginPage';
 import PremiumLoginPage from './pages/PremiumLoginPage';
 import { RegistroPage } from './pages/RegistroPage';
-import { DashboardPage } from './pages/DashboardPage';
 import { lazy, Suspense } from 'react';
 
 // Lazy load admin pages
@@ -88,7 +87,7 @@ function App() {
           <Route 
             path="/dashboard" 
             element={
-              isAuthenticated ? <DashboardPage /> : <Navigate to="/login" replace />
+              isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />
             } 
           />
           <Route

@@ -5,7 +5,7 @@ import './DashboardCard.scss';
 const DashboardCard: React.FC = () => {
   const navigate = useNavigate();
   return (
-    <div className="card-home bg-white rounded-xl shadow-lg p-8 flex flex-col items-center hover:shadow-2xl transition group border border-oxitrans-red/30" onClick={() => navigate('/dashboard')} style={{cursor: 'pointer'}}>
+    <div className="card-home bg-white rounded-xl shadow-lg p-8 flex flex-col items-center hover:shadow-2xl transition group border border-oxitrans-red/30" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
       <div className="bg-oxitrans-red/10 rounded-full p-4 mb-4 flex items-center justify-center">
         <i className="icon-bar-chart-2 text-oxitrans-red" style={{fontSize: 40}}></i>
       </div>

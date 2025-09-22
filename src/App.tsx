@@ -23,6 +23,9 @@ const LogsPage = lazy(() => import('./pages/LogsPage'));
 const AlertasPage = lazy(() => import('./pages/AlertasPage'));
 const ConfiguracionPage = lazy(() => import('./pages/ConfiguracionPage'));
 
+// Lazy load jornada laboral
+const JornadaLaboralPage = lazy(() => import('./pages/JornadaLaboralPage'));
+
 // Main pages
 import HomePage from './pages/HomePage';
 import NovedadesPage from './pages/NovedadesPage';
@@ -226,6 +229,16 @@ function App() {
               isAuthenticated ? (
                 <Suspense fallback={<div>Cargando...</div>}>
                   <ConfiguracionPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/jornada-laboral"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <JornadaLaboralPage />
                 </Suspense>
               ) : <Navigate to="/login" replace />
             }

@@ -21,6 +21,22 @@ export const RegionalModel = {
     }
   },
 
+  async obtenerPorUsuario(usuarioId: number): Promise<Regional | null> {
+    try {
+      const query = `
+        SELECT r.* 
+        FROM regionales r 
+        JOIN usuarios u ON r.id = u.regional_id 
+        WHERE u.id = ?
+      `;
+      const result = await executeQuery(query, [usuarioId]);
+      return result.length > 0 ? result[0] as Regional : null;
+    } catch (error) {
+      console.error('Error en RegionalModel.obtenerPorUsuario:', error);
+      throw new Error('Error al obtener regional del usuario');
+    }
+  },
+
   async create(nombre: string, descripcion?: string, latitud?: number, longitud?: number): Promise<Regional> {
     try {
       // Definir tipo para el resultado del insert

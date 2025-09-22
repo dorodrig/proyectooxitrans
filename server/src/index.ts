@@ -10,6 +10,10 @@ import rateLimit from 'express-rate-limit';
 // Importar configuración de base de datos
 import { testConnection } from './config/database';
 
+// Importar servicios
+import { emailService } from './services/emailService';
+import { taskScheduler } from './services/taskSchedulerService';
+
 // Importar rutas
 import authRoutes from './routes/auth';
 import usuariosRoutes from './routes/usuarios';
@@ -17,6 +21,7 @@ import registrosRoutes from './routes/registros';
 import cargosRoutes from './routes/cargos';
 import regionalesRoutes from './routes/regionales';
 import novedadesRoutes from './routes/novedades';
+import jornadasRoutes from './routes/jornadas';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -93,6 +98,7 @@ app.use('/api/registros', registrosRoutes);
 app.use('/api/cargos', cargosRoutes);
 app.use('/api/regionales', regionalesRoutes);
 app.use('/api/novedades', novedadesRoutes);
+app.use('/api/jornadas', jornadasRoutes);
 
 // Ruta de health check
 app.get('/api/health', (req, res) => {
@@ -162,6 +168,17 @@ const startServer = async (): Promise<void> => {
       console.error('❌ No se pudo conectar a la base de datos');
       process.exit(1);
     }
+    
+    // Verificar configuración de email
+    console.log('📧 Verificando configuración de email...');
+    const emailConfigValid = await emailService.verificarConfiguracion();
+    if (!emailConfigValid) {
+      console.warn('⚠️ Configuración de email no válida - las notificaciones por email no funcionarán');
+    }
+    
+    // Inicializar servicios programados
+    console.log('⏰ Servicios programados inicializados');
+    // taskScheduler ya se inicializa automáticamente al importarse
     
     // Iniciar servidor
     app.listen(PORT, () => {

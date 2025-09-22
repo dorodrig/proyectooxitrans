@@ -65,6 +65,79 @@ CREATE TABLE registros_acceso (
 );
 
 -- ====================================
+-- TABLA DE JORNADAS LABORALES
+-- ====================================
+CREATE TABLE jornadas_laborales (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario_id INT NOT NULL,
+    fecha DATE NOT NULL,
+    
+    -- Marcación de entrada
+    entrada TIMESTAMP NULL,
+    ubicacion_entrada_lat DECIMAL(10, 8) NULL,
+    ubicacion_entrada_lng DECIMAL(11, 8) NULL,
+    ubicacion_entrada_accuracy DECIMAL(6, 2) NULL,
+    
+    -- Descanso mañana (15 minutos)
+    descanso_manana_inicio TIMESTAMP NULL,
+    descanso_manana_fin TIMESTAMP NULL,
+    
+    -- Almuerzo (1 hora máximo)
+    almuerzo_inicio TIMESTAMP NULL,
+    almuerzo_fin TIMESTAMP NULL,
+    
+    -- Descanso tarde (15 minutos)
+    descanso_tarde_inicio TIMESTAMP NULL,
+    descanso_tarde_fin TIMESTAMP NULL,
+    
+    -- Marcación de salida
+    salida TIMESTAMP NULL,
+    ubicacion_salida_lat DECIMAL(10, 8) NULL,
+    ubicacion_salida_lng DECIMAL(11, 8) NULL,
+    ubicacion_salida_accuracy DECIMAL(6, 2) NULL,
+    
+    -- Cálculos y control
+    horas_trabajadas DECIMAL(4, 2) NOT NULL DEFAULT 0.00,
+    auto_cerrada BOOLEAN NOT NULL DEFAULT FALSE,
+    auto_cerrada_razon VARCHAR(255) NULL,
+    observaciones TEXT NULL,
+    
+    -- Metadatos
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    -- Constraints y validaciones
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    
+    -- Un usuario solo puede tener una jornada por día
+    UNIQUE KEY unique_usuario_fecha (usuario_id, fecha),
+    
+    -- Indices para consultas eficientes
+    INDEX idx_usuario_fecha (usuario_id, fecha),
+    INDEX idx_fecha (fecha),
+    INDEX idx_usuario_id (usuario_id),
+    INDEX idx_auto_cerrada (auto_cerrada),
+    INDEX idx_horas_trabajadas (horas_trabajadas),
+    
+    -- Constraints de validación
+    CONSTRAINT chk_horas_trabajadas CHECK (horas_trabajadas >= 0 AND horas_trabajadas <= 24),
+    CONSTRAINT chk_entrada_antes_salida CHECK (
+        salida IS NULL OR entrada IS NULL OR salida >= entrada
+    ),
+    CONSTRAINT chk_almuerzo_orden CHECK (
+        almuerzo_fin IS NULL OR almuerzo_inicio IS NULL OR almuerzo_fin >= almuerzo_inicio
+    ),
+    CONSTRAINT chk_descanso_manana_orden CHECK (
+        descanso_manana_fin IS NULL OR descanso_manana_inicio IS NULL OR 
+        descanso_manana_fin >= descanso_manana_inicio
+    ),
+    CONSTRAINT chk_descanso_tarde_orden CHECK (
+        descanso_tarde_fin IS NULL OR descanso_tarde_inicio IS NULL OR 
+        descanso_tarde_fin >= descanso_tarde_inicio
+    )
+);
+
+-- ====================================
 -- TABLA DE REGIONALES
 -- ====================================
 CREATE TABLE regionales (
@@ -239,6 +312,35 @@ SELECT
 FROM usuarios 
 WHERE estado = 'activo';
 
+-- Vista de jornadas laborales del día actual
+CREATE VIEW jornadas_hoy AS
+SELECT 
+    j.id, j.usuario_id, j.fecha,
+    j.entrada, j.almuerzo_inicio, j.almuerzo_fin, j.salida,
+    j.descanso_manana_inicio, j.descanso_manana_fin,
+    j.descanso_tarde_inicio, j.descanso_tarde_fin,
+    j.horas_trabajadas, j.auto_cerrada, j.observaciones,
+    u.nombre, u.apellido, u.documento, u.departamento, u.cargo
+FROM jornadas_laborales j
+JOIN usuarios u ON j.usuario_id = u.id
+WHERE j.fecha = CURDATE()
+ORDER BY j.entrada DESC;
+
+-- Vista de estadísticas diarias de jornadas
+CREATE VIEW estadisticas_jornadas_diarias AS
+SELECT 
+    fecha,
+    COUNT(*) as total_jornadas,
+    COUNT(CASE WHEN entrada IS NOT NULL AND salida IS NOT NULL THEN 1 END) as jornadas_completas,
+    COUNT(CASE WHEN auto_cerrada = TRUE THEN 1 END) as jornadas_auto_cerradas,
+    AVG(horas_trabajadas) as promedio_horas,
+    MIN(horas_trabajadas) as min_horas,
+    MAX(horas_trabajadas) as max_horas,
+    COUNT(CASE WHEN TIME(entrada) <= '07:15:00' THEN 1 END) as entradas_puntuales
+FROM jornadas_laborales
+GROUP BY fecha
+ORDER BY fecha DESC;
+
 -- Vista de registros de acceso del día actual
 CREATE VIEW registros_hoy AS
 SELECT 
@@ -268,7 +370,252 @@ ORDER BY fecha DESC;
 
 DELIMITER //
 
--- Procedimiento para registrar acceso
+-- Procedimiento para iniciar jornada laboral
+CREATE PROCEDURE IniciarJornada(
+    IN p_usuario_id INT,
+    IN p_latitud DECIMAL(10, 8),
+    IN p_longitud DECIMAL(11, 8),
+    IN p_accuracy DECIMAL(6, 2)
+)
+BEGIN
+    DECLARE v_fecha DATE DEFAULT CURDATE();
+    DECLARE v_existe INT DEFAULT 0;
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    -- Verificar si ya existe jornada para hoy
+    SELECT COUNT(*) INTO v_existe 
+    FROM jornadas_laborales 
+    WHERE usuario_id = p_usuario_id AND fecha = v_fecha;
+    
+    IF v_existe > 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Ya existe una jornada registrada para hoy';
+    END IF;
+    
+    -- Crear nueva jornada
+    INSERT INTO jornadas_laborales (
+        usuario_id, fecha, entrada, 
+        ubicacion_entrada_lat, ubicacion_entrada_lng, ubicacion_entrada_accuracy
+    ) VALUES (
+        p_usuario_id, v_fecha, NOW(), 
+        p_latitud, p_longitud, p_accuracy
+    );
+    
+    COMMIT;
+END //
+
+-- Procedimiento para registrar evento en jornada
+CREATE PROCEDURE RegistrarEventoJornada(
+    IN p_usuario_id INT,
+    IN p_tipo ENUM('descanso_manana_inicio', 'descanso_manana_fin', 
+                   'almuerzo_inicio', 'almuerzo_fin', 
+                   'descanso_tarde_inicio', 'descanso_tarde_fin', 'salida'),
+    IN p_latitud DECIMAL(10, 8),
+    IN p_longitud DECIMAL(11, 8),
+    IN p_accuracy DECIMAL(6, 2),
+    IN p_observaciones TEXT
+)
+BEGIN
+    DECLARE v_fecha DATE DEFAULT CURDATE();
+    DECLARE v_jornada_id INT;
+    DECLARE v_timestamp TIMESTAMP DEFAULT NOW();
+    
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    -- Obtener ID de jornada actual
+    SELECT id INTO v_jornada_id 
+    FROM jornadas_laborales 
+    WHERE usuario_id = p_usuario_id AND fecha = v_fecha;
+    
+    IF v_jornada_id IS NULL THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No existe jornada iniciada para hoy';
+    END IF;
+    
+    -- Registrar evento según tipo
+    CASE p_tipo
+        WHEN 'descanso_manana_inicio' THEN
+            UPDATE jornadas_laborales 
+            SET descanso_manana_inicio = v_timestamp
+            WHERE id = v_jornada_id;
+            
+        WHEN 'descanso_manana_fin' THEN
+            UPDATE jornadas_laborales 
+            SET descanso_manana_fin = v_timestamp
+            WHERE id = v_jornada_id;
+            
+        WHEN 'almuerzo_inicio' THEN
+            UPDATE jornadas_laborales 
+            SET almuerzo_inicio = v_timestamp
+            WHERE id = v_jornada_id;
+            
+        WHEN 'almuerzo_fin' THEN
+            UPDATE jornadas_laborales 
+            SET almuerzo_fin = v_timestamp
+            WHERE id = v_jornada_id;
+            
+        WHEN 'descanso_tarde_inicio' THEN
+            UPDATE jornadas_laborales 
+            SET descanso_tarde_inicio = v_timestamp
+            WHERE id = v_jornada_id;
+            
+        WHEN 'descanso_tarde_fin' THEN
+            UPDATE jornadas_laborales 
+            SET descanso_tarde_fin = v_timestamp
+            WHERE id = v_jornada_id;
+            
+        WHEN 'salida' THEN
+            UPDATE jornadas_laborales 
+            SET salida = v_timestamp,
+                ubicacion_salida_lat = p_latitud,
+                ubicacion_salida_lng = p_longitud,
+                ubicacion_salida_accuracy = p_accuracy
+            WHERE id = v_jornada_id;
+    END CASE;
+    
+    -- Actualizar observaciones si se proporcionan
+    IF p_observaciones IS NOT NULL THEN
+        UPDATE jornadas_laborales 
+        SET observaciones = CONCAT(COALESCE(observaciones, ''), 
+                                  CASE WHEN observaciones IS NULL THEN '' ELSE '; ' END,
+                                  p_observaciones)
+        WHERE id = v_jornada_id;
+    END IF;
+    
+    -- Recalcular horas trabajadas
+    CALL CalcularHorasTrabajadas(v_jornada_id);
+    
+    COMMIT;
+END //
+
+-- Procedimiento para calcular horas trabajadas
+CREATE PROCEDURE CalcularHorasTrabajadas(IN p_jornada_id INT)
+BEGIN
+    DECLARE v_entrada TIMESTAMP;
+    DECLARE v_salida TIMESTAMP;
+    DECLARE v_almuerzo_inicio TIMESTAMP;
+    DECLARE v_almuerzo_fin TIMESTAMP;
+    DECLARE v_descanso_m_inicio TIMESTAMP;
+    DECLARE v_descanso_m_fin TIMESTAMP;
+    DECLARE v_descanso_t_inicio TIMESTAMP;
+    DECLARE v_descanso_t_fin TIMESTAMP;
+    DECLARE v_horas_totales DECIMAL(4, 2) DEFAULT 0;
+    
+    -- Obtener todos los timestamps
+    SELECT entrada, salida, almuerzo_inicio, almuerzo_fin,
+           descanso_manana_inicio, descanso_manana_fin,
+           descanso_tarde_inicio, descanso_tarde_fin
+    INTO v_entrada, v_salida, v_almuerzo_inicio, v_almuerzo_fin,
+         v_descanso_m_inicio, v_descanso_m_fin,
+         v_descanso_t_inicio, v_descanso_t_fin
+    FROM jornadas_laborales 
+    WHERE id = p_jornada_id;
+    
+    -- Calcular si hay entrada
+    IF v_entrada IS NOT NULL THEN
+        -- Usar salida si existe, si no usar hora actual
+        SET v_salida = COALESCE(v_salida, NOW());
+        
+        -- Horas totales = tiempo entre entrada y salida
+        SET v_horas_totales = TIMESTAMPDIFF(MINUTE, v_entrada, v_salida) / 60.0;
+        
+        -- Restar tiempo de almuerzo
+        IF v_almuerzo_inicio IS NOT NULL THEN
+            SET v_almuerzo_fin = COALESCE(v_almuerzo_fin, NOW());
+            SET v_horas_totales = v_horas_totales - 
+                (TIMESTAMPDIFF(MINUTE, v_almuerzo_inicio, v_almuerzo_fin) / 60.0);
+        END IF;
+        
+        -- Restar descansos
+        IF v_descanso_m_inicio IS NOT NULL AND v_descanso_m_fin IS NOT NULL THEN
+            SET v_horas_totales = v_horas_totales - 
+                (TIMESTAMPDIFF(MINUTE, v_descanso_m_inicio, v_descanso_m_fin) / 60.0);
+        END IF;
+        
+        IF v_descanso_t_inicio IS NOT NULL AND v_descanso_t_fin IS NOT NULL THEN
+            SET v_horas_totales = v_horas_totales - 
+                (TIMESTAMPDIFF(MINUTE, v_descanso_t_inicio, v_descanso_t_fin) / 60.0);
+        END IF;
+        
+        -- Asegurar que las horas no sean negativas
+        SET v_horas_totales = GREATEST(0, v_horas_totales);
+    END IF;
+    
+    -- Actualizar jornada
+    UPDATE jornadas_laborales 
+    SET horas_trabajadas = v_horas_totales
+    WHERE id = p_jornada_id;
+END //
+
+-- Procedimiento para auto-cerrar jornadas de 8 horas
+CREATE PROCEDURE AutoCerrarJornadas()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_jornada_id INT;
+    DECLARE v_usuario_id INT;
+    DECLARE v_nombre VARCHAR(100);
+    DECLARE v_apellido VARCHAR(100);
+    DECLARE v_email VARCHAR(255);
+    
+    DECLARE jornadas_cursor CURSOR FOR
+        SELECT j.id, j.usuario_id, u.nombre, u.apellido, u.email
+        FROM jornadas_laborales j
+        JOIN usuarios u ON j.usuario_id = u.id
+        WHERE j.fecha = CURDATE()
+          AND j.entrada IS NOT NULL
+          AND j.salida IS NULL
+          AND j.auto_cerrada = FALSE
+          AND TIMESTAMPDIFF(HOUR, j.entrada, NOW()) >= 8;
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    OPEN jornadas_cursor;
+    
+    read_loop: LOOP
+        FETCH jornadas_cursor INTO v_jornada_id, v_usuario_id, v_nombre, v_apellido, v_email;
+        
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+        
+        -- Cerrar jornada automáticamente
+        UPDATE jornadas_laborales 
+        SET salida = DATE_ADD(entrada, INTERVAL 8 HOUR),
+            auto_cerrada = TRUE,
+            auto_cerrada_razon = 'Jornada cerrada automáticamente después de 8 horas'
+        WHERE id = v_jornada_id;
+        
+        -- Recalcular horas
+        CALL CalcularHorasTrabajadas(v_jornada_id);
+        
+        -- Crear notificación
+        INSERT INTO notificaciones (
+            usuario_id, tipo, titulo, mensaje
+        ) VALUES (
+            v_usuario_id,
+            'warning',
+            'Jornada Auto-cerrada',
+            CONCAT('Tu jornada laboral fue cerrada automáticamente después de 8 horas. ',
+                   'Se enviará un email de notificación.')
+        );
+        
+    END LOOP;
+    
+    CLOSE jornadas_cursor;
+END //
+
+-- Procedimiento para registrar acceso (mantener compatibilidad)
 CREATE PROCEDURE RegistrarAcceso(
     IN p_usuario_id INT,
     IN p_tipo ENUM('entrada', 'salida'),
@@ -349,6 +696,73 @@ BEGIN
         'Perfil Actualizado',
         CONCAT('Tu perfil fue actualizado el ', DATE_FORMAT(NOW(), '%d/%m/%Y a las %H:%i'))
     );
+END //
+
+-- Trigger para validar horarios de descanso en jornadas
+CREATE TRIGGER validar_horarios_jornada
+    BEFORE UPDATE ON jornadas_laborales
+    FOR EACH ROW
+BEGIN
+    -- Validar duración del almuerzo (máximo 1 hora)
+    IF NEW.almuerzo_inicio IS NOT NULL AND NEW.almuerzo_fin IS NOT NULL THEN
+        IF TIMESTAMPDIFF(MINUTE, NEW.almuerzo_inicio, NEW.almuerzo_fin) > 60 THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'El almuerzo no puede exceder 60 minutos';
+        END IF;
+    END IF;
+    
+    -- Validar duración de descansos (máximo 15 minutos cada uno)
+    IF NEW.descanso_manana_inicio IS NOT NULL AND NEW.descanso_manana_fin IS NOT NULL THEN
+        IF TIMESTAMPDIFF(MINUTE, NEW.descanso_manana_inicio, NEW.descanso_manana_fin) > 15 THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Los descansos no pueden exceder 15 minutos';
+        END IF;
+    END IF;
+    
+    IF NEW.descanso_tarde_inicio IS NOT NULL AND NEW.descanso_tarde_fin IS NOT NULL THEN
+        IF TIMESTAMPDIFF(MINUTE, NEW.descanso_tarde_inicio, NEW.descanso_tarde_fin) > 15 THEN
+            SIGNAL SQLSTATE '45000' 
+            SET MESSAGE_TEXT = 'Los descansos no pueden exceder 15 minutos';
+        END IF;
+    END IF;
+END //
+
+-- Trigger para notificar registro de entrada
+CREATE TRIGGER notificar_entrada_jornada
+    AFTER INSERT ON jornadas_laborales
+    FOR EACH ROW
+BEGIN
+    INSERT INTO notificaciones (
+        usuario_id, tipo, titulo, mensaje
+    ) VALUES (
+        NEW.usuario_id,
+        'success',
+        'Entrada Registrada',
+        CONCAT('Entrada registrada exitosamente a las ', 
+               TIME_FORMAT(NEW.entrada, '%H:%i'), 
+               ' del ', DATE_FORMAT(NEW.fecha, '%d/%m/%Y'))
+    );
+END //
+
+-- Trigger para notificar cierre de jornada
+CREATE TRIGGER notificar_salida_jornada
+    AFTER UPDATE ON jornadas_laborales
+    FOR EACH ROW
+BEGIN
+    -- Solo si se acaba de registrar la salida
+    IF OLD.salida IS NULL AND NEW.salida IS NOT NULL THEN
+        INSERT INTO notificaciones (
+            usuario_id, tipo, titulo, mensaje
+        ) VALUES (
+            NEW.usuario_id,
+            'info',
+            'Jornada Finalizada',
+            CONCAT('Jornada finalizada a las ', 
+                   TIME_FORMAT(NEW.salida, '%H:%i'), 
+                   '. Horas trabajadas: ', 
+                   FORMAT(NEW.horas_trabajadas, 2), ' hrs')
+        );
+    END IF;
 END //
 
 DELIMITER ;

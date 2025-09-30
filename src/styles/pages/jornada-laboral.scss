@@ -1,0 +1,450 @@
+// ====================================
+// 🕒 JORNADA LABORAL - MÓDULO OXITRANS
+// Estilos específicos para el módulo de jornada laboral
+// ====================================
+
+@use '../abstracts' as *;
+@use 'sass:color';
+
+// 📄 Contenedor principal de jornada laboral
+.jornada-laboral {
+  min-height: 100vh;
+  background: linear-gradient(135deg, 
+    lighten($oxitrans-light, 2%) 0%, 
+    $oxitrans-light 100%);
+  padding: $spacing-lg;
+
+  // 📱 Responsive
+  @media (max-width: 768px) {
+    padding: $spacing-md;
+  }
+
+  // 🎯 Contenedor de contenido
+  &__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 $spacing-md;
+  }
+
+  // 📋 Encabezado de jornada
+  &__header {
+    background: white;
+    border-radius: $border-radius-lg;
+    padding: $spacing-xl;
+    margin-bottom: $spacing-xl;
+    box-shadow: $shadow-md;
+    border-left: 4px solid $oxitrans-primary;
+
+    h1 {
+      color: $oxitrans-dark;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: $spacing-sm;
+      
+      @media (max-width: 768px) {
+        font-size: 2rem;
+      }
+    }
+
+    &-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: $spacing-lg;
+      margin-top: $spacing-lg;
+
+      .info-item {
+        display: flex;
+        flex-direction: column;
+        
+        .label {
+          font-size: $font-size-sm;
+          color: $text-muted;
+          font-weight: 500;
+          margin-bottom: $spacing-xs;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .value {
+          font-size: $font-size-lg;
+          color: $oxitrans-dark;
+          font-weight: 600;
+          
+          &.tiempo-trabajado {
+            color: $oxitrans-primary;
+            font-size: 1.8rem;
+            font-weight: 700;
+          }
+        }
+      }
+    }
+  }
+
+  // 📍 Sección de ubicación GPS
+  &__ubicacion {
+    background: white;
+    border-radius: $border-radius-lg;
+    padding: $spacing-xl;
+    margin-bottom: $spacing-xl;
+    box-shadow: $shadow-sm;
+    border: 1px solid lighten($oxitrans-gray-light, 20%);
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      color: $oxitrans-dark;
+      font-size: $font-size-xl;
+      font-weight: 600;
+      margin-bottom: $spacing-lg;
+
+      svg {
+        color: $oxitrans-primary;
+      }
+    }
+
+    &-content {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: $spacing-lg;
+      align-items: start;
+
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: $spacing-md;
+      }
+    }
+
+    &-details {
+      .coords {
+        font-family: 'Courier New', monospace;
+        font-size: $font-size-sm;
+        color: $text-muted;
+        margin-bottom: $spacing-xs;
+        
+        &.precision {
+          color: $info-color;
+          font-weight: 500;
+        }
+      }
+
+      .status {
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: $spacing-xs;
+        margin-top: $spacing-sm;
+        padding: $spacing-xs $spacing-sm;
+        border-radius: $border-radius-sm;
+        font-size: $font-size-sm;
+        font-weight: 500;
+
+        .lucide {
+          flex-shrink: 0;
+          margin-bottom: 2px;
+        }
+
+        .ubicacion-info, .distancia-info {
+          font-size: 0.8rem;
+          font-weight: 400;
+          opacity: 0.9;
+          margin-top: 2px;
+          line-height: 1.3;
+        }
+
+        &.valida {
+          background-color: lighten($success-color, 45%);
+          color: $success-color;
+          border: 1px solid lighten($success-color, 30%);
+        }
+
+        &.invalida {
+          background-color: lighten($error-color, 45%);
+          color: $error-color;
+          border: 1px solid lighten($error-color, 30%);
+        }
+
+        &.cargando {
+          background-color: lighten($warning-color, 45%);
+          color: darken($warning-color, 20%);
+          border: 1px solid lighten($warning-color, 30%);
+        }
+      }
+    }
+
+    &-actions {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-sm;
+
+      @media (max-width: 768px) {
+        flex-direction: row;
+        justify-content: space-between;
+      }
+    }
+  }
+
+  // 🎛️ Grid de botones de registro
+  &__botones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+
+    @media (max-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: $spacing-md;
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  // 🔘 Botón de evento individual
+  &__boton-evento {
+    @include button-base;
+    background: white;
+    border: 2px solid lighten($oxitrans-gray-light, 20%);
+    border-radius: $border-radius-lg;
+    padding: $spacing-xl;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+    transition: all 0.3s ease;
+    box-shadow: $shadow-sm;
+    position: relative;
+    overflow: hidden;
+
+    // Estado hover
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: $shadow-lg;
+      border-color: $oxitrans-primary;
+    }
+
+    // Estados específicos
+    &.entrada {
+      &:not(:disabled):not(.completado) {
+        border-color: $success-color;
+        background: linear-gradient(135deg, 
+          white 0%, 
+          lighten($success-color, 48%) 100%);
+
+        &:hover {
+          border-color: darken($success-color, 10%);
+        }
+      }
+
+      &.completado {
+        background: $success-color;
+        color: white;
+        border-color: $success-color;
+      }
+    }
+
+    &.almuerzo, &.descanso {
+      &:not(:disabled):not(.completado) {
+        border-color: $info-color;
+        background: linear-gradient(135deg, 
+          white 0%, 
+          lighten($info-color, 48%) 100%);
+
+        &:hover {
+          border-color: darken($info-color, 10%);
+        }
+      }
+
+      &.completado {
+        background: $info-color;
+        color: white;
+        border-color: $info-color;
+      }
+    }
+
+    &.salida {
+      &:not(:disabled):not(.completado) {
+        border-color: $error-color;
+        background: linear-gradient(135deg, 
+          white 0%, 
+          lighten($error-color, 48%) 100%);
+
+        &:hover {
+          border-color: darken($error-color, 10%);
+        }
+      }
+
+      &.completado {
+        background: $error-color;
+        color: white;
+        border-color: $error-color;
+      }
+    }
+
+    // Estado deshabilitado
+    &:disabled {
+      background: lighten($oxitrans-gray-light, 15%);
+      color: $text-muted;
+      border-color: lighten($oxitrans-gray-light, 10%);
+      cursor: not-allowed;
+      
+      &:hover {
+        transform: none;
+        box-shadow: $shadow-sm;
+      }
+    }
+
+    // Icono del botón
+    .icono {
+      font-size: 2rem;
+      margin-bottom: $spacing-xs;
+
+      &.entrada { color: $success-color; }
+      &.almuerzo { color: $info-color; }
+      &.descanso { color: $warning-color; }
+      &.salida { color: $error-color; }
+    }
+
+    // Título del botón
+    .titulo {
+      font-size: $font-size-lg;
+      font-weight: 600;
+      color: $oxitrans-dark;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    // Subtítulo/estado
+    .subtitulo {
+      font-size: $font-size-sm;
+      color: $text-muted;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    // Hora registrada
+    .hora {
+      position: absolute;
+      bottom: $spacing-sm;
+      right: $spacing-sm;
+      font-size: $font-size-xs;
+      color: $text-muted;
+      font-weight: 500;
+      background: rgba(white, 0.9);
+      padding: $spacing-xs;
+      border-radius: $border-radius-sm;
+    }
+  }
+
+  // 🔘 Botones de acción (GPS, Validar)
+  &__btn-accion {
+    @include button-base;
+    background: $oxitrans-primary;
+    color: white;
+    border: 1px solid $oxitrans-primary;
+    padding: $spacing-sm $spacing-lg;
+    border-radius: $border-radius-md;
+    font-weight: 500;
+    white-space: nowrap;
+
+    &:hover:not(:disabled) {
+      background: darken($oxitrans-primary, 10%);
+      border-color: darken($oxitrans-primary, 10%);
+      transform: translateY(-1px);
+      box-shadow: $shadow-md;
+    }
+
+    &.secundario {
+      background: white;
+      color: $oxitrans-primary;
+      border-color: $oxitrans-primary;
+
+      &:hover:not(:disabled) {
+        background: lighten($oxitrans-primary, 48%);
+      }
+    }
+
+    svg {
+      margin-right: $spacing-xs;
+    }
+  }
+}
+
+// 💨 Animaciones de carga
+.loading-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+// 🎯 Estados especiales
+.estado-pendiente {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.estado-completado {
+  position: relative;
+  
+  &::after {
+    content: '✓';
+    position: absolute;
+    top: $spacing-xs;
+    right: $spacing-xs;
+    background: $success-color;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-sm;
+    font-weight: 700;
+  }
+}
+
+// 📱 Mejoras responsive adicionales
+@media (max-width: 480px) {
+  .jornada-laboral {
+    &__header {
+      padding: $spacing-lg;
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      &-info {
+        grid-template-columns: 1fr;
+        gap: $spacing-md;
+        
+        .info-item .value.tiempo-trabajado {
+          font-size: 1.5rem;
+        }
+      }
+    }
+    
+    &__ubicacion {
+      padding: $spacing-lg;
+    }
+    
+    &__boton-evento {
+      min-height: 120px;
+      padding: $spacing-lg;
+      
+      .icono {
+        font-size: 1.5rem;
+      }
+      
+      .titulo {
+        font-size: $font-size-base;
+      }
+    }
+  }
+}

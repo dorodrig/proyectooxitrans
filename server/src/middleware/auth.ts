@@ -1,12 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { UsuarioModel } from '../models/UsuarioModel';
-import { Usuario } from '../types';
+import { AuthenticatedRequest } from '../types/auth';
 
-// Interface tipada para requests autenticados
-interface AuthRequest extends Request {
-  user?: Usuario;
-}
+// Usar la interfaz común para requests autenticados
+type AuthRequest = AuthenticatedRequest;
 
 // Interface para el payload del JWT
 interface JWTPayload {
@@ -57,28 +55,22 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
       return;
     }
 
-    // Convertir al formato esperado por el tipo Usuario de types/index.ts
-    const formattedUser: Usuario = {
-      id: user.id,
+    // Convertir al formato esperado por AuthenticatedRequest
+    const formattedUser = {
+      id: parseInt(user.id.toString()),
       nombre: user.nombre,
       apellido: user.apellido,
       email: user.email,
-      telefono: user.telefono || undefined,
       documento: user.documento,
-      tipoDocumento: user.tipoDocumento,
-      rol: user.rol,
-      estado: user.estado,
-      fechaIngreso: new Date(user.fechaIngreso),
       departamento: user.departamento,
       cargo: user.cargo,
-      codigoAcceso: user.codigoAcceso || undefined,
-      fotoUrl: user.fotoUrl || undefined,
-      created_at: new Date(user.created_at),
-      updated_at: new Date(user.updated_at)
+      rol: user.rol,
+      activo: user.estado === 'activo',
+      fechaCreacion: new Date(user.created_at)
     };
 
     // Asignar el usuario al request
-    req.user = formattedUser;
+    req.usuario = formattedUser;
     next();
   } catch (error) {
     console.error('[auth] Error en autenticación:', error);
@@ -92,7 +84,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
 // Middleware para verificar roles específicos
 export const requireRole = (...roles: Array<'admin' | 'empleado' | 'supervisor'>) => {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
-    if (!req.user) {
+    if (!req.usuario) {
       res.status(401).json({
         success: false,
         message: 'Usuario no autenticado'
@@ -100,7 +92,7 @@ export const requireRole = (...roles: Array<'admin' | 'empleado' | 'supervisor'>
       return;
     }
     
-    if (!roles.includes(req.user.rol)) {
+    if (!roles.includes(req.usuario.rol)) {
       res.status(403).json({
         success: false,
         message: 'No tienes permisos para acceder a este recurso'

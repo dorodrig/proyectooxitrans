@@ -1,0 +1,294 @@
+/* ====================================
+   🎨 JORNADA LABORAL - ESTILOS CRÍTICOS
+   Estilos CSS directo para garantizar aplicación
+   ==================================== */
+
+.jornada-laboral {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f9fafb 0%, #f4f4f9 100%);
+    padding: 1.5rem;
+}
+
+.jornada-laboral__container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.jornada-laboral__header {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #297372;
+}
+
+.jornada-laboral__header h1 {
+    color: #303030;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.jornada-laboral__header-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.jornada-laboral__header-info .info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.jornada-laboral__header-info .label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.jornada-laboral__header-info .value {
+    font-size: 1.125rem;
+    color: #303030;
+    font-weight: 600;
+}
+
+.jornada-laboral__header-info .value.tiempo-trabajado {
+    color: #297372;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.jornada-laboral__ubicacion {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+}
+
+.jornada-laboral__ubicacion h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #303030;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+.jornada-laboral__ubicacion h2 svg {
+    color: #297372;
+}
+
+.jornada-laboral__ubicacion-content {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.jornada-laboral__botones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.jornada-laboral__boton-evento {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 2rem;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.jornada-laboral__boton-evento:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-color: #297372;
+}
+
+.jornada-laboral__boton-evento.entrada:not(:disabled):not(.completado) {
+    border-color: #17b04f;
+    background: linear-gradient(135deg, white 0%, #f0fff4 100%);
+}
+
+.jornada-laboral__boton-evento.entrada.completado {
+    background: #17b04f;
+    color: white;
+    border-color: #17b04f;
+}
+
+.jornada-laboral__boton-evento.almuerzo:not(:disabled):not(.completado) {
+    border-color: #0d6ed2;
+    background: linear-gradient(135deg, white 0%, #eff6ff 100%);
+}
+
+.jornada-laboral__boton-evento.almuerzo.completado {
+    background: #0d6ed2;
+    color: white;
+    border-color: #0d6ed2;
+}
+
+.jornada-laboral__boton-evento.descanso:not(:disabled):not(.completado) {
+    border-color: #f6c115;
+    background: linear-gradient(135deg, white 0%, #fffbeb 100%);
+}
+
+.jornada-laboral__boton-evento.descanso.completado {
+    background: #f6c115;
+    color: white;
+    border-color: #f6c115;
+}
+
+.jornada-laboral__boton-evento.salida:not(:disabled):not(.completado) {
+    border-color: #ff3239;
+    background: linear-gradient(135deg, white 0%, #fef2f2 100%);
+}
+
+.jornada-laboral__boton-evento.salida.completado {
+    background: #ff3239;
+    color: white;
+    border-color: #ff3239;
+}
+
+.jornada-laboral__boton-evento:disabled {
+    background: #f9fafb;
+    color: #6c757d;
+    border-color: #d1d5db;
+    cursor: not-allowed;
+}
+
+.jornada-laboral__boton-evento .icono {
+    font-size: 2rem;
+    margin-bottom: 0.25rem;
+}
+
+.jornada-laboral__boton-evento .titulo {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #303030;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.jornada-laboral__boton-evento .subtitulo {
+    font-size: 0.875rem;
+    color: #6c757d;
+    text-align: center;
+    font-weight: 500;
+}
+
+.jornada-laboral__boton-evento .hora {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 0.25rem;
+    border-radius: 4px;
+}
+
+.jornada-laboral__btn-accion {
+    background: #297372;
+    color: white;
+    border: 1px solid #297372;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.jornada-laboral__btn-accion:hover:not(:disabled) {
+    background: #1f5a59;
+    border-color: #1f5a59;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.jornada-laboral__btn-accion.secundario {
+    background: white;
+    color: #297372;
+    border-color: #297372;
+}
+
+.jornada-laboral__btn-accion.secundario:hover:not(:disabled) {
+    background: #f0f9f9;
+}
+
+.jornada-laboral__btn-accion svg {
+    margin-right: 0.25rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .jornada-laboral {
+        padding: 1rem;
+    }
+    
+    .jornada-laboral__header {
+        padding: 1.5rem;
+    }
+    
+    .jornada-laboral__header h1 {
+        font-size: 2rem;
+    }
+    
+    .jornada-laboral__header-info {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .jornada-laboral__header-info .value.tiempo-trabajado {
+        font-size: 1.5rem;
+    }
+    
+    .jornada-laboral__ubicacion {
+        padding: 1.5rem;
+    }
+    
+    .jornada-laboral__ubicacion-content {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .jornada-laboral__botones {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .jornada-laboral__botones {
+        grid-template-columns: 1fr;
+    }
+    
+    .jornada-laboral__boton-evento {
+        min-height: 120px;
+        padding: 1.5rem;
+    }
+}

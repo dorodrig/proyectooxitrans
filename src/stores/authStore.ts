@@ -37,6 +37,10 @@ export const useAuthStore = create<AuthStore>()(
           try {
             const response = await authService.login({ documento, password });
             
+            // Guardar en localStorage explícitamente
+            localStorage.setItem('auth_token', response.token);
+            localStorage.setItem('usuario', JSON.stringify(response.usuario));
+            
             set({
               usuario: response.usuario,
               token: response.token,
@@ -125,21 +129,31 @@ export const useAuthStore = create<AuthStore>()(
 
         initializeAuth: async () => {
           set({ isLoading: true });
+          
+          // Obtener datos del localStorage
           const token = localStorage.getItem('auth_token');
-          const usuario = authService.getUserFromStorage();
-          if (token && usuario) {
-            // Verificar que el token siga siendo válido
-            const isValid = await get().verifyToken();
-            if (isValid) {
-              set({
-                usuario,
-                token,
-                isAuthenticated: true,
-                isLoading: false,
-              });
-              return;
+          const usuarioStr = localStorage.getItem('usuario');
+          
+          if (token && usuarioStr) {
+            try {
+              const usuario = JSON.parse(usuarioStr);
+              
+              // Verificar que el token siga siendo válido
+              const isValid = await get().verifyToken();
+              if (isValid) {
+                set({
+                  usuario,
+                  token,
+                  isAuthenticated: true,
+                  isLoading: false,
+                });
+                return;
+              }
+            } catch (error) {
+              console.error('Error parsing usuario from localStorage:', error);
             }
           }
+          
           // Si no hay token válido o no existe en localStorage, limpiar todo
           localStorage.removeItem('auth_token');
           localStorage.removeItem('usuario');

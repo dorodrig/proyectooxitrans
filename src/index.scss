@@ -2,24 +2,17 @@
 // ARCHIVO PRINCIPAL DE ESTILOS
 // OXITRANS S.A.S - Control de Acceso
 // ====================================
-@use './styles/components/asignarRolUsuario';
 
-// 🎨 Variables Premium para UI/UX avanzado
-@use './styles/abstracts/variables-premium';
-
-// 🎨 Dashboard Avanzado - Estilos Premium
-@use './styles/dashboard/advanced-dashboard';
-
-// Abstracts (variables, mixins, functions)
+// 🎯 Abstracts (variables, mixins, functions) - REQUERIDO PRIMERO
 @use './styles/abstracts' as *;
 
-// Base (reset, typography, etc.)
+// 🧱 Base (reset, typography, etc.)
 @use './styles/base/reset' as *;
 
-// Components (botones, cards, forms, etc.)
+// 🧩 Components base
 @use './styles/components/base' as *;
 
-// Pages (estilos específicos de páginas)
+// 📄 Pages específicas (importación directa)
 @use './styles/pages/login' as *;
 @use './styles/pages/registro' as *;
 @use './styles/pages/dashboard' as *;
@@ -27,6 +20,16 @@
 @use './styles/pages/home' as *;
 @use './styles/pages/admin-usuarios' as *;
 @use './styles/pages/asignarRolesPage' as *;
+@use './styles/pages/jornada-laboral' as *;
+
+// 🎨 Componentes específicos
+@use './styles/components/asignarRolUsuario';
+
+// 🎨 Variables Premium para UI/UX avanzado
+@use './styles/abstracts/variables-premium';
+
+// 🎨 Dashboard Avanzado - Estilos Premium
+@use './styles/dashboard/advanced-dashboard';
 
 // Efectos especiales y avanzados (Sass moderno)
 @use './styles/dashboard/modern-dashboard';

@@ -18,13 +18,19 @@ const SidebarNew: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       title: 'Principal',
       items: [
         { icon: '🏠', label: 'Dashboard', href: '/' },
-        { icon: '�', label: 'Novedades', href: '/novedades' },
+        { icon: '📰', label: 'Novedades', href: '/novedades' },
+      ]
+    },
+    {
+      title: 'Jornada Laboral',
+      items: [
+        { icon: '⏰', label: 'Mi Jornada', href: '/jornada-laboral' },
       ]
     },
     {
       title: 'Administración',
       items: [
-        { icon: '�👥', label: 'Gestión de Usuarios', href: '/admin/usuarios' },
+        { icon: '👥', label: 'Gestión de Usuarios', href: '/admin/usuarios' },
         { icon: '🔧', label: 'Control Maestro', href: '/control-maestro' },
         { icon: '🔑', label: 'Asignar Roles', href: '/admin/asignar-roles' },
         { icon: '🏢', label: 'Regionales', href: '/admin/regionales' },
@@ -35,17 +41,17 @@ const SidebarNew: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     {
       title: 'Control de Acceso',
       items: [
-        { icon: '�', label: 'Control de Acceso', href: '/acceso' },
+        { icon: '🚪', label: 'Control de Acceso', href: '/acceso' },
         { icon: '👤', label: 'Visitantes', href: '/visitantes' },
         { icon: '📊', label: 'Reportes', href: '/reportes' },
         { icon: '📋', label: 'Logs de Actividad', href: '/logs' },
       ]
     },
     {
-      title: 'Sistema',
+      // title: 'Sistema',
       items: [
-        { icon: '⚠️', label: 'Alertas', href: '/alertas' },
-        { icon: '⚙️', label: 'Configuración', href: '/configuracion' },
+        // { icon: '⚠️', label: 'Alertas', href: '/alertas' },
+        // { icon: '⚙️', label: 'Configuración', href: '/configuracion' },
       ]
     }
   ];

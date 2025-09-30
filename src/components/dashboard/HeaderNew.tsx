@@ -111,7 +111,7 @@ const Header: React.FC<HeaderProps> = ({
         </button>
 
         {/* Search Bar */}
-        <div style={{ 
+        {/* <div style={{ 
           position: 'relative',
           width: '300px',
           maxWidth: '300px'
@@ -150,7 +150,7 @@ const Header: React.FC<HeaderProps> = ({
           }}>
             🔍
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Header Actions */}
@@ -174,7 +174,7 @@ const Header: React.FC<HeaderProps> = ({
           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
-          <div style={{ fontSize: '1.25rem' }}>🔔</div>
+          {/* <div style={{ fontSize: '1.25rem' }}>🔔</div>
           <span style={{
             position: 'absolute',
             top: '-0.25rem',
@@ -190,7 +190,7 @@ const Header: React.FC<HeaderProps> = ({
             justifyContent: 'center'
           }}>
             5
-          </span>
+          </span> */}
         </button>
 
         {/* Messages */}
@@ -207,7 +207,7 @@ const Header: React.FC<HeaderProps> = ({
           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
         >
-          <div style={{ fontSize: '1.25rem' }}>💬</div>
+          {/* <div style={{ fontSize: '1.25rem' }}>💬</div>
           <span style={{
             position: 'absolute',
             top: '-0.25rem',
@@ -223,7 +223,7 @@ const Header: React.FC<HeaderProps> = ({
             justifyContent: 'center'
           }}>
             9
-          </span>
+          </span> */}
         </button>
 
         {/* User Profile con Dropdown */}
@@ -312,7 +312,7 @@ const Header: React.FC<HeaderProps> = ({
             }}>
               <div style={{ padding: '0.5rem' }}>
                 {/* Profile Option */}
-                <button
+                {/* <button
                   style={{
                     width: '100%',
                     display: 'flex',
@@ -333,10 +333,10 @@ const Header: React.FC<HeaderProps> = ({
                 >
                   <span style={{ fontSize: '1rem' }}>👤</span>
                   Mi Perfil
-                </button>
+                </button> */}
 
                 {/* Settings Option */}
-                <button
+                {/* <button
                   style={{
                     width: '100%',
                     display: 'flex',
@@ -357,7 +357,7 @@ const Header: React.FC<HeaderProps> = ({
                 >
                   <span style={{ fontSize: '1rem' }}>⚙️</span>
                   Configuración
-                </button>
+                </button> */}
 
                 {/* Divider */}
                 <div style={{

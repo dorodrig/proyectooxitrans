@@ -60,7 +60,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router basename="/proyectooxitrans">
+      <Router basename={import.meta.env.PROD ? "/proyectooxitrans" : ""}>
         <div className="App">
         <Routes>
           <Route 

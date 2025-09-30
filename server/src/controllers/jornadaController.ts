@@ -1,7 +1,16 @@
 import { Response } from 'express';
 import { JornadaModel } from '../models/JornadaModel';
 import { RegionalModel } from '../models/RegionalModel';
+import { executeQuery } from '../config/database';
 import { AuthenticatedRequest } from '../types/auth';
+
+interface UsuarioUbicacion {
+  ubicacion_trabajo_latitud?: number;
+  ubicacion_trabajo_longitud?: number;
+  nombre_ubicacion_trabajo?: string;
+  tolerancia_ubicacion_metros?: number;
+  regional_id?: number;
+}
 
 export class JornadaController {
   /**
@@ -208,43 +217,220 @@ export class JornadaController {
     valida: boolean;
     distancia: number;
     tolerancia: number;
-    regional: any;
+    ubicacion: { nombre: string; latitud: number; longitud: number } | null;
+    tipoValidacion: 'ubicacion_especifica' | 'regional' | 'sin_restriccion';
   }> {
-    // Obtener regional del usuario
-    const regional = await RegionalModel.obtenerPorUsuario(usuarioId);
-    
-    if (!regional || typeof regional.latitud !== 'number' || typeof regional.longitud !== 'number') {
-      // Si no hay regional asignada o no tiene coordenadas, permitir cualquier ubicación
+    try {
+      // Primero intentar obtener ubicación específica del usuario
+      const queryUsuario = `
+        SELECT 
+          ubicacion_trabajo_latitud, 
+          ubicacion_trabajo_longitud, 
+          nombre_ubicacion_trabajo,
+          tolerancia_ubicacion_metros,
+          regional_id
+        FROM usuarios 
+        WHERE id = ?
+      `;
+      
+      const resultUsuario = await executeQuery(queryUsuario, [usuarioId]);
+      
+      if (resultUsuario.length === 0) {
+        throw new Error('Usuario no encontrado');
+      }
+      
+      const usuario = resultUsuario[0] as UsuarioUbicacion;
+      
+      // Si el usuario tiene ubicación específica asignada
+      if (usuario.ubicacion_trabajo_latitud && usuario.ubicacion_trabajo_longitud) {
+        const distancia = JornadaController.calcularDistancia(
+          latitude,
+          longitude,
+          usuario.ubicacion_trabajo_latitud,
+          usuario.ubicacion_trabajo_longitud
+        );
+        
+        const tolerancia = usuario.tolerancia_ubicacion_metros || 50;
+        const valida = distancia <= tolerancia;
+        
+        return {
+          valida,
+          distancia,
+          tolerancia,
+          ubicacion: {
+            nombre: usuario.nombre_ubicacion_trabajo || 'Ubicación de trabajo',
+            latitud: usuario.ubicacion_trabajo_latitud,
+            longitud: usuario.ubicacion_trabajo_longitud
+          },
+          tipoValidacion: 'ubicacion_especifica'
+        };
+      }
+      
+      // Si no tiene ubicación específica, usar ubicación de la regional
+      if (usuario.regional_id) {
+        const regional = await RegionalModel.obtenerPorUsuario(usuarioId);
+        
+        if (regional && typeof regional.latitud === 'number' && typeof regional.longitud === 'number') {
+          const distancia = JornadaController.calcularDistancia(
+            latitude,
+            longitude,
+            regional.latitud,
+            regional.longitud
+          );
+          
+          const tolerancia = 50; // 50 metros de tolerancia para regionales
+          const valida = distancia <= tolerancia;
+          
+          return {
+            valida,
+            distancia,
+            tolerancia,
+            ubicacion: {
+              nombre: regional.nombre,
+              latitud: regional.latitud,
+              longitud: regional.longitud
+            },
+            tipoValidacion: 'regional'
+          };
+        }
+      }
+      
+      // Si no hay ubicación específica ni regional configurada
       return {
         valida: true,
         distancia: 0,
-        tolerancia: 10,
-        regional: null
+        tolerancia: 0,
+        ubicacion: null,
+        tipoValidacion: 'sin_restriccion'
       };
+      
+    } catch (error) {
+      console.error('Error en validarUbicacionInterna:', error);
+      throw error;
     }
+  }
 
-    // Calcular distancia usando fórmula de Haversine
-    const distancia = JornadaController.calcularDistancia(
-      latitude,
-      longitude,
-      regional.latitud,
-      regional.longitud
-    );
-
-    const tolerancia = 50; // 50 metros de tolerancia
-    const valida = distancia <= tolerancia;
-
-    return {
-      valida,
-      distancia,
-      tolerancia,
-      regional: {
-        id: regional.id,
-        nombre: regional.nombre,
-        latitud: regional.latitud,
-        longitud: regional.longitud
+  /**
+   * Obtener estadísticas de jornadas
+   */
+  static async obtenerEstadisticas(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.usuario) {
+        res.status(401).json({
+          success: false,
+          message: 'Usuario no autenticado'
+        });
+        return;
       }
-    };
+
+      // Por ahora retornamos estadísticas dummy
+      const estadisticas = {
+        jornadasCompletadas: 0,
+        horasTrabajadasTotal: 0,
+        promedioHorasDiarias: 0,
+        diasTrabajados: 0
+      };
+
+      res.json({
+        success: true,
+        data: estadisticas
+      });
+    } catch (error) {
+      console.error('Error en obtenerEstadisticas:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Obtener resumen para administradores
+   */
+  static async obtenerResumenAdmin(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.usuario || req.usuario.rol !== 'admin') {
+        res.status(403).json({
+          success: false,
+          message: 'Acceso denegado'
+        });
+        return;
+      }
+
+      // Por ahora retornamos resumen dummy
+      const resumen = {
+        empleadosActivos: 0,
+        jornadasAbiertas: 0,
+        horasTrabajadasHoy: 0
+      };
+
+      res.json({
+        success: true,
+        data: resumen
+      });
+    } catch (error) {
+      console.error('Error en obtenerResumenAdmin:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Ejecutar auto-cierre manual
+   */
+  static async ejecutarAutoCierre(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.usuario || req.usuario.rol !== 'admin') {
+        res.status(403).json({
+          success: false,
+          message: 'Acceso denegado'
+        });
+        return;
+      }
+
+      const resultado = await JornadaModel.ejecutarAutoCierre();
+
+      res.json({
+        success: true,
+        message: 'Auto-cierre ejecutado exitosamente',
+        data: resultado
+      });
+    } catch (error) {
+      console.error('Error en ejecutarAutoCierre:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
+  }
+
+  /**
+   * Generar reporte Excel
+   */
+  static async generarReporteExcel(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+      if (!req.usuario || req.usuario.rol !== 'admin') {
+        res.status(403).json({
+          success: false,
+          message: 'Acceso denegado'
+        });
+        return;
+      }
+
+      const buffer = await JornadaModel.generarReporteExcel();
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=reporte-jornadas.xlsx');
+      res.send(buffer);
+    } catch (error) {
+      console.error('Error en generarReporteExcel:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error interno del servidor'
+      });
+    }
   }
 
   /**

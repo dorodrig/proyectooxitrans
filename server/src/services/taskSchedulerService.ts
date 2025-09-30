@@ -39,17 +39,8 @@ export class TaskSchedulerService {
               try {
                 await emailService.enviarJornadaAutoCerrada({
                   usuario: {
-                    nombre: detalle.nombre.split(' ')[0],
-                    apellido: detalle.nombre.split(' ').slice(1).join(' '),
-                    email: detalle.email,
-                    documento: '', // Se podría obtener de la BD si es necesario
-                    departamento: '' // Se podría obtener de la BD si es necesario
-                  },
-                  jornada: {
-                    fecha: new Date().toISOString().split('T')[0],
-                    entrada: detalle.entrada,
-                    salida: detalle.salida,
-                    horasTrabajadas: 8 // Siempre será 8 horas en auto-cierre
+                    nombre: detalle.nombre,
+                    email: detalle.email
                   }
                 });
               } catch (emailError) {
@@ -110,22 +101,13 @@ export class TaskSchedulerService {
       
       if (resultado.jornadasCerradas > 0) {
         // Procesar emails
-        const emailsEnviados = [];
+        const emailsEnviados: string[] = [];
         for (const detalle of resultado.detalles) {
           try {
             await emailService.enviarJornadaAutoCerrada({
               usuario: {
-                nombre: detalle.nombre.split(' ')[0],
-                apellido: detalle.nombre.split(' ').slice(1).join(' '),
-                email: detalle.email,
-                documento: '',
-                departamento: ''
-              },
-              jornada: {
-                fecha: new Date().toISOString().split('T')[0],
-                entrada: detalle.entrada,
-                salida: detalle.salida,
-                horasTrabajadas: 8
+                nombre: detalle.nombre,
+                email: detalle.email
               }
             });
             emailsEnviados.push(detalle.email);
@@ -164,7 +146,7 @@ export class TaskSchedulerService {
    * Obtener estado básico de las tareas
    */
   obtenerEstadoTareas(): Array<{ nombre: string; activa: boolean }> {
-    const estado = [];
+    const estado: Array<{ nombre: string; activa: boolean }> = [];
     
     for (const [nombre] of this.jobs) {
       estado.push({

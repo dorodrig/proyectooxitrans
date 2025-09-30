@@ -12,7 +12,7 @@ export interface RegistroJornada {
   descansoTardeInicio?: string;
   descansoTardeFin?: string;
   salida?: string;
-  horasTrabajadas: number;
+  horasTrabajadas?: number; // Cambiado a opcional
   ubicacionEntrada?: {
     latitude: number;
     longitude: number;
@@ -23,7 +23,7 @@ export interface RegistroJornada {
     longitude: number;
     accuracy: number;
   };
-  autoCerrada: boolean;
+  autoCerrada?: boolean; // Cambiado a opcional
   observaciones?: string;
   created_at?: string;
   updated_at?: string;
@@ -46,12 +46,12 @@ export interface ValidacionUbicacion {
   valida: boolean;
   distancia: number;
   tolerancia: number;
-  regional: {
-    id: number;
+  ubicacion: {
     nombre: string;
     latitud: number;
     longitud: number;
-  };
+  } | null;
+  tipoValidacion: 'ubicacion_especifica' | 'regional' | 'sin_restriccion';
 }
 
 class JornadasService {

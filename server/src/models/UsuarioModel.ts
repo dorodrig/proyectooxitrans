@@ -17,6 +17,9 @@ export interface Usuario {
   cargo: string;
   codigoAcceso: string | null;
   fotoUrl: string | null;
+  regional_id: number | null;
+  tipo_usuario: 'planta' | 'visita' | 'temporal' | null;
+  regionalNombre?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -36,6 +39,9 @@ interface UserRow {
   cargo: string;
   codigo_acceso: string | null;
   foto_url: string | null;
+  regional_id: number | null;
+  tipo_usuario: 'planta' | 'visita' | 'temporal' | null;
+  regionalNombre?: string | null;
   password_hash?: string;
   created_at: string;
   updated_at: string;
@@ -79,6 +85,9 @@ export class UsuarioModel {
       cargo: row.cargo,
       codigoAcceso: row.codigo_acceso ?? null,
       fotoUrl: row.foto_url ?? null,
+      regional_id: row.regional_id ?? null,
+      tipo_usuario: row.tipo_usuario ?? null,
+      regionalNombre: row.regionalNombre ?? null,
       created_at: typeof row.created_at === 'string' ? row.created_at : String(row.created_at),
       updated_at: typeof row.updated_at === 'string' ? row.updated_at : String(row.updated_at)
     };
@@ -90,7 +99,7 @@ export class UsuarioModel {
     console.log('[UsuarioModel.findById] ID convertido:', idNum, 'tipo:', typeof idNum);
     
     const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, regional_id, tipo_usuario, created_at, updated_at
       FROM usuarios
       WHERE id = ? AND estado != 'eliminado'
     `;
@@ -105,7 +114,7 @@ export class UsuarioModel {
 
   static async findByEmail(email: string): Promise<Usuario | null> {
     const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, regional_id, tipo_usuario, created_at, updated_at
       FROM usuarios
       WHERE email = ? AND estado != 'eliminado'
     `;
@@ -116,7 +125,7 @@ export class UsuarioModel {
 
   static async findByDocument(documento: string): Promise<Usuario | null> {
     const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, regional_id, tipo_usuario, created_at, updated_at
       FROM usuarios
       WHERE documento = ? AND estado != 'eliminado'
     `;
@@ -127,7 +136,7 @@ export class UsuarioModel {
 
   static async findByEmailWithPassword(email: string): Promise<(Usuario & { passwordHash: string }) | null> {
     const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, password_hash, created_at, updated_at
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, regional_id, tipo_usuario, password_hash, created_at, updated_at
       FROM usuarios
       WHERE email = ? AND estado = 'activo'
     `;
@@ -139,7 +148,7 @@ export class UsuarioModel {
 
   static async findByDocumentWithPassword(documento: string): Promise<(Usuario & { passwordHash: string }) | null> {
     const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, password_hash, created_at, updated_at
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, regional_id, tipo_usuario, password_hash, created_at, updated_at
       FROM usuarios
       WHERE documento = ? AND estado = 'activo'
     `;
@@ -345,7 +354,7 @@ export class UsuarioModel {
   static async asignarRegionalYTipo(id: string, regionalId: string, tipoUsuario: string): Promise<boolean> {
     const query = `
       UPDATE usuarios 
-      SET departamento = ?, cargo = ?, updated_at = NOW() 
+      SET regional_id = ?, tipo_usuario = ?, updated_at = NOW() 
       WHERE id = ? AND estado != 'eliminado'
     `;
     const result = await executeQuery(query, [regionalId, tipoUsuario, id]) as DatabaseResult | DatabaseResult[];
@@ -401,10 +410,12 @@ export class UsuarioModel {
     const total = countResults[0].total;
 
     const dataQuery = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
-      FROM usuarios 
+      SELECT u.id, u.nombre, u.apellido, u.email, u.telefono, u.documento, u.tipo_documento, u.rol, u.estado, u.fecha_ingreso, u.departamento, u.cargo, u.codigo_acceso, u.foto_url, u.regional_id, u.tipo_usuario, u.created_at, u.updated_at,
+             r.nombre as regionalNombre
+      FROM usuarios u
+      LEFT JOIN regionales r ON u.regional_id = r.id
       ${whereClause}
-      ORDER BY created_at DESC 
+      ORDER BY u.created_at DESC 
       LIMIT ${limit} OFFSET ${offset}
     `;
     const dataResults = await executeQuery(dataQuery) as UserRow[];
@@ -521,7 +532,7 @@ export class UsuarioModel {
     }
 
     const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, regional_id, tipo_usuario, created_at, updated_at
       FROM usuarios 
       ${whereClause}
       ORDER BY nombre, apellido
@@ -532,7 +543,7 @@ export class UsuarioModel {
 
   static async findByDepartamento(departamento: string): Promise<Usuario[]> {
     const query = `
-      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, created_at, updated_at
+      SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, regional_id, tipo_usuario, created_at, updated_at
       FROM usuarios 
       WHERE departamento = ? AND estado != 'eliminado'
       ORDER BY nombre, apellido

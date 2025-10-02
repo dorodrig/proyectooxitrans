@@ -27,6 +27,8 @@ export interface Usuario {
   cargo: string;
   codigoAcceso?: string;
   fotoUrl?: string;
+  regionalId?: string;
+  tipoUsuario?: TipoUsuario;
   created_at: Date;
   updated_at: Date;
 }

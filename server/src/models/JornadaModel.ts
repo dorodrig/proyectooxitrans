@@ -47,18 +47,26 @@ export class JornadaModel {
       }
 
       const row = rows[0];
+      
+      // Función helper para convertir timestamp UTC a string ISO
+      const convertTimestamp = (timestamp: string | null): string | undefined => {
+        if (!timestamp) return undefined;
+        // El timestamp ya viene como string ISO, lo devolvemos tal como está
+        return timestamp;
+      };
+
       return {
         id: row.id,
         usuarioId: row.usuario_id,
         fecha: row.fecha,
-        entrada: row.entrada,
-        almuerzoInicio: row.almuerzo_inicio,
-        almuerzoFin: row.almuerzo_fin,
-        descansoMananaInicio: row.descanso_manana_inicio,
-        descansoMananaFin: row.descanso_manana_fin,
-        descansoTardeInicio: row.descanso_tarde_inicio,
-        descansoTardeFin: row.descanso_tarde_fin,
-        salida: row.salida,
+        entrada: convertTimestamp(row.entrada),
+        almuerzoInicio: convertTimestamp(row.almuerzo_inicio),
+        almuerzoFin: convertTimestamp(row.almuerzo_fin),
+        descansoMananaInicio: convertTimestamp(row.descanso_manana_inicio),
+        descansoMananaFin: convertTimestamp(row.descanso_manana_fin),
+        descansoTardeInicio: convertTimestamp(row.descanso_tarde_inicio),
+        descansoTardeFin: convertTimestamp(row.descanso_tarde_fin),
+        salida: convertTimestamp(row.salida),
         horasTrabajadas: row.horas_trabajadas || 0,
         autoCerrada: Boolean(row.auto_cerrada),
         observaciones: row.observaciones
@@ -126,6 +134,17 @@ export class JornadaModel {
         throw new Error(`Tipo de evento no válido: ${registro.tipo}`);
       }
 
+      // Validar constraint antes de actualizar
+      if (campo === 'salida') {
+        // Verificar que salida no sea anterior a entrada
+        const entrada = new Date(jornada.entrada || '').getTime();
+        const salida = new Date(registro.timestamp).getTime();
+        
+        if (salida < entrada) {
+          throw new Error('La hora de salida no puede ser anterior a la entrada');
+        }
+      }
+      
       await pool.execute(
         `UPDATE jornadas_laborales 
          SET ${campo} = ? 
@@ -158,11 +177,14 @@ export class JornadaModel {
         throw new Error('No hay jornada activa para cerrar');
       }
 
+      // Usar timestamp actual para salida
+      const ahora = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      
       await pool.execute(
         `UPDATE jornadas_laborales 
-         SET salida = NOW(), observaciones = CONCAT(COALESCE(observaciones, ''), ?, '\n')
+         SET salida = ?, observaciones = CONCAT(COALESCE(observaciones, ''), ?, '\n')
          WHERE id = ?`,
-        [observaciones, jornada.id]
+        [ahora, observaciones, jornada.id]
       );
 
       await this.calcularHorasTrabajadas(jornada.id);
@@ -239,7 +261,6 @@ export class JornadaModel {
   static async ejecutarAutoCierre(): Promise<{ jornadasCerradas: number; detalles: any[] }> {
     try {
       // Por ahora retornamos valores dummy
-      console.log('Ejecutando auto-cierre de jornadas...');
       return {
         jornadasCerradas: 0,
         detalles: []

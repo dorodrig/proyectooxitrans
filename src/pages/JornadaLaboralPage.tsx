@@ -78,21 +78,40 @@ const JornadaLaboralPage: React.FC = () => {
     enabled: !!usuario, // Solo ejecutar si hay usuario autenticado
   });
 
-  // Debug: log de la jornada
+  // Debug: log de la jornada (solo errores)
   React.useEffect(() => {
     if (jornada) {
-      console.log('Jornada data:', jornada);
-      console.log('horasTrabajadas type:', typeof jornada.horasTrabajadas);
-      console.log('horasTrabajadas value:', jornada.horasTrabajadas);
+      // Solo log en desarrollo para errores
+      if (process.env.NODE_ENV === 'development' && jornada.horasTrabajadas && typeof jornada.horasTrabajadas !== 'number') {
+        console.warn('⚠️ horasTrabajadas no es número:', jornada.horasTrabajadas, typeof jornada.horasTrabajadas);
+      }
     }
   }, [jornada]);
+
+  // Forzar refetch inmediato al cargar el componente
+  React.useEffect(() => {
+    refetch();
+  }, [refetch]);
 
   // Mutation para validar ubicación
   const validarUbicacionMutation = useMutation({
     mutationFn: (coords: { latitude: number; longitude: number }) => 
       jornadasService.validarUbicacion(coords.latitude, coords.longitude),
+    onSuccess: (data) => {
+      if (data.valida) {
+        const ubicacionNombre = data.ubicacion?.nombre || 'tu ubicación de trabajo';
+        const distancia = Math.round(data.distancia);
+        alert(`✅ Ubicación válida!\n\nEstás a ${distancia}m de ${ubicacionNombre}.\nPuedes registrar entrada/salida.`);
+      } else {
+        const distancia = Math.round(data.distancia);
+        const tolerancia = data.tolerancia;
+        const ubicacionNombre = data.ubicacion?.nombre || 'tu ubicación de trabajo';
+        alert(`❌ Ubicación fuera de rango!\n\nEstás a ${distancia}m de ${ubicacionNombre}.\nDistancia máxima permitida: ${tolerancia}m\n\nAcércate más para poder registrar.`);
+      }
+    },
     onError: (error: Error) => {
       console.error('Error validando ubicación:', error);
+      alert('Error al validar ubicación. Verifica tu conexión e inténtalo de nuevo.');
     }
   });
 
@@ -140,32 +159,91 @@ const JornadaLaboralPage: React.FC = () => {
 
   // Actualizar tiempo transcurrido
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (jornada?.entrada) {
-        const entrada = new Date(jornada.entrada);
-        const ahora = new Date();
-        
-        let tiempoTotal = ahora.getTime() - entrada.getTime();
+    const calcularTiempo = () => {
+      if (!jornada?.entrada) {
+        setTiempoTranscurrido('00:00:00');
+        return;
+      }
 
-        // Restar tiempo de almuerzo si está en curso o terminado
+      try {
+        // Crear objeto Date para entrada
+        let entrada = new Date(jornada.entrada);
+        
+        // Si el timestamp no parece ser UTC, tratarlo como Colombia
+        if (!jornada.entrada.includes('Z') && !jornada.entrada.includes('+')) {
+          entrada = new Date(jornada.entrada + ' UTC-05:00');
+        }
+        
+        const ahoraUTC = new Date();
+        
+        // Calcular tiempo total trabajado
+        let tiempoTotal = ahoraUTC.getTime() - entrada.getTime();
+
+        // Si la jornada ya terminó, usar la hora de salida
+        if (jornada.salida) {
+          const salida = new Date(jornada.salida);
+          tiempoTotal = salida.getTime() - entrada.getTime();
+        }
+
+        // Restar tiempo de almuerzo
         if (jornada.almuerzoInicio) {
           const almuerzoInicio = new Date(jornada.almuerzoInicio);
-          const almuerzoFin = jornada.almuerzoFin ? new Date(jornada.almuerzoFin) : ahora;
-          tiempoTotal -= (almuerzoFin.getTime() - almuerzoInicio.getTime());
+          let almuerzoFin: Date;
+          
+          if (jornada.almuerzoFin) {
+            almuerzoFin = new Date(jornada.almuerzoFin);
+          } else if (!jornada.salida) {
+            // Si está en almuerzo y no ha terminado la jornada, usar hora actual
+            almuerzoFin = ahoraUTC;
+          } else {
+            almuerzoFin = almuerzoInicio; // No restar nada si la jornada terminó sin terminar almuerzo
+          }
+          
+          const tiempoAlmuerzo = almuerzoFin.getTime() - almuerzoInicio.getTime();
+          if (tiempoAlmuerzo > 0) {
+            tiempoTotal -= tiempoAlmuerzo;
+          }
         }
 
         // Restar descansos completados
         if (jornada.descansoMananaInicio && jornada.descansoMananaFin) {
           const inicio = new Date(jornada.descansoMananaInicio);
           const fin = new Date(jornada.descansoMananaFin);
-          tiempoTotal -= (fin.getTime() - inicio.getTime());
+          const tiempoDescanso = fin.getTime() - inicio.getTime();
+          if (tiempoDescanso > 0) {
+            tiempoTotal -= tiempoDescanso;
+          }
         }
 
         if (jornada.descansoTardeInicio && jornada.descansoTardeFin) {
           const inicio = new Date(jornada.descansoTardeInicio);
           const fin = new Date(jornada.descansoTardeFin);
-          tiempoTotal -= (fin.getTime() - inicio.getTime());
+          const tiempoDescanso = fin.getTime() - inicio.getTime();
+          if (tiempoDescanso > 0) {
+            tiempoTotal -= tiempoDescanso;
+          }
         }
+
+        // Restar descanso de mañana en curso
+        if (jornada.descansoMananaInicio && !jornada.descansoMananaFin && !jornada.salida) {
+          const inicio = new Date(jornada.descansoMananaInicio);
+          const tiempoDescanso = ahoraUTC.getTime() - inicio.getTime();
+          if (tiempoDescanso > 0) {
+            tiempoTotal -= tiempoDescanso;
+          }
+        }
+
+        // Restar descanso de tarde en curso
+        if (jornada.descansoTardeInicio && !jornada.descansoTardeFin && !jornada.salida) {
+          const inicio = new Date(jornada.descansoTardeInicio);
+          const tiempoDescanso = ahoraUTC.getTime() - inicio.getTime();
+          if (tiempoDescanso > 0) {
+            tiempoTotal -= tiempoDescanso;
+          }
+        }
+
+        // Asegurar que el tiempo no sea negativo
+        tiempoTotal = Math.max(0, tiempoTotal);
 
         const horas = Math.floor(tiempoTotal / (1000 * 60 * 60));
         const minutos = Math.floor((tiempoTotal % (1000 * 60 * 60)) / (1000 * 60));
@@ -174,10 +252,17 @@ const JornadaLaboralPage: React.FC = () => {
         setTiempoTranscurrido(
           `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`
         );
-      } else {
+      } catch (error) {
+        console.error('Error calculando tiempo transcurrido:', error);
         setTiempoTranscurrido('00:00:00');
       }
-    }, 1000);
+    };
+
+    // Calcular inmediatamente
+    calcularTiempo();
+    
+    // Actualizar cada segundo solo si la jornada está activa
+    const interval = setInterval(calcularTiempo, 1000);
 
     return () => clearInterval(interval);
   }, [jornada]);
@@ -203,7 +288,11 @@ const JornadaLaboralPage: React.FC = () => {
         });
         
         if (!validacion.valida) {
-          alert('Debes estar en la ubicación de trabajo para registrar entrada/salida');
+          const distancia = Math.round(validacion.distancia);
+          const tolerancia = validacion.tolerancia;
+          const ubicacionNombre = validacion.ubicacion?.nombre || 'tu ubicación de trabajo';
+          
+          alert(`Estás muy lejos de ${ubicacionNombre}.\n\nDistancia actual: ${distancia}m\nDistancia máxima permitida: ${tolerancia}m\n\nDebes estar dentro de ${tolerancia} metros para registrar entrada/salida.`);
           return;
         }
       } catch (error) {
@@ -279,11 +368,30 @@ const JornadaLaboralPage: React.FC = () => {
 
   const formatearHora = (fecha?: string) => {
     if (!fecha) return '--:--';
-    return new Date(fecha).toLocaleTimeString('es-CO', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'America/Bogota' // Zona horaria de Colombia
-    });
+    
+    try {
+      // Crear objeto Date desde el timestamp (asumiendo UTC del backend)
+      const fechaObj = new Date(fecha);
+      
+      // Verificar si la fecha es válida
+      if (isNaN(fechaObj.getTime())) {
+        console.error('❌ Fecha inválida:', fecha);
+        return '--:--';
+      }
+      
+      // Convertir directamente a hora de Colombia (UTC-5)
+      const colombiaOffset = -5 * 60; // Colombia es UTC-5 (en minutos)
+      const utcTime = fechaObj.getTime() + (fechaObj.getTimezoneOffset() * 60000);
+      const colombiaTime = new Date(utcTime + (colombiaOffset * 60000));
+      
+      // Formatear la hora resultante
+      const horaFormateada = colombiaTime.toTimeString().slice(0, 8); // HH:MM:SS
+      
+      return horaFormateada;
+    } catch (error) {
+      console.error('❌ Error formateando hora:', error, 'Fecha:', fecha);
+      return '--:--';
+    }
   };
 
   if (isLoading) {

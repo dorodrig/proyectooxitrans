@@ -8,6 +8,8 @@ import { useAccesosPorHora } from '../../hooks/useDashboardData';
 const AccessChart: React.FC = () => {
   const { data: hourlyData = [], isLoading, error } = useAccesosPorHora();
 
+  console.log('📊 [AccessChart] Datos del gráfico:', { hourlyData, isLoading, error });
+
   // Mostrar estado de carga
   if (isLoading) {
     return (

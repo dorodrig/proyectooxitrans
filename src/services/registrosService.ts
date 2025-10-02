@@ -84,7 +84,9 @@ export const registrosService = {
 
   // Obtener registros del día actual
   getToday: async (): Promise<(RegistroAcceso & { usuario: Usuario })[]> => {
-    return apiClient.get('/registros/today');
+    const response = await apiClient.get('/registros/today');
+    // El backend devuelve { success: true, data: registros }
+    return response.data || response;
   },
 
   // Obtener registros por fecha
@@ -103,7 +105,9 @@ export const registrosService = {
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
     
-    return apiClient.get(`/registros/estadisticas?${params}`);
+    const response = await apiClient.get(`/registros/estadisticas?${params}`);
+    // El backend devuelve { success: true, data: estadisticas }
+    return response.data || response;
   },
 
   // Obtener reporte de asistencia

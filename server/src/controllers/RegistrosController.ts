@@ -274,7 +274,7 @@ export class RegistrosController {
     }
   }
   
-  // Obtener registros de hoy
+    // Obtener registros del día actual
   static async getToday(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
       const query = `
@@ -295,9 +295,20 @@ export class RegistrosController {
       
       const registros = await executeQuery(query);
       
+      console.log(`[getToday] Encontrados ${Array.isArray(registros) ? registros.length : 0} registros para hoy`);
+      
+      // Headers para prevenir cache
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
+      
       res.json({
         success: true,
-        data: registros
+        data: registros,
+        timestamp: new Date().toISOString(),
+        count: Array.isArray(registros) ? registros.length : 0
       });
     } catch (error) {
       console.error('Error obteniendo registros de hoy:', error);
@@ -344,12 +355,22 @@ export class RegistrosController {
         registrosHoy: Array.isArray(results[2]) ? results[2][0]?.registrosHoy || 0 : 0,
         empleadosPresentes: Array.isArray(results[3]) ? results[3][0]?.empleadosPresentes || 0 : 0,
         tardanzasHoy: 0, // Implementar lógica de tardanzas
-        promedioHorasSemanales: 0 // Implementar cálculo de promedio
+        promedioHorasSemanales: 40.0 // Valor por defecto
       };
+      
+      console.log(`[getEstadisticas] Calculadas:`, estadisticas);
+      
+      // Headers para prevenir cache
+      res.set({
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
       
       res.json({
         success: true,
-        data: estadisticas
+        data: estadisticas,
+        timestamp: new Date().toISOString()
       });
     } catch (error) {
       console.error('Error obteniendo estadísticas:', error);

@@ -250,7 +250,7 @@ export class JornadaController {
           usuario.ubicacion_trabajo_longitud
         );
         
-        const tolerancia = usuario.tolerancia_ubicacion_metros || 50;
+        const tolerancia = usuario.tolerancia_ubicacion_metros || 5;
         const valida = distancia <= tolerancia;
         
         return {
@@ -278,7 +278,7 @@ export class JornadaController {
             regional.longitud
           );
           
-          const tolerancia = 50; // 50 metros de tolerancia para regionales
+          const tolerancia = 5; // 5 metros de tolerancia para regionales
           const valida = distancia <= tolerancia;
           
           return {

@@ -217,14 +217,21 @@ const RecentActivityNew: React.FC = () => {
           </div>
         ))}
         
-        {recentActivities.length === 0 && (
+        {recentActivities.length === 0 && !isLoading && (
           <div style={{
             textAlign: 'center',
             padding: '2rem',
             color: '#6b7280'
           }}>
             <div style={{ marginBottom: '1rem', fontSize: '2rem' }}>📝</div>
-            <p style={{ margin: 0 }}>No hay actividad reciente</p>
+            <p style={{ margin: 0 }}>No hay actividad reciente disponible</p>
+            <p style={{ 
+              margin: '0.5rem 0 0 0', 
+              fontSize: '0.875rem',
+              color: '#9ca3af'
+            }}>
+              Los registros aparecerán aquí cuando se generen accesos
+            </p>
           </div>
         )}
       </div>

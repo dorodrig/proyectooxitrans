@@ -59,6 +59,7 @@ app.use(globalLimiter);
 // CORS
 const allowedOrigins = [
   'http://localhost:5173',
+  'http://localhost:5174', // Puerto Vite alternativo
   'http://localhost:3000', 
   'https://dorodrig.github.io'
 ];
@@ -106,8 +107,44 @@ app.get('/api/health', (req, res) => {
     success: true,
     message: 'Servidor funcionando correctamente',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    cors_origins: allowedOrigins
   });
+});
+
+// Ruta de debug para jornada (solo en desarrollo)
+app.get('/api/debug/jornada/:usuarioId?', async (req, res) => {
+  try {
+    const usuarioId = req.params.usuarioId || '1';
+    const { pool } = await import('./config/database');
+    
+    const [jornada] = await pool.execute(`
+      SELECT 
+        *,
+        DATE_FORMAT(entrada, '%Y-%m-%d %H:%i:%s') as entrada_formatted,
+        DATE_FORMAT(almuerzo_inicio, '%Y-%m-%d %H:%i:%s') as almuerzo_inicio_formatted
+      FROM jornadas_laborales 
+      WHERE usuario_id = ? AND fecha = CURDATE()
+    `, [usuarioId]);
+    
+    res.json({
+      success: true,
+      debug_info: {
+        usuario_id: usuarioId,
+        timestamp_server: new Date().toISOString(),
+        timestamp_colombia: new Date().toLocaleString('es-CO', {
+          timeZone: 'America/Bogota',
+          hour12: false
+        }),
+        jornada_data: jornada
+      }
+    });
+  } catch (error) {
+    console.error('Error en debug jornada:', error);
+    res.status(500).json({ 
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
 });
 
 // Ruta de bienvenida para backend

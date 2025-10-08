@@ -1,6 +1,49 @@
 import { pool } from '../config/database';
 import { RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 
+/**
+ * 🚀 Convierte timestamp de Colombia a formato MySQL preservando la hora local
+ * Evita que MySQL interprete incorrectamente las zonas horarias
+ */
+const convertirTimestampParaMySQL = (timestamp: string): string => {
+  try {
+    console.log('📤 [MySQL] Convirtiendo timestamp:', timestamp);
+    
+    // Si ya es un timestamp con zona horaria de Colombia, parsearlo y convertir a formato MySQL
+    const fecha = new Date(timestamp);
+    
+    // Obtener componentes en zona horaria de Colombia (preservar la hora local)
+    const formatter = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Bogota',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+    
+    const parts = formatter.formatToParts(fecha);
+    const year = parts.find(p => p.type === 'year')?.value;
+    const month = parts.find(p => p.type === 'month')?.value;
+    const day = parts.find(p => p.type === 'day')?.value;
+    const hour = parts.find(p => p.type === 'hour')?.value;
+    const minute = parts.find(p => p.type === 'minute')?.value;
+    const second = parts.find(p => p.type === 'second')?.value;
+    
+    // Formato MySQL: 'YYYY-MM-DD HH:MM:SS' (sin zona horaria, pero en hora de Colombia)
+    const mysqlTimestamp = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    console.log('📥 [MySQL] Timestamp convertido:', mysqlTimestamp);
+    
+    return mysqlTimestamp;
+  } catch (error) {
+    console.error('❌ [MySQL] Error convirtiendo timestamp:', timestamp, error);
+    // Fallback: mantener el timestamp original
+    return timestamp;
+  }
+};
+
 export interface JornadaLaboral {
   id: number;
   usuarioId: number;
@@ -48,11 +91,50 @@ export class JornadaModel {
 
       const row = rows[0];
       
-      // Función helper para convertir timestamp UTC a string ISO
+      // Función helper para convertir timestamp de MySQL a formato Colombia
       const convertTimestamp = (timestamp: string | null): string | undefined => {
         if (!timestamp) return undefined;
-        // El timestamp ya viene como string ISO, lo devolvemos tal como está
-        return timestamp;
+        
+        try {
+          let fechaObj: Date;
+          
+          if (typeof timestamp === 'string') {
+            if (timestamp.includes('T') && (timestamp.includes('Z') || timestamp.includes('-05:00') || timestamp.includes('+') || timestamp.includes('-'))) {
+              // Ya tiene zona horaria, usar directamente
+              fechaObj = new Date(timestamp);
+            } else {
+              // Formato MySQL sin zona horaria, asumir que es Colombia y agregar offset
+              fechaObj = new Date(`${timestamp.replace(' ', 'T')}-05:00`);
+            }
+          } else {
+            fechaObj = new Date(timestamp);
+          }
+          
+          // Convertir a formato ISO con zona horaria Colombia
+          const formatter = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'America/Bogota',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+          });
+          
+          const parts = formatter.formatToParts(fechaObj);
+          const year = parts.find(p => p.type === 'year')?.value;
+          const month = parts.find(p => p.type === 'month')?.value;
+          const day = parts.find(p => p.type === 'day')?.value;
+          const hour = parts.find(p => p.type === 'hour')?.value;
+          const minute = parts.find(p => p.type === 'minute')?.value;
+          const second = parts.find(p => p.type === 'second')?.value;
+          
+          return `${year}-${month}-${day}T${hour}:${minute}:${second}-05:00`;
+        } catch (error) {
+          console.error('Error convirtiendo timestamp:', timestamp, error);
+          return timestamp;
+        }
       };
 
       return {
@@ -89,7 +171,7 @@ export class JornadaModel {
         ) VALUES (?, CURDATE(), ?, ?, ?, ?, ?)`,
         [
           usuarioId,
-          registro.timestamp,
+          convertirTimestampParaMySQL(registro.timestamp),
           registro.ubicacion?.latitude || null,
           registro.ubicacion?.longitude || null,
           registro.ubicacion?.accuracy || null,
@@ -149,7 +231,7 @@ export class JornadaModel {
         `UPDATE jornadas_laborales 
          SET ${campo} = ? 
          WHERE id = ?`,
-        [registro.timestamp, jornada.id]
+        [convertirTimestampParaMySQL(registro.timestamp), jornada.id]
       );
 
       // Recalcular horas trabajadas

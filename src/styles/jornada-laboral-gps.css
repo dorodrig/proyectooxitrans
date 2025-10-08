@@ -1,0 +1,156 @@
+/* ====================================
+   🎨 JORNADA LABORAL GPS - ESTILOS MEJORADOS
+   ==================================== */
+
+/* Contenedor para los botones de validación */
+.jornada-laboral__validacion-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+/* Estilo para el botón de forzar validación */
+.jornada-laboral__btn-accion.forzar-validacion {
+    background-color: #f59e0b;
+    border-color: #d97706;
+    color: white;
+    font-size: 0.75rem;
+}
+
+.jornada-laboral__btn-accion.forzar-validacion:hover:not(:disabled) {
+    background-color: #d97706;
+    border-color: #b45309;
+}
+
+/* Estilo para el timestamp de la ubicación GPS */
+.jornada-laboral__ubicacion-details .timestamp {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-style: italic;
+    margin-left: 0.5rem;
+}
+
+/* Mejorar la visualización de la sección de coordenadas */
+.jornada-laboral__ubicacion-details .coords {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.875rem;
+    background: #f8fafc;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Mejora visual para la precisión GPS */
+.jornada-laboral__ubicacion-details .precision {
+    color: #4b5563;
+    font-size: 0.8125rem;
+    background: #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+
+/* Indicador visual de la calidad de precisión GPS */
+.jornada-laboral__ubicacion-details .precision::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+/* Indicadores de precisión por nivel */
+.jornada-laboral__ubicacion-details .precision.excelente::before {
+    background-color: #16a34a; /* Verde */
+}
+
+.jornada-laboral__ubicacion-details .precision.buena::before {
+    background-color: #ca8a04; /* Amarillo */
+}
+
+.jornada-laboral__ubicacion-details .precision.baja::before {
+    background-color: #dc2626; /* Rojo */
+}
+
+/* Estilo para el botón de GPS cuando está cargando */
+.jornada-laboral__btn-accion.cargando {
+    position: relative;
+    background-color: #cbd5e1;
+    color: #334155;
+    border-color: #94a3b8;
+    cursor: wait;
+}
+
+/* Animación de pulso para el botón de GPS durante la carga */
+.jornada-laboral__btn-accion.cargando::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Estilo para el botón de GPS avanzado */
+.jornada-laboral__btn-accion.avanzado {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border: 1px solid #1e40af;
+    color: white;
+    font-weight: 600;
+    position: relative;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.jornada-laboral__btn-accion.avanzado:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+    border-color: #1e3a8a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 8px -1px rgba(59, 130, 246, 0.4);
+}
+
+.jornada-laboral__btn-accion.avanzado::after {
+    content: "⚡";
+    position: absolute;
+    top: 2px;
+    right: 6px;
+    font-size: 0.75rem;
+    opacity: 0.8;
+}
+
+/* Contenedor de acciones de ubicación mejorado */
+.jornada-laboral__ubicacion-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+    justify-content: center;
+}
+
+/* Responsivo para móviles */
+@media (max-width: 640px) {
+    .jornada-laboral__ubicacion-actions {
+        flex-direction: column;
+    }
+    
+    .jornada-laboral__btn-accion {
+        min-width: 100%;
+    }
+}

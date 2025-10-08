@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../stores/authStore';
 import NavigationBar from '../components/common/NavigationBar';
 import { jornadasService } from '../services/jornadasService';
@@ -6,6 +6,11 @@ import type { RegistroTiempo } from '../services/jornadasService';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MapPin, Play, Pause, Square, Coffee, Utensils, CheckCircle2, AlertTriangle } from 'lucide-react';
 import '../styles/jornada-laboral-direct.css';
+import '../styles/jornada-laboral-gps.css';
+import { useGPSStore } from '../services/gpsService';
+import { tiempoLaboralService, obtenerTimestampColombia, formatearHoraUI } from '../services/tiempoLaboralService';
+import { notificacionesService } from '../services/notificacionesService';
+import JornadaTimeline from '../components/jornada/JornadaTimeline';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -57,23 +62,28 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-interface UbicacionActual {
-  latitude: number;
-  longitude: number;
-  accuracy: number;
-}
+// Usando UbicacionActual desde gpsService.ts
 
 const JornadaLaboralPage: React.FC = () => {
   const { usuario } = useAuthStore();
   const queryClient = useQueryClient();
-  const [ubicacionActual, setUbicacionActual] = useState<UbicacionActual | null>(null);
-  const [ubicacionError, setUbicacionError] = useState<string | null>(null);
+  const { 
+    ubicacionActual, 
+    error: ubicacionError, 
+    cargando: gpsLoading,
+    intentoActual: gpsIntento,
+    precision: gpsPrecision,
+    obtenerUbicacion: getGPSLocation,
+    obtenerUbicacionAvanzada: getGPSLocationAdvanced
+  } = useGPSStore();
   const [tiempoTranscurrido, setTiempoTranscurrido] = useState<string>('00:00:00');
 
   // Query para obtener jornada actual
   const { data: jornada, isLoading, error, refetch } = useQuery({
     queryKey: ['jornada-actual'],
     queryFn: () => jornadasService.obtenerJornadaActual(),
+    staleTime: 30000,      // Datos frescos por 30 segundos
+    gcTime: 5 * 60000,     // Mantener en cache por 5 minutos (antes cacheTime)
     refetchInterval: 30000, // Refrescar cada 30 segundos
     enabled: !!usuario, // Solo ejecutar si hay usuario autenticado
   });
@@ -95,12 +105,29 @@ const JornadaLaboralPage: React.FC = () => {
 
   // Mutation para validar ubicación
   const validarUbicacionMutation = useMutation({
-    mutationFn: (coords: { latitude: number; longitude: number }) => 
-      jornadasService.validarUbicacion(coords.latitude, coords.longitude),
+    mutationFn: (options: { latitude: number; longitude: number; forzarValidacion?: boolean }) => 
+      jornadasService.validarUbicacion(
+        options.latitude,
+        options.longitude,
+        options.forzarValidacion || false
+      ),
     onSuccess: (data) => {
+      // Guardar el resultado de validación en el store para su uso futuro
+      useGPSStore.getState().establecerUltimaValidacion(data);
+      
+      // Mostrar notificación informativa si la validación es relevante
       if (data.valida) {
         const ubicacionNombre = data.ubicacion?.nombre || 'tu ubicación de trabajo';
         const distancia = Math.round(data.distancia);
+        
+        // Solo mostrar notificación si la distancia es menor a cierto umbral
+        if (distancia < 100) {
+          notificacionesService.mostrar(
+            `Ubicación validada: ${ubicacionNombre} (${distancia}m)`, 
+            'success', 
+            3000
+          );
+        }
         alert(`✅ Ubicación válida!\n\nEstás a ${distancia}m de ${ubicacionNombre}.\nPuedes registrar entrada/salida.`);
       } else {
         const distancia = Math.round(data.distancia);
@@ -127,131 +154,36 @@ const JornadaLaboralPage: React.FC = () => {
     }
   });
 
-  // Obtener ubicación actual (función estable sin dependencias)
-  const obtenerUbicacion = async () => {
-    if (!navigator.geolocation) {
-      setUbicacionError('Geolocalización no está disponible en este dispositivo');
-      return;
-    }
+  // Ref para inicialización de ubicación
+  const ubicacionInicializadaRef = useRef(false);
 
-    setUbicacionError(null);
-    
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const ubicacion = {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy
-        };
-        setUbicacionActual(ubicacion);
-      },
-      (error) => {
-        console.error('Error obteniendo ubicación:', error);
-        setUbicacionError(`Error de geolocalización: ${error.message}`);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 60000
-      }
-    );
+  // Función wrapper para obtener ubicación usando el store global de GPS
+  const obtenerUbicacion = async () => {
+    console.log('🎯 [JornadaLaboral] Solicitando ubicación GPS...');
+    await getGPSLocation();
+    console.log('🎯 [JornadaLaboral] Ubicación obtenida:', ubicacionActual);
+  };
+  
+  // Función para determinar la clase de precisión del GPS
+  const getPrecisionClass = (accuracy: number | undefined): string => {
+    if (!accuracy) return '';
+    if (accuracy <= 20) return 'excelente'; // 20 metros o menos - excelente precisión
+    if (accuracy <= 50) return 'buena';     // 50 metros o menos - buena precisión
+    return 'baja';                          // Más de 50 metros - baja precisión
   };
 
-  // Actualizar tiempo transcurrido
+  // Actualizar tiempo transcurrido usando el servicio de tiempo laboral
   useEffect(() => {
     const calcularTiempo = () => {
-      if (!jornada?.entrada) {
+      if (!jornada) {
         setTiempoTranscurrido('00:00:00');
         return;
       }
 
       try {
-        // Crear objeto Date para entrada
-        let entrada = new Date(jornada.entrada);
-        
-        // Si el timestamp no parece ser UTC, tratarlo como Colombia
-        if (!jornada.entrada.includes('Z') && !jornada.entrada.includes('+')) {
-          entrada = new Date(jornada.entrada + ' UTC-05:00');
-        }
-        
-        const ahoraUTC = new Date();
-        
-        // Calcular tiempo total trabajado
-        let tiempoTotal = ahoraUTC.getTime() - entrada.getTime();
-
-        // Si la jornada ya terminó, usar la hora de salida
-        if (jornada.salida) {
-          const salida = new Date(jornada.salida);
-          tiempoTotal = salida.getTime() - entrada.getTime();
-        }
-
-        // Restar tiempo de almuerzo
-        if (jornada.almuerzoInicio) {
-          const almuerzoInicio = new Date(jornada.almuerzoInicio);
-          let almuerzoFin: Date;
-          
-          if (jornada.almuerzoFin) {
-            almuerzoFin = new Date(jornada.almuerzoFin);
-          } else if (!jornada.salida) {
-            // Si está en almuerzo y no ha terminado la jornada, usar hora actual
-            almuerzoFin = ahoraUTC;
-          } else {
-            almuerzoFin = almuerzoInicio; // No restar nada si la jornada terminó sin terminar almuerzo
-          }
-          
-          const tiempoAlmuerzo = almuerzoFin.getTime() - almuerzoInicio.getTime();
-          if (tiempoAlmuerzo > 0) {
-            tiempoTotal -= tiempoAlmuerzo;
-          }
-        }
-
-        // Restar descansos completados
-        if (jornada.descansoMananaInicio && jornada.descansoMananaFin) {
-          const inicio = new Date(jornada.descansoMananaInicio);
-          const fin = new Date(jornada.descansoMananaFin);
-          const tiempoDescanso = fin.getTime() - inicio.getTime();
-          if (tiempoDescanso > 0) {
-            tiempoTotal -= tiempoDescanso;
-          }
-        }
-
-        if (jornada.descansoTardeInicio && jornada.descansoTardeFin) {
-          const inicio = new Date(jornada.descansoTardeInicio);
-          const fin = new Date(jornada.descansoTardeFin);
-          const tiempoDescanso = fin.getTime() - inicio.getTime();
-          if (tiempoDescanso > 0) {
-            tiempoTotal -= tiempoDescanso;
-          }
-        }
-
-        // Restar descanso de mañana en curso
-        if (jornada.descansoMananaInicio && !jornada.descansoMananaFin && !jornada.salida) {
-          const inicio = new Date(jornada.descansoMananaInicio);
-          const tiempoDescanso = ahoraUTC.getTime() - inicio.getTime();
-          if (tiempoDescanso > 0) {
-            tiempoTotal -= tiempoDescanso;
-          }
-        }
-
-        // Restar descanso de tarde en curso
-        if (jornada.descansoTardeInicio && !jornada.descansoTardeFin && !jornada.salida) {
-          const inicio = new Date(jornada.descansoTardeInicio);
-          const tiempoDescanso = ahoraUTC.getTime() - inicio.getTime();
-          if (tiempoDescanso > 0) {
-            tiempoTotal -= tiempoDescanso;
-          }
-        }
-
-        // Asegurar que el tiempo no sea negativo
-        tiempoTotal = Math.max(0, tiempoTotal);
-
-        const horas = Math.floor(tiempoTotal / (1000 * 60 * 60));
-        const minutos = Math.floor((tiempoTotal % (1000 * 60 * 60)) / (1000 * 60));
-        const segundos = Math.floor((tiempoTotal % (1000 * 60)) / 1000);
-
-        setTiempoTranscurrido(
-          `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`
-        );
+        // Usar el servicio especializado para calcular tiempo con precisión
+        const tiempoFormateado = tiempoLaboralService.calcularTiempoTranscurrido(jornada);
+        setTiempoTranscurrido(tiempoFormateado);
       } catch (error) {
         console.error('Error calculando tiempo transcurrido:', error);
         setTiempoTranscurrido('00:00:00');
@@ -261,16 +193,23 @@ const JornadaLaboralPage: React.FC = () => {
     // Calcular inmediatamente
     calcularTiempo();
     
-    // Actualizar cada segundo solo si la jornada está activa
+    // Actualizar cada segundo solo si la jornada está activa y no ha terminado
     const interval = setInterval(calcularTiempo, 1000);
 
     return () => clearInterval(interval);
   }, [jornada]);
 
-  // Obtener ubicación al cargar (solo una vez)
+  // Obtener ubicación al cargar (solo una vez y controlado)
   useEffect(() => {
-    obtenerUbicacion();
-  }, []); // Solo ejecutar una vez al montar el componente
+    if (!ubicacionInicializadaRef.current && usuario) {
+      ubicacionInicializadaRef.current = true;
+      console.log('🌐 [INIT] Iniciando GPS por primera vez...');
+      // Pequeño delay para asegurar que la página esté completamente cargada
+      setTimeout(() => {
+        obtenerUbicacion();
+      }, 1000);
+    }
+  }, [usuario]); // Ejecutar cuando el usuario esté disponible
 
   // Función para registrar evento
   const registrarEvento = async (tipo: RegistroTiempo['tipo']) => {
@@ -280,11 +219,16 @@ const JornadaLaboralPage: React.FC = () => {
     }
 
     // Validar ubicación para entrada y salida antes de registrar
-    if (tipo === 'entrada' || tipo === 'salida') {
+    // Para entrada y salida necesitamos validación estricta, para descansos podemos ser más flexibles
+    const necesitaValidacionEstricta = tipo === 'entrada' || tipo === 'salida';
+    
+    if (necesitaValidacionEstricta) {
       try {
+        // Para entrada y salida, forzamos validación siempre para mayor seguridad
         const validacion = await validarUbicacionMutation.mutateAsync({
           latitude: ubicacionActual.latitude,
-          longitude: ubicacionActual.longitude
+          longitude: ubicacionActual.longitude,
+          forzarValidacion: true // Forzar validación para momentos críticos (entrada/salida)
         });
         
         if (!validacion.valida) {
@@ -300,17 +244,77 @@ const JornadaLaboralPage: React.FC = () => {
         alert('Error al validar ubicación. Inténtalo de nuevo.');
         return;
       }
+    } else {
+      // Para descansos, usar la cache si está disponible (no tan crítico)
+      try {
+        const validacion = await validarUbicacionMutation.mutateAsync({
+          latitude: ubicacionActual.latitude,
+          longitude: ubicacionActual.longitude,
+          forzarValidacion: false // Usar cache si disponible
+        });
+        
+        if (!validacion.valida) {
+          // Para descansos, solo mostrar advertencia pero permitir continuar
+          const distancia = Math.round(validacion.distancia);
+          const tolerancia = validacion.tolerancia;
+          const ubicacionNombre = validacion.ubicacion?.nombre || 'tu ubicación de trabajo';
+          
+          const continuar = window.confirm(
+            `Advertencia: Estás a ${distancia}m de ${ubicacionNombre}, fuera del rango permitido de ${tolerancia}m.\n\n` +
+            `¿Deseas continuar de todos modos?`
+          );
+          
+          if (!continuar) return;
+        }
+      } catch (error) {
+        console.error('Error validando ubicación para descanso:', error);
+        // En caso de error en validación de descanso, permitir continuar con advertencia
+        const continuar = window.confirm(
+          'No se pudo validar tu ubicación. ¿Deseas continuar de todos modos?'
+        );
+        
+        if (!continuar) return;
+      }
+    }
+
+    const timestamp = obtenerTimestampColombia();
+    
+    // Validación adicional para salida - evitar error de backend
+    if (tipo === 'salida' && jornada?.entrada) {
+      try {
+        const entradaTime = new Date(jornada.entrada).getTime();
+        const salidaTime = new Date(timestamp).getTime();
+        
+        if (salidaTime <= entradaTime) {
+          alert('Error: No se puede registrar salida antes o al mismo tiempo que la entrada. ' +
+                'Verifica que tengas la hora correcta en tu dispositivo.');
+          return;
+        }
+        
+        // Validación adicional: diferencia mínima de 1 minuto
+        const diferenciaMinutos = (salidaTime - entradaTime) / (1000 * 60);
+        if (diferenciaMinutos < 1) {
+          alert('Error: Debe haber al menos 1 minuto de diferencia entre entrada y salida.');
+          return;
+        }
+      } catch (error) {
+        console.error('Error validando timestamps:', error);
+        alert('Error validando horarios. Por favor intenta de nuevo.');
+        return;
+      }
     }
 
     const registro: RegistroTiempo = {
       tipo,
-      timestamp: new Date().toISOString(),
+      timestamp,
       ubicacion: ubicacionActual,
       observaciones: ''
     };
 
     registrarTiempoMutation.mutate(registro);
   };
+
+  // Usando la función obtenerTimestampColombia del tiempoLaboralService
 
   // Verificar si puede registrar el siguiente evento
   const puedeRegistrar = (tipo: string): boolean => {
@@ -366,33 +370,8 @@ const JornadaLaboralPage: React.FC = () => {
     );
   }
 
-  const formatearHora = (fecha?: string) => {
-    if (!fecha) return '--:--';
-    
-    try {
-      // Crear objeto Date desde el timestamp (asumiendo UTC del backend)
-      const fechaObj = new Date(fecha);
-      
-      // Verificar si la fecha es válida
-      if (isNaN(fechaObj.getTime())) {
-        console.error('❌ Fecha inválida:', fecha);
-        return '--:--';
-      }
-      
-      // Convertir directamente a hora de Colombia (UTC-5)
-      const colombiaOffset = -5 * 60; // Colombia es UTC-5 (en minutos)
-      const utcTime = fechaObj.getTime() + (fechaObj.getTimezoneOffset() * 60000);
-      const colombiaTime = new Date(utcTime + (colombiaOffset * 60000));
-      
-      // Formatear la hora resultante
-      const horaFormateada = colombiaTime.toTimeString().slice(0, 8); // HH:MM:SS
-      
-      return horaFormateada;
-    } catch (error) {
-      console.error('❌ Error formateando hora:', error, 'Fecha:', fecha);
-      return '--:--';
-    }
-  };
+  // Usando formatearHoraUI del tiempoLaboralService
+  const formatearHora = formatearHoraUI;
 
   if (isLoading) {
     return (
@@ -496,8 +475,11 @@ const JornadaLaboralPage: React.FC = () => {
                   <div className="coords">
                     Lat: {ubicacionActual.latitude.toFixed(6)}, Lng: {ubicacionActual.longitude.toFixed(6)}
                   </div>
-                  <div className="coords precision">
+                  <div className={`coords precision ${getPrecisionClass(ubicacionActual.accuracy)}`}>
                     Precisión: {ubicacionActual.accuracy.toFixed(0)}m
+                    <span className="timestamp">
+                      ({new Date(ubicacionActual.timestamp).toLocaleTimeString()})
+                    </span>
                   </div>
                   {validarUbicacionMutation.data && (
                     <div className={`status ${validarUbicacionMutation.data.valida ? 'valida' : 'invalida'}`}>
@@ -530,32 +512,83 @@ const JornadaLaboralPage: React.FC = () => {
                     </div>
                   )}
                 </>
+              ) : gpsLoading ? (
+                <div className="status cargando">
+                  <div className="gps-progress">
+                    <div className="progress-text">
+                      🛰️ Obteniendo ubicación precisa... (Intento {gpsIntento}/3)
+                    </div>
+                    {gpsPrecision && (
+                      <div className="precision-info">
+                        Precisión actual: ±{Math.round(gpsPrecision)}m
+                      </div>
+                    )}
+                    <div className="progress-tips">
+                      💡 Para mejor precisión: ve al aire libre y espera unos segundos
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <p className="status cargando">Obteniendo ubicación...</p>
+                <p className="status cargando">Ubicación no disponible</p>
               )}
             </div>
             
             <div className="jornada-laboral__ubicacion-actions">
               <button
-                onClick={obtenerUbicacion}
-                className="jornada-laboral__btn-accion"
+                onClick={() => obtenerUbicacion()}
+                disabled={gpsLoading}
+                className={`jornada-laboral__btn-accion ${gpsLoading ? 'cargando' : ''}`}
               >
                 <MapPin className="h-4 w-4" />
-                Actualizar GPS
+                {gpsLoading 
+                  ? `Obteniendo GPS... (${gpsIntento}/5)` 
+                  : 'GPS Rápido'
+                }
+              </button>
+              
+              <button
+                onClick={() => getGPSLocationAdvanced()}
+                disabled={gpsLoading}
+                className={`jornada-laboral__btn-accion avanzado ${gpsLoading ? 'cargando' : ''}`}
+                title="GPS de alta precisión - Toma múltiples lecturas y las promedia"
+              >
+                <MapPin className="h-4 w-4" />
+                {gpsLoading 
+                  ? `GPS Avanzado... (${gpsIntento}/3)` 
+                  : 'GPS Alta Precisión'
+                }
               </button>
               
               {ubicacionActual && (
-                <button
-                  onClick={() => validarUbicacionMutation.mutate({
-                    latitude: ubicacionActual.latitude,
-                    longitude: ubicacionActual.longitude
-                  })}
-                  disabled={validarUbicacionMutation.isPending}
-                  className="jornada-laboral__btn-accion secundario"
-                >
-                  <CheckCircle2 className="h-4 w-4" />
-                  {validarUbicacionMutation.isPending ? 'Validando...' : 'Validar Ubicación'}
-                </button>
+                <div className="jornada-laboral__validacion-buttons">
+                  <button
+                    onClick={() => validarUbicacionMutation.mutate({
+                      latitude: ubicacionActual.latitude,
+                      longitude: ubicacionActual.longitude,
+                      forzarValidacion: false // Usar cache si está disponible
+                    })}
+                    disabled={validarUbicacionMutation.isPending}
+                    className="jornada-laboral__btn-accion secundario"
+                    title="Validar usando cache si está disponible"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    {validarUbicacionMutation.isPending ? 'Validando...' : 'Validar Ubicación'}
+                  </button>
+                  
+                  <button
+                    onClick={() => validarUbicacionMutation.mutate({
+                      latitude: ubicacionActual.latitude,
+                      longitude: ubicacionActual.longitude,
+                      forzarValidacion: true // Ignorar cache y forzar validación
+                    })}
+                    disabled={validarUbicacionMutation.isPending}
+                    className="jornada-laboral__btn-accion forzar-validacion"
+                    title="Forzar validación con el servidor, ignorando cache"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Forzar Validación
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -756,8 +789,13 @@ const JornadaLaboralPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600">
-                  {typeof jornada?.horasTrabajadas === 'number' 
-                    ? jornada.horasTrabajadas.toFixed(2) + 'h'
+                  {jornada ? 
+                    (jornada.salida
+                      ? (typeof jornada?.horasTrabajadas === 'number' 
+                          ? jornada.horasTrabajadas.toFixed(2) + 'h'
+                          : tiempoLaboralService.calcularHorasDecimal(jornada).toFixed(2) + 'h')
+                      : tiempoLaboralService.calcularHorasDecimal(jornada).toFixed(2) + 'h'
+                    ) 
                     : '0.00h'
                   }
                 </div>
@@ -787,6 +825,13 @@ const JornadaLaboralPage: React.FC = () => {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Línea de tiempo visual de la jornada */}
+        {jornada && (
+          <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
+            <JornadaTimeline jornada={jornada} />
           </div>
         )}
       </div>

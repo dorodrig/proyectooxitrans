@@ -101,7 +101,12 @@ export class JornadaController {
    */
   static async validarUbicacion(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
+      console.log('🚀 [ENDPOINT] validarUbicacion iniciado');
+      console.log('🚀 [ENDPOINT] req.usuario:', req.usuario);
+      console.log('🚀 [ENDPOINT] req.body:', req.body);
+      
       if (!req.usuario) {
+        console.log('❌ [ENDPOINT] Usuario no autenticado');
         res.status(401).json({
           success: false,
           message: 'Usuario no autenticado'
@@ -109,10 +114,18 @@ export class JornadaController {
         return;
       }
 
-      const usuarioId = req.usuario.id;
+      const usuarioId = parseInt(req.usuario.id.toString(), 10); // Asegurar que sea número
       const { latitude, longitude } = req.body;
+      
+      console.log('🚀 [ENDPOINT] Datos para validación:', { 
+        usuarioId, 
+        usuarioIdType: typeof usuarioId,
+        latitude, 
+        longitude 
+      });
 
       if (!latitude || !longitude) {
+        console.log('❌ [ENDPOINT] Faltan coordenadas');
         res.status(400).json({
           success: false,
           message: 'Latitud y longitud son requeridos'
@@ -120,18 +133,31 @@ export class JornadaController {
         return;
       }
 
+      if (isNaN(usuarioId)) {
+        console.log('❌ [ENDPOINT] usuarioId no es un número válido:', req.usuario.id);
+        res.status(400).json({
+          success: false,
+          message: 'ID de usuario inválido'
+        });
+        return;
+      }
+
+      console.log('🚀 [ENDPOINT] Llamando a validarUbicacionInterna...');
       const validacion = await JornadaController.validarUbicacionInterna(
         usuarioId,
         latitude,
-        longitude
+        longitude,
+        req
       );
 
+      console.log('🚀 [ENDPOINT] Resultado de validación:', validacion);
+      
       res.json({
         success: true,
         data: validacion
       });
     } catch (error) {
-      console.error('Error en validarUbicacion:', error);
+      console.error('❌ [ENDPOINT] Error en validarUbicacion:', error);
       res.status(500).json({
         success: false,
         message: 'Error interno del servidor'
@@ -212,7 +238,8 @@ export class JornadaController {
   private static async validarUbicacionInterna(
     usuarioId: number,
     latitude: number,
-    longitude: number
+    longitude: number,
+    req: AuthenticatedRequest
   ): Promise<{
     valida: boolean;
     distancia: number;
@@ -221,6 +248,9 @@ export class JornadaController {
     tipoValidacion: 'ubicacion_especifica' | 'regional' | 'sin_restriccion';
   }> {
     try {
+      console.log('🎯 [DEBUG] Validando ubicación para usuario:', usuarioId);
+      console.log('🎯 [DEBUG] Coordenadas recibidas:', { latitude, longitude });
+      
       // Primero intentar obtener ubicación específica del usuario
       const queryUsuario = `
         SELECT 
@@ -234,10 +264,28 @@ export class JornadaController {
       `;
       
       const resultUsuario = await executeQuery(queryUsuario, [usuarioId]);
+      console.log('🎯 [DEBUG] Datos del usuario:', resultUsuario);
       
       if (resultUsuario.length === 0) {
         throw new Error('Usuario no encontrado');
       }
+      
+      // Query adicional para debugging - verificar la relación usuario-regional
+      const debugQuery = `
+        SELECT 
+          u.id as usuario_id,
+          u.nombre as usuario_nombre,
+          u.regional_id,
+          r.id as regional_id_real,
+          r.nombre as regional_nombre,
+          r.latitud as regional_latitud,
+          r.longitud as regional_longitud
+        FROM usuarios u
+        LEFT JOIN regionales r ON u.regional_id = r.id
+        WHERE u.id = ?
+      `;
+      const debugResult = await executeQuery(debugQuery, [usuarioId]);
+      console.log('🎯 [DEBUG] Relación usuario-regional:', debugResult);
       
       const usuario = resultUsuario[0] as UsuarioUbicacion;
       
@@ -268,34 +316,80 @@ export class JornadaController {
       
       // Si no tiene ubicación específica, usar ubicación de la regional
       if (usuario.regional_id) {
+        console.log('🎯 [DEBUG] Usuario tiene regional_id:', usuario.regional_id);
         const regional = await RegionalModel.obtenerPorUsuario(usuarioId);
+        console.log('🎯 [DEBUG] Regional obtenida:', regional);
         
-        if (regional && typeof regional.latitud === 'number' && typeof regional.longitud === 'number') {
-          const distancia = JornadaController.calcularDistancia(
-            latitude,
-            longitude,
-            regional.latitud,
-            regional.longitud
-          );
+        if (regional && regional.latitud && regional.longitud) {
+          console.log('🎯 [DEBUG] Tipos de coordenadas originales:', {
+            latitud_original: regional.latitud,
+            longitud_original: regional.longitud,
+            latitud_tipo: typeof regional.latitud,
+            longitud_tipo: typeof regional.longitud
+          });
           
-          const tolerancia = 5; // 5 metros de tolerancia para regionales
+          // Convertir coordenadas de string a number si es necesario
+          const regionalLat = typeof regional.latitud === 'string' ? parseFloat(regional.latitud) : Number(regional.latitud);
+          const regionalLng = typeof regional.longitud === 'string' ? parseFloat(regional.longitud) : Number(regional.longitud);
+          
+          console.log('🎯 [DEBUG] Coordenadas convertidas:', {
+            latitud_convertida: regionalLat,
+            longitud_convertida: regionalLng,
+            latitud_es_numero: !isNaN(regionalLat),
+            longitud_es_numero: !isNaN(regionalLng)
+          });
+          
+          if (!isNaN(regionalLat) && !isNaN(regionalLng)) {
+            console.log('🎯 [DEBUG] Coordenadas de la regional válidas:', { 
+              latitud: regionalLat, 
+              longitud: regionalLng 
+            });
+            
+            const distancia = JornadaController.calcularDistancia(
+              latitude,
+              longitude,
+              regionalLat,
+              regionalLng
+            );
+          
+          console.log('🎯 [DEBUG] Distancia calculada:', distancia);
+          
+          // 🚀 TOLERANCIA INTELIGENTE BASADA EN DISPOSITIVO
+          const tolerancia = JornadaController.calcularToleranciaInteligente(req, distancia);
           const valida = distancia <= tolerancia;
           
-          return {
+          console.log('🎯 [DEBUG] Validación:', { 
+            distancia: Math.round(distancia), 
+            tolerancia, 
             valida,
-            distancia,
-            tolerancia,
-            ubicacion: {
-              nombre: regional.nombre,
-              latitud: regional.latitud,
-              longitud: regional.longitud
-            },
-            tipoValidacion: 'regional'
-          };
+            regional_nombre: regional.nombre,
+            usuario_coords: { latitude, longitude },
+            regional_coords: { latitud: regional.latitud, longitud: regional.longitud }
+          });
+          
+            return {
+              valida,
+              distancia,
+              tolerancia,
+              ubicacion: {
+                nombre: regional.nombre,
+                latitud: regionalLat,
+                longitud: regionalLng
+              },
+              tipoValidacion: 'regional'
+            };
+          } else {
+            console.log('🎯 [DEBUG] Coordenadas no válidas después de conversión');
+          }
+        } else {
+          console.log('🎯 [DEBUG] Regional sin coordenadas o son null/undefined');
         }
+      } else {
+        console.log('🎯 [DEBUG] Usuario sin regional_id asignada');
       }
       
       // Si no hay ubicación específica ni regional configurada
+      console.log('🎯 [DEBUG] Sin ubicación específica ni regional - permitiendo acceso');
       return {
         valida: true,
         distancia: 0,
@@ -431,6 +525,58 @@ export class JornadaController {
         message: 'Error interno del servidor'
       });
     }
+  }
+
+  /**
+   * 🚀 TOLERANCIA INTELIGENTE GPS
+   * Calcula tolerancia dinámica basada en tipo de dispositivo y precisión GPS
+   */
+  private static calcularToleranciaInteligente(req: AuthenticatedRequest, distancia: number): number {
+    // Analizar headers para detectar tipo de dispositivo
+    const userAgent = req.get('User-Agent') || '';
+    const isMobile = /Mobile|Android|iPhone|iPad/i.test(userAgent);
+    const isDesktop = !isMobile && /Windows|Mac|Linux/i.test(userAgent);
+    
+    // Tolerancias base
+    const TOLERANCIA_MOVIL = 50;     // 50m para móviles con GPS
+    const TOLERANCIA_LAPTOP = 750;   // 750m para laptops con WiFi
+    const TOLERANCIA_OFICINA = 100;  // 100m para oficinas
+    
+    // Detección de contexto
+    let tolerancia: number;
+    
+    if (isMobile) {
+      // Móvil: GPS real disponible, tolerancia estricta
+      tolerancia = TOLERANCIA_MOVIL;
+      console.log('📱 [TOLERANCIA] Dispositivo móvil detectado - GPS precisión:', tolerancia + 'm');
+    } else if (isDesktop) {
+      // Desktop/Laptop: Usar WiFi/IP, tolerancia relajada
+      tolerancia = TOLERANCIA_LAPTOP;
+      console.log('💻 [TOLERANCIA] Laptop/Desktop detectado - WiFi tolerancia:', tolerancia + 'm');
+    } else {
+      // Desconocido: tolerancia intermedia
+      tolerancia = TOLERANCIA_OFICINA;
+      console.log('❓ [TOLERANCIA] Dispositivo desconocido - tolerancia por defecto:', tolerancia + 'm');
+    }
+    
+    // Ajuste dinámico basado en distancia actual
+    if (distancia > 200 && distancia < 1000) {
+      // Si estás "cerca pero no tanto", dar un poco más de tolerancia
+      tolerancia = Math.max(tolerancia, distancia * 1.2);
+      console.log('📊 [TOLERANCIA] Ajuste dinámico aplicado:', Math.round(tolerancia) + 'm');
+    }
+    
+    // Log final
+    console.log('✅ [TOLERANCIA] Final:', {
+      userAgent: userAgent.substring(0, 50) + '...',
+      isMobile,
+      isDesktop,
+      distanciaReal: Math.round(distancia),
+      toleranciaAplicada: Math.round(tolerancia),
+      aprobado: distancia <= tolerancia
+    });
+    
+    return Math.round(tolerancia);
   }
 
   /**

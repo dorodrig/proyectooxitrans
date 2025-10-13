@@ -1,0 +1,146 @@
+// ====================================
+// 📊 GENERADOR REPORTES - ESTILOS
+// ====================================
+
+@use '../../abstracts/variables' as *;
+@use 'sass:color';
+
+.generador-reportes {
+  background: $surface-color;
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow-sm;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-lg;
+    padding-bottom: $spacing-md;
+    border-bottom: 1px solid $border-color;
+
+    h3 {
+      color: $text-primary;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin: 0;
+    }
+  }
+
+  &__opciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-xl;
+  }
+
+  &__grupo {
+    background: color.adjust($background-color, $lightness: 2%);
+    border-radius: $border-radius;
+    padding: $spacing-md;
+
+    h4 {
+      color: $text-primary;
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 $spacing-sm 0;
+    }
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      margin-bottom: $spacing-xs;
+      font-size: 0.9rem;
+      color: $text-secondary;
+      cursor: pointer;
+
+      input[type="checkbox"] {
+        accent-color: $oxitrans-primary;
+      }
+    }
+  }
+
+  &__acciones {
+    display: flex;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      padding: $spacing-sm $spacing-lg;
+      border: none;
+      border-radius: $border-radius;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &.btn-pdf {
+        background: $error-color;
+        color: white;
+
+        &:hover {
+          background: color.adjust($error-color, $lightness: -10%);
+          transform: translateY(-2px);
+          box-shadow: $shadow-md;
+        }
+      }
+
+      &.btn-excel {
+        background: $success-color;
+        color: white;
+
+        &:hover {
+          background: color.adjust($success-color, $lightness: -10%);
+          transform: translateY(-2px);
+          box-shadow: $shadow-md;
+        }
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+      }
+    }
+  }
+
+  &__preview {
+    margin-top: $spacing-lg;
+    padding: $spacing-md;
+    background: color.adjust($info-color, $lightness: 45%, $alpha: -0.9);
+    border: 1px solid color.adjust($info-color, $lightness: 30%, $alpha: -0.7);
+    border-radius: $border-radius;
+
+    h5 {
+      color: $info-color;
+      font-size: 0.9rem;
+      margin: 0 0 $spacing-xs 0;
+    }
+
+    p {
+      color: $text-secondary;
+      font-size: 0.85rem;
+      margin: 0;
+    }
+  }
+}
+
+// Estados responsive
+@media (max-width: 768px) {
+  .generador-reportes {
+    &__opciones {
+      grid-template-columns: 1fr;
+    }
+
+    &__acciones {
+      flex-direction: column;
+      
+      .btn {
+        justify-content: center;
+      }
+    }
+  }
+}

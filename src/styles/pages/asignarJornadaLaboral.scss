@@ -1,0 +1,366 @@
+// ================================================
+// Asignar Jornada Laboral - Estilos SCSS
+// ================================================
+@use '../abstracts' as *;
+
+.asignar-jornada-laboral {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  
+  &__container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    
+    @media (max-width: 768px) {
+      padding: 1rem;
+    }
+  }
+  
+  &__header {
+    text-align: center;
+    margin-bottom: 3rem;
+    
+    h1 {
+      @include center-flex;
+      gap: 1rem;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: $primary-color;
+      margin-bottom: 0.5rem;
+      
+      @media (max-width: 768px) {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+      
+      svg {
+        color: $accent-color;
+      }
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      color: $text-secondary;
+      font-weight: 500;
+      
+      @media (max-width: 768px) {
+        font-size: 1rem;
+      }
+    }
+  }
+  
+  &__form-container {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    
+    @media (max-width: 768px) {
+      padding: 1.5rem;
+      border-radius: 12px;
+    }
+  }
+  
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+  
+  // Mensajes de éxito y error
+  &__success-message {
+    @include center-flex;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    color: #065f46;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #a7f3d0;
+    font-weight: 600;
+    
+    svg {
+      flex-shrink: 0;
+    }
+  }
+  
+  &__error-message {
+    @include center-flex;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, #fee2e2, #fecaca);
+    color: #991b1b;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    border: 1px solid #fecaca;
+    font-weight: 600;
+    
+    svg {
+      flex-shrink: 0;
+    }
+  }
+  
+  // Campos del formulario
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  &__label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    color: $text-primary;
+    margin-bottom: 0.25rem;
+    
+    svg {
+      color: $accent-color;
+      flex-shrink: 0;
+    }
+  }
+  
+  &__input {
+    padding: 1rem 1.25rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: inherit;
+    background: white;
+    transition: all 0.3s ease;
+    
+    &:focus {
+      outline: none;
+      border-color: $accent-color;
+      box-shadow: 0 0 0 3px rgba(237, 137, 54, 0.1);
+      background: #fefefe;
+    }
+    
+    &:hover:not(:focus) {
+      border-color: #cbd5e1;
+    }
+    
+    &.error {
+      border-color: #ef4444;
+      background: #fef2f2;
+      
+      &:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      }
+    }
+    
+    &.readonly {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      color: $text-secondary;
+      cursor: not-allowed;
+      
+      &:focus {
+        border-color: #cbd5e1;
+        box-shadow: none;
+      }
+    }
+    
+    // Estilos específicos para campos de tiempo
+    &[type="time"] {
+      font-family: 'Inter', monospace;
+      font-weight: 600;
+      text-align: center;
+      letter-spacing: 0.05em;
+    }
+    
+    // Estilos específicos para números
+    &[type="number"] {
+      text-align: center;
+      font-weight: 600;
+    }
+  }
+  
+  &__error {
+    color: #ef4444;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-top: 0.25rem;
+    
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.25rem;
+    
+    &::before {
+      content: "⚠️";
+      flex-shrink: 0;
+    }
+  }
+  
+  &__help {
+    color: $text-secondary;
+    font-size: 0.875rem;
+    font-style: italic;
+    margin-top: 0.25rem;
+    
+    &.calculated {
+      color: $accent-color;
+      font-weight: 600;
+      font-style: normal;
+    }
+  }
+  
+  // Resumen de la jornada
+  &__summary {
+    background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+    border: 2px solid #bae6fd;
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 1rem 0;
+    
+    h3 {
+      color: $primary-color;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      
+      @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+    }
+    
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e0f2fe;
+      
+      .label {
+        font-weight: 600;
+        color: $text-secondary;
+        font-size: 0.9rem;
+      }
+      
+      .value {
+        font-weight: 700;
+        color: $primary-color;
+        font-size: 1rem;
+      }
+      
+      &.warning {
+        background: linear-gradient(135deg, #fef3c7, #fde68a);
+        border-color: #f59e0b;
+        
+        .label, .value {
+          color: #92400e;
+        }
+      }
+    }
+  }
+  
+  // Botones de acción
+  &__actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+  
+  &__btn-guardar {
+    @include center-flex;
+    gap: 0.75rem;
+    background: linear-gradient(135deg, $accent-color, #d97706);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(237, 137, 54, 0.3);
+    
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, #d97706, #b45309);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
+    }
+    
+    &:active:not(:disabled) {
+      transform: translateY(-1px);
+    }
+    
+    &:disabled {
+      background: linear-gradient(135deg, #9ca3af, #6b7280);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 2px 8px rgba(156, 163, 175, 0.3);
+    }
+    
+    svg {
+      flex-shrink: 0;
+    }
+    
+    @media (max-width: 768px) {
+      width: 100%;
+      min-width: auto;
+    }
+  }
+}
+
+// Animaciones y transiciones adicionales
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.asignar-jornada-laboral__form-container {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.asignar-jornada-laboral__field {
+  animation: slideInUp 0.4s ease-out;
+  animation-fill-mode: both;
+  
+  @for $i from 1 through 6 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.1}s;
+    }
+  }
+}
+
+// Responsive improvements
+@media (max-width: 640px) {
+  .asignar-jornada-laboral {
+    &__container {
+      padding: 0.5rem;
+    }
+    
+    &__form-container {
+      margin: 0;
+      border-radius: 8px;
+    }
+    
+    &__summary .summary-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

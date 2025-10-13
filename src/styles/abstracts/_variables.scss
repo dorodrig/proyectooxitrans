@@ -1,6 +1,6 @@
 // ====================================
 // 🎨 OXITRANS S.A.S - SISTEMA DE DISEÑO UNIFICADO
-// Basado en el diseño premium implementado
+// Basado en el diseño premium implementado - SCSS Moderno
 // ====================================
 
 // 🎯 PALETA DE COLORES PRINCIPAL (Premium Style)
@@ -20,7 +20,7 @@
   --bs-border-radius: 10px;
 }
 
-// 🏢 Colores corporativos OXITRANS (Actualizados)
+// 🏢 Colores corporativos OXITRANS (Base)
 $oxitrans-primary: #297372;        // Verde principal corporativo
 $oxitrans-primary-dark: #1f5a59;   // Verde más oscuro
 $oxitrans-primary-light: #3d9895;  // Verde más claro
@@ -29,16 +29,17 @@ $oxitrans-danger: #ff3239;         // Rojo para errores/alertas
 $oxitrans-dark: #303030;           // Negro corporativo
 $oxitrans-light: #f4f4f9;          // Blanco/gris muy claro
 
-// 🔄 COMPATIBILIDAD: Variables antiguas (para migración gradual)
-$oxitrans-red: $oxitrans-primary;
-$oxitrans-red-dark: $oxitrans-primary-dark; 
-$oxitrans-red-light: $oxitrans-primary-light;
-$oxitrans-gray: #7a7a7d;
-$oxitrans-gray-light: #ababae;
-$oxitrans-black: $oxitrans-dark;
-$accent-color: $oxitrans-primary-light;    // Color de acento
-$text-muted: #6c757d;                      // Texto secundario
-$border-radius-default: 6px;               // Radio de borde por defecto
+// 🌈 Paleta de grises premium (DEFINIR PRIMERO - Orden importante)
+$gray-50: #f9fafb;
+$gray-100: #f4f4f9;               // Igual a $oxitrans-light
+$gray-200: #e5e7eb;
+$gray-300: #c3c3c7;               // Gris corporativo
+$gray-400: #9ca3af;
+$gray-500: #6b7280;
+$gray-600: #7a7a7d;               // Gris corporativo
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #303030;               // Igual a $oxitrans-dark
 
 // 🎨 Colores del sistema unificado
 $primary-color: $oxitrans-primary;
@@ -47,25 +48,47 @@ $success-color: #17b04f;
 $warning-color: #f6c115;
 $error-color: $oxitrans-danger;
 $info-color: #0d6ed2;
+
+// 📝 Colores de texto
+$text-primary: #202020;        // Color principal del texto
+$text-secondary: #6b7280;      // Texto secundario
+$text-color: #202020;          // Alias para compatibilidad
+$text-color-muted: #9ca3af;    // Texto suave/desactivado
+$text-light: #ffffff;          // Texto sobre fondos oscuros
+
+// 🎨 Colores de superficies
+$background-color: $gray-100;   // Fondo principal
+$surface-color: #ffffff;        // Superficie de cards y elementos
+$border-color: $gray-300;       // Bordes estándar
 $dark-color: $oxitrans-dark;
 $light-color: $oxitrans-light;
 
-// 🌈 Paleta de grises premium
-$gray-50: #f9fafb;
-$gray-100: $oxitrans-light;        // #f4f4f9
-$gray-200: #e5e7eb;
-$gray-300: #c3c3c7;               // Gris corporativo
-$gray-400: #9ca3af;
-$gray-500: #6b7280;
-$gray-600: #7a7a7d;               // Gris corporativo
-$gray-700: #374151;
-$gray-800: #1f2937;
-$gray-900: $oxitrans-dark;         // #303030
+// 📝 Variables de texto (DEFINIR DESPUÉS de grises)
+$text-primary: $oxitrans-dark;          // #303030 - Texto principal
+$text-secondary: $gray-600;             // #7a7a7d - Texto secundario
+$text-muted: $gray-500;                 // #6b7280 - Texto atenuado
+$text-light: $gray-400;                 // #9ca3af - Texto claro
+
+// 🎨 Variables de acento y colores especiales
+$accent-color: #ed8936;                 // Color de acento naranja
+$border-color: $gray-300;               // #c3c3c7 - Color de bordes
+$background-color: $gray-50;            // #f9fafb - Fondo principal
+$surface-color: #ffffff;                // Blanco - Superficies
+
+// 🔄 COMPATIBILIDAD: Variables antiguas (migración gradual)
+$oxitrans-red: $oxitrans-primary;
+$oxitrans-red-dark: $oxitrans-primary-dark; 
+$oxitrans-red-light: $oxitrans-primary-light;
+$oxitrans-gray: $gray-600;
+$oxitrans-gray-light: $oxitrans-secondary;
+$oxitrans-black: $oxitrans-dark;
+$border-radius-default: 6px;
 
 // 🔤 Tipografía premium
 $font-family-primary: 'Noto Sans', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 $font-family-secondary: 'Inter', system-ui, sans-serif;
 
+// 📝 Tamaños de fuente (sin duplicados)
 $font-size-xs: 0.75rem;    // 12px
 $font-size-sm: 0.875rem;   // 14px
 $font-size-base: 1rem;     // 16px
@@ -75,13 +98,14 @@ $font-size-2xl: 1.5rem;    // 24px
 $font-size-3xl: 1.875rem;  // 30px
 $font-size-4xl: 2.25rem;   // 36px
 
+// 📏 Pesos de fuente
 $font-weight-light: 300;
 $font-weight-normal: 400;
 $font-weight-medium: 500;
 $font-weight-semibold: 600;
 $font-weight-bold: 700;
 
-// 📏 Espaciado premium
+// 📏 Espaciado premium (consolidado)
 $spacing-xs: 0.25rem;   // 4px
 $spacing-sm: 0.5rem;    // 8px
 $spacing-md: 1rem;      // 16px
@@ -90,12 +114,13 @@ $spacing-xl: 2rem;      // 32px
 $spacing-2xl: 3rem;     // 48px
 $spacing-3xl: 4rem;     // 64px
 
-// 🔲 Bordes y radio premium
+// 🔲 Bordes y radio premium (sin duplicados)
 $border-radius-sm: 4px;
 $border-radius-md: 6px;
 $border-radius-lg: 8px;
 $border-radius-xl: 10px;    // Radio principal del diseño premium
 $border-radius-full: 9999px;
+$border-radius: $border-radius-md; // Variable por defecto para compatibilidad
 
 // 🌟 Sombras premium
 $shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -125,36 +150,14 @@ $form-control-border-color: var(--bs-gray-300);
 $form-control-focus-border-color: var(--bs-primary);
 $form-control-focus-box-shadow: none;
 
-// Breakpoints responsivos
+// 📱 Breakpoints responsivos
 $breakpoint-sm: 640px;
 $breakpoint-md: 768px;
 $breakpoint-lg: 1024px;
 $breakpoint-xl: 1280px;
 $breakpoint-2xl: 1536px;
 
-// 📏 Espaciado unificado
-$spacing-xs: 0.25rem;    // 4px
-$spacing-sm: 0.5rem;     // 8px
-$spacing-md: 1rem;       // 16px
-$spacing-lg: 1.5rem;     // 24px
-$spacing-xl: 2rem;       // 32px
-$spacing-2xl: 3rem;      // 48px
-
-// 📝 Tamaños de fuente
-$font-size-xs: 0.75rem;    // 12px
-$font-size-sm: 0.875rem;   // 14px
-$font-size-base: 1rem;     // 16px
-$font-size-lg: 1.125rem;   // 18px
-$font-size-xl: 1.25rem;    // 20px
-$font-size-2xl: 1.5rem;    // 24px
-
-// 🎯 Bordes
-$border-radius-sm: 4px;
-$border-radius-md: 6px;
-$border-radius-lg: 8px;
-$border-radius-xl: 12px;
-
-// Z-index
+// 🎯 Z-index layering
 $z-dropdown: 1000;
 $z-sticky: 1020;
 $z-fixed: 1030;

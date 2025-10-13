@@ -10,7 +10,7 @@
 .jornada-laboral {
   min-height: 100vh;
   background: linear-gradient(135deg, 
-    lighten($oxitrans-light, 2%) 0%, 
+    color.adjust($oxitrans-light, $lightness: 2%) 0%, 
     $oxitrans-light 100%);
   padding: $spacing-lg;
 
@@ -87,7 +87,7 @@
     padding: $spacing-xl;
     margin-bottom: $spacing-xl;
     box-shadow: $shadow-sm;
-    border: 1px solid lighten($oxitrans-gray-light, 20%);
+    border: 1px solid color.adjust($oxitrans-gray-light, $lightness: 20%);
 
     h2 {
       display: flex;
@@ -153,21 +153,49 @@
         }
 
         &.valida {
-          background-color: lighten($success-color, 45%);
+          background-color: color.adjust($success-color, $lightness: 45%);
           color: $success-color;
-          border: 1px solid lighten($success-color, 30%);
+          border: 1px solid color.adjust($success-color, $lightness: 30%);
         }
 
         &.invalida {
-          background-color: lighten($error-color, 45%);
+          background-color: color.adjust($error-color, $lightness: 45%);
           color: $error-color;
-          border: 1px solid lighten($error-color, 30%);
+          border: 1px solid color.adjust($error-color, $lightness: 30%);
         }
 
         &.cargando {
-          background-color: lighten($warning-color, 45%);
-          color: darken($warning-color, 20%);
-          border: 1px solid lighten($warning-color, 30%);
+          background-color: color.adjust($warning-color, $lightness: 45%);
+          color: color.adjust($warning-color, $lightness: -20%);
+          border: 1px solid color.adjust($warning-color, $lightness: 30%);
+          
+          // 🛰️ Estilos para el progreso del GPS mejorado
+          .gps-progress {
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-xs;
+            
+            .progress-text {
+              font-weight: 600;
+              font-size: $font-size-sm;
+              display: flex;
+              align-items: center;
+              gap: $spacing-xs;
+            }
+            
+            .precision-info {
+              font-size: 0.8rem;
+              color: color.adjust($warning-color, $lightness: -10%);
+              font-weight: 500;
+            }
+            
+            .progress-tips {
+              font-size: 0.75rem;
+              opacity: 0.8;
+              font-style: italic;
+              margin-top: $spacing-xs;
+            }
+          }
         }
       }
     }
@@ -205,7 +233,7 @@
   &__boton-evento {
     @include button-base;
     background: white;
-    border: 2px solid lighten($oxitrans-gray-light, 20%);
+    border: 2px solid color.adjust($oxitrans-gray-light, $lightness: 20%);
     border-radius: $border-radius-lg;
     padding: $spacing-xl;
     min-height: 140px;
@@ -232,10 +260,10 @@
         border-color: $success-color;
         background: linear-gradient(135deg, 
           white 0%, 
-          lighten($success-color, 48%) 100%);
+          color.adjust($success-color, $lightness: 48%) 100%);
 
         &:hover {
-          border-color: darken($success-color, 10%);
+          border-color: color.adjust($success-color, $lightness: -10%);
         }
       }
 
@@ -251,10 +279,10 @@
         border-color: $info-color;
         background: linear-gradient(135deg, 
           white 0%, 
-          lighten($info-color, 48%) 100%);
+          color.adjust($info-color, $lightness: 48%) 100%);
 
         &:hover {
-          border-color: darken($info-color, 10%);
+          border-color: color.adjust($info-color, $lightness: -10%);
         }
       }
 
@@ -270,10 +298,10 @@
         border-color: $error-color;
         background: linear-gradient(135deg, 
           white 0%, 
-          lighten($error-color, 48%) 100%);
+          color.adjust($error-color, $lightness: 48%) 100%);
 
         &:hover {
-          border-color: darken($error-color, 10%);
+          border-color: color.adjust($error-color, $lightness: -10%);
         }
       }
 
@@ -286,9 +314,9 @@
 
     // Estado deshabilitado
     &:disabled {
-      background: lighten($oxitrans-gray-light, 15%);
+      background: color.adjust($oxitrans-gray-light, $lightness: 15%);
       color: $text-muted;
-      border-color: lighten($oxitrans-gray-light, 10%);
+      border-color: color.adjust($oxitrans-gray-light, $lightness: 10%);
       cursor: not-allowed;
       
       &:hover {
@@ -351,8 +379,8 @@
     white-space: nowrap;
 
     &:hover:not(:disabled) {
-      background: darken($oxitrans-primary, 10%);
-      border-color: darken($oxitrans-primary, 10%);
+      background: color.adjust($oxitrans-primary, $lightness: -10%);
+      border-color: color.adjust($oxitrans-primary, $lightness: -10%);
       transform: translateY(-1px);
       box-shadow: $shadow-md;
     }
@@ -363,12 +391,38 @@
       border-color: $oxitrans-primary;
 
       &:hover:not(:disabled) {
-        background: lighten($oxitrans-primary, 48%);
+        background: color.adjust($oxitrans-primary, $lightness: 48%);
       }
     }
 
     svg {
       margin-right: $spacing-xs;
+    }
+
+    // 🛰️ Estado de carga del GPS
+    &.cargando {
+      position: relative;
+      color: rgba(255, 255, 255, 0.8);
+      cursor: wait;
+      
+      &:disabled {
+        opacity: 0.8;
+        background: color.adjust($oxitrans-primary, $lightness: 10%);
+        
+        &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: $spacing-sm;
+          width: 16px;
+          height: 16px;
+          margin-top: -8px;
+          border: 2px solid rgba(255, 255, 255, 0.3);
+          border-radius: 50%;
+          border-top-color: rgba(255, 255, 255, 0.8);
+          animation: gps-spin 1s ease-in-out infinite;
+        }
+      }
     }
   }
 }
@@ -381,6 +435,16 @@
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+// 🛰️ Animación específica para GPS
+@keyframes gps-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 // 🎯 Estados especiales

@@ -56,6 +56,16 @@ export interface ValidacionUbicacion {
 
 class JornadasService {
   private baseURL = '/jornadas';
+  
+  // Sistema de cache para validaciones de ubicación
+  private validacionCache: {
+    coords: { latitude: number; longitude: number };
+    resultado: ValidacionUbicacion;
+    timestamp: number;
+  } | null = null;
+  
+  // Tiempo de vida de la cache en milisegundos (5 minutos)
+  private readonly CACHE_TTL = 5 * 60 * 1000;
 
   /**
    * Obtener jornada actual del usuario autenticado
@@ -86,17 +96,79 @@ class JornadasService {
 
   /**
    * Validar ubicación actual contra regional asignada
+   * @param latitude Latitud de la ubicación actual
+   * @param longitude Longitud de la ubicación actual
+   * @param forzarValidacion Si es true, ignora la cache y fuerza una nueva validación
+   * @returns Resultado de la validación
    */
-  async validarUbicacion(latitude: number, longitude: number): Promise<ValidacionUbicacion> {
+  async validarUbicacion(
+    latitude: number, 
+    longitude: number, 
+    forzarValidacion: boolean = false
+  ): Promise<ValidacionUbicacion> {
     try {
+      // Verificar si hay una validación en cache reciente y válida
+      if (!forzarValidacion && this.validacionCache) {
+        const { coords, resultado, timestamp } = this.validacionCache;
+        const ahora = Date.now();
+        
+        // Verificar si la cache está dentro del tiempo de vida
+        const cacheActiva = ahora - timestamp < this.CACHE_TTL;
+        
+        // Verificar si las coordenadas están dentro de un radio cercano (10 metros)
+        const distancia = this.calcularDistancia(
+          latitude, longitude,
+          coords.latitude, coords.longitude
+        );
+        
+        const coordenadasCercanas = distancia < 10; // 10 metros
+        
+        if (cacheActiva && coordenadasCercanas) {
+          console.log('📍 Usando validación de ubicación cacheada', {
+            distancia: `${distancia.toFixed(1)}m`,
+            tiempoCache: `${((ahora - timestamp) / 1000).toFixed(0)}s`
+          });
+          return resultado;
+        }
+      }
+      
+      // Si no hay cache válida o se fuerza validación, hacer la llamada API
+      console.log('📍 Validando ubicación con el servidor...');
       const response = await apiClient.post(`${this.baseURL}/validar-ubicacion`, {
         latitude,
         longitude
       });
+      
+      // Guardar en cache
+      this.validacionCache = {
+        coords: { latitude, longitude },
+        resultado: response.data,
+        timestamp: Date.now()
+      };
+      
       return response.data;
     } catch (error) {
+      console.error('Error validando ubicación:', error);
       throw error;
     }
+  }
+  
+  /**
+   * Calcular distancia entre dos puntos en metros usando fórmula de Haversine
+   */
+  private calcularDistancia(
+    lat1: number, lon1: number,
+    lat2: number, lon2: number
+  ): number {
+    const R = 6371000; // Radio de la tierra en metros
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   }
 
   /**

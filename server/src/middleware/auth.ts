@@ -35,7 +35,9 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     console.log('[auth] decoded.userId:', decoded.userId, 'tipo:', typeof decoded.userId);
     
     // Buscar el usuario en la base de datos
-    const user = await UsuarioModel.findById(decoded.userId);
+    const userId = parseInt(decoded.userId);
+    console.log('[auth] Buscando usuario ID:', userId);
+    const user = await UsuarioModel.findById(userId);
     console.log('[auth] resultado búsqueda usuario:', user);
     
     if (!user) {

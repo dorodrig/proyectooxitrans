@@ -10,11 +10,15 @@ declare global {
     ApexCharts?: any;
     Chart?: any;
     translations?: any;
+    __localizationPolyfillLoaded?: boolean;
   }
 }
 
 // Crear objeto global de localizaciones si no existe
-if (typeof window !== 'undefined') {
+if (typeof window !== 'undefined' && !window.__localizationPolyfillLoaded) {
+  // Marcar como cargado para evitar duplicaciones
+  window.__localizationPolyfillLoaded = true;
+  
   // Polyfill para ApexCharts y otras librerías de gráficos
   if (!window.ApexCharts) {
     window.ApexCharts = {};
@@ -77,16 +81,35 @@ if (typeof window !== 'undefined') {
     };
   }
 
-  // Global error handler para localizaciones
+  // 🔇 SUPER SILENCIADOR para localizaciones y extensiones
   const originalError = console.error;
+  
   console.error = function(...args) {
     const message = args[0];
-    if (typeof message === 'string' && 
-        (message.includes('RegisterClientLocalizationsError') ||
-         message.includes('translations') ||
-         message.includes('localization'))) {
-      console.warn('🔧 Localization error intercepted and handled:', ...args);
-      return;
+    if (typeof message === 'string') {
+      // Lista completa de errores a silenciar
+      const silentErrors = [
+        'RegisterClientLocalizationsError',
+        'Cannot read properties of undefined',
+        'translations',
+        'localization',
+        'net::ERR_BLOCKED_BY_CLIENT',
+        'ERR_BLOCKED_BY_RESPONSE',
+        'The message port closed',
+        'DevTools',
+        'React DevTools',
+        'extension',
+        'Extension',
+        'chrome-extension',
+        'moz-extension',
+        'Failed to load resource',
+        'manifest',
+        'service worker'
+      ];
+      
+      if (silentErrors.some(error => message.includes(error))) {
+        return; // Silenciar completamente
+      }
     }
     originalError.apply(console, args);
   };
@@ -94,9 +117,25 @@ if (typeof window !== 'undefined') {
   // Interceptar promesas rechazadas por errores de localización
   window.addEventListener('unhandledrejection', (event) => {
     const error = event.reason;
-    if (error && error.name === 'RegisterClientLocalizationsError') {
-      console.warn('🔧 RegisterClientLocalizationsError intercepted and handled:', error);
+    if (error && (
+        error.name === 'RegisterClientLocalizationsError' ||
+        (typeof error === 'string' && error.includes('localization')) ||
+        (error.message && error.message.includes('ERR_BLOCKED_BY_CLIENT'))
+    )) {
+      console.info('🔧 Unhandled rejection intercepted and handled:', error);
       event.preventDefault(); // Prevenir que se muestre en la consola
+    }
+  });
+
+  // Interceptar errores de recursos bloqueados
+  window.addEventListener('error', (event) => {
+    if (event.message && (
+        event.message.includes('ERR_BLOCKED_BY_CLIENT') ||
+        event.message.includes('ERR_BLOCKED_BY_RESPONSE') ||
+        event.message.includes('net::ERR_')
+    )) {
+      console.info('🔧 Network error intercepted:', event.message);
+      event.preventDefault();
     }
   });
 

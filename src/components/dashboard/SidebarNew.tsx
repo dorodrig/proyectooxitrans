@@ -31,6 +31,7 @@ const SidebarNew: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       title: 'Administración',
       items: [
         { icon: '👥', label: 'Gestión de Usuarios', href: '/admin/usuarios' },
+        { icon: '🔍', label: 'Consultas Colaboradores', href: '/consultas-colaboradores' },
         { icon: '🔧', label: 'Control Maestro', href: '/control-maestro' },
         { icon: '🔑', label: 'Asignar Roles', href: '/admin/asignar-roles' },
         { icon: '🏢', label: 'Regionales', href: '/admin/regionales' },

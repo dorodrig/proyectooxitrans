@@ -5,7 +5,7 @@ import NavigationBar from '../components/common/NavigationBar';
 // Aquí iría el componente de gestión de regionales
 const RegionalesPage: React.FC = () => {
   return (
-    <div className="regionales-page max-w-2xl mx-auto py-8">
+    <div className="regionales-page mx-auto py-8 px-4">
       <NavigationBar 
         title="Gestionar Regionales"
         showBackButton={true}

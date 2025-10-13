@@ -105,15 +105,15 @@ export const useEmpleadosPresentes = () => {
           
           // Procesar registros para encontrar empleados presentes
           registros.forEach((registro) => {
-            const empleadoId = registro.usuario_id || registro.usuario?.id;
-            const nombre = registro.nombre || registro.usuario?.nombre || '';
-            const apellido = registro.apellido || registro.usuario?.apellido || '';
+            const empleadoId = registro.usuarioId || registro.usuario?.id;
+            const nombre = registro.usuario?.nombre || '';
+            const apellido = registro.usuario?.apellido || '';
             
             if (empleadoId && registro.tipo === 'entrada') {
               empleadosPresentes.set(empleadoId, {
                 id: empleadoId,
                 nombre: `${nombre} ${apellido}`.trim(),
-                departamento: registro.departamento || registro.usuario?.departamento || 'N/A'
+                departamento: registro.usuario?.departamento || 'N/A'
               });
             } else if (empleadoId && registro.tipo === 'salida') {
               // Si hay salida posterior, remover de presentes
@@ -209,9 +209,9 @@ export const useActividadReciente = () => {
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, 10)
       .map((registro) => {
-        const empleadoNombre = registro.nombre || registro.usuario?.nombre || 'N/A';
-        const empleadoApellido = registro.apellido || registro.usuario?.apellido || '';
-        const departamento = registro.departamento || registro.usuario?.departamento || 'N/A';
+        const empleadoNombre = registro.usuario?.nombre || 'N/A';
+        const empleadoApellido = registro.usuario?.apellido || '';
+        const departamento = registro.usuario?.departamento || 'N/A';
         
         return {
           id: registro.id,

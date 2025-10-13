@@ -1,0 +1,609 @@
+// ====================================
+// 📊 CALCULADORA HORAS EXTRAS - ESTILOS SCSS
+// Estilos para componente de cálculo según legislación colombiana
+// ====================================
+
+@use '../abstracts/variables' as *;
+@use 'sass:color';
+
+.calculadora-horas-extras {
+  background: white;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xl;
+  box-shadow: $shadow-md;
+
+  // ====================================
+  // 🎛️ CONTROLES SUPERIORES
+  // ====================================
+  &__controles {
+    display: flex;
+    gap: $spacing-lg;
+    align-items: end;
+    margin-bottom: $spacing-xl;
+    padding: $spacing-lg;
+    background: $gray-50;
+    border-radius: $border-radius-md;
+    flex-wrap: wrap;
+
+    .control-grupo {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-xs;
+
+      label {
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        color: $text-secondary;
+      }
+
+      select, input {
+        padding: $spacing-sm $spacing-md;
+        border: 1px solid $border-color;
+        border-radius: $border-radius-md;
+        font-size: $font-size-sm;
+        background: white;
+        min-width: 150px;
+
+        &:focus {
+          outline: none;
+          border-color: $oxitrans-primary;
+          box-shadow: 0 0 0 2px rgba($oxitrans-primary, 0.2);
+        }
+      }
+
+      .input-moneda {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        .moneda-signo {
+          position: absolute;
+          left: $spacing-sm;
+          font-weight: $font-weight-semibold;
+          color: $text-secondary;
+          z-index: 1;
+        }
+
+        input {
+          padding-left: $spacing-lg;
+          font-family: 'Courier New', monospace;
+        }
+      }
+    }
+
+    .btn-toggle-detalles {
+      padding: $spacing-sm $spacing-md;
+      background: $oxitrans-primary;
+      color: white;
+      border: none;
+      border-radius: $border-radius-md;
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+
+      &:hover {
+        background: $oxitrans-primary-dark;
+        transform: translateY(-2px);
+        box-shadow: $shadow-sm;
+      }
+    }
+  }
+
+  // ====================================
+  // 📈 RESUMEN EJECUTIVO
+  // ====================================
+  &__resumen {
+    background: linear-gradient(135deg, $oxitrans-primary-light 0%, $oxitrans-primary 100%);
+    color: white;
+    padding: $spacing-xl;
+    border-radius: $border-radius-lg;
+    margin-bottom: $spacing-xl;
+
+    h3 {
+      margin: 0 0 $spacing-lg;
+      font-size: $font-size-xl;
+      font-weight: $font-weight-bold;
+    }
+
+    .resumen-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: $spacing-lg;
+      margin-bottom: $spacing-xl;
+
+      .resumen-item {
+        text-align: center;
+        background: rgba(white, 0.1);
+        backdrop-filter: blur(10px);
+        padding: $spacing-md;
+        border-radius: $border-radius-md;
+        border: 1px solid rgba(white, 0.2);
+
+        &.destacado {
+          background: rgba(white, 0.2);
+          border-color: rgba(white, 0.4);
+          transform: scale(1.05);
+        }
+
+        &.monetario {
+          background: rgba($success-color, 0.2);
+          border-color: rgba($success-color, 0.4);
+        }
+
+        .resumen-valor {
+          font-size: $font-size-2xl;
+          font-weight: $font-weight-bold;
+          margin-bottom: $spacing-xs;
+        }
+
+        .resumen-label {
+          font-size: $font-size-xs;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          opacity: 0.9;
+        }
+      }
+    }
+
+    .resumen-extras {
+      background: rgba(white, 0.1);
+      border-radius: $border-radius-md;
+      padding: $spacing-lg;
+
+      h4 {
+        margin: 0 0 $spacing-md;
+        font-size: $font-size-lg;
+        font-weight: $font-weight-semibold;
+      }
+
+      .extras-breakdown {
+        display: flex;
+        gap: $spacing-lg;
+        flex-wrap: wrap;
+
+        .extras-item {
+          display: flex;
+          align-items: center;
+          gap: $spacing-sm;
+          background: rgba(white, 0.1);
+          padding: $spacing-sm $spacing-md;
+          border-radius: $border-radius-sm;
+          flex: 1;
+          min-width: 200px;
+
+          &.diurnas {
+            border-left: 4px solid #fbbf24; // Amarillo para diurno
+          }
+
+          &.nocturnas {
+            border-left: 4px solid #6366f1; // Índigo para nocturno
+          }
+
+          .extras-icono {
+            font-size: $font-size-lg;
+          }
+
+          .extras-tipo {
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            flex: 1;
+          }
+
+          .extras-cantidad {
+            font-family: 'Courier New', monospace;
+            font-weight: $font-weight-bold;
+          }
+
+          .extras-valor {
+            font-size: $font-size-xs;
+            opacity: 0.9;
+            margin-left: $spacing-xs;
+          }
+        }
+      }
+    }
+  }
+
+  // ====================================
+  // 📋 TABLA DETALLADA
+  // ====================================
+  &__tabla {
+    .tabla-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: $spacing-lg;
+
+      h3 {
+        margin: 0;
+        font-size: $font-size-xl;
+        color: $text-primary;
+      }
+
+      .tabla-contador {
+        font-size: $font-size-sm;
+        color: $text-secondary;
+        background: $gray-100;
+        padding: $spacing-xs $spacing-sm;
+        border-radius: $border-radius-sm;
+      }
+    }
+
+    .tabla-container {
+      overflow-x: auto;
+      border-radius: $border-radius-lg;
+      box-shadow: $shadow-sm;
+      border: 1px solid $border-color;
+    }
+
+    .tabla-calculos {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+
+      thead {
+        th {
+          background: $gray-100;
+          color: $text-primary;
+          font-weight: $font-weight-semibold;
+          padding: $spacing-md;
+          text-align: left;
+          border-bottom: 2px solid $border-color;
+          font-size: $font-size-sm;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+
+      tbody {
+        tr {
+          transition: background-color 0.2s ease;
+
+          &:hover {
+            background: $gray-50;
+          }
+
+          &.con-extras {
+            border-left: 4px solid $warning-color;
+          }
+
+          td {
+            padding: $spacing-md;
+            border-bottom: 1px solid rgba($border-color, 0.5);
+            vertical-align: middle;
+            font-size: $font-size-sm;
+          }
+        }
+      }
+
+      .fecha-cell {
+        .fecha-principal {
+          font-weight: $font-weight-semibold;
+          color: $text-primary;
+        }
+
+        .fecha-dia {
+          font-size: $font-size-xs;
+          color: $text-secondary;
+          text-transform: uppercase;
+        }
+      }
+
+      .horas-cell {
+        font-family: 'Courier New', monospace;
+        font-weight: $font-weight-medium;
+        text-align: right;
+
+        .horas-valor {
+          font-size: $font-size-base;
+          color: $text-primary;
+        }
+
+        &.ordinarias {
+          color: $success-color;
+        }
+
+        &.extras {
+          .extras-total {
+            font-weight: $font-weight-bold;
+            color: $warning-color;
+          }
+
+          .extras-detalle {
+            font-size: $font-size-xs;
+            margin-top: $spacing-xs;
+            display: flex;
+            gap: $spacing-xs;
+            justify-content: flex-end;
+
+            .diurna {
+              color: #f59e0b;
+            }
+
+            .nocturna {
+              color: #6366f1;
+            }
+          }
+
+          .sin-extras {
+            color: $text-muted;
+            font-style: italic;
+          }
+        }
+      }
+
+      .extras-breakdown-cell {
+        text-align: right;
+      }
+
+      .desglose-cell {
+        .desglose-detallado {
+          font-size: $font-size-xs;
+          
+          .desglose-linea {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+            
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+      }
+
+      .valor-cell {
+        text-align: right;
+        font-family: 'Courier New', monospace;
+
+        .valor-total {
+          font-weight: $font-weight-bold;
+          color: $success-color;
+        }
+
+        .valor-extras {
+          font-size: $font-size-xs;
+          color: $warning-color;
+          display: block;
+          margin-top: 2px;
+        }
+
+        .sin-valor {
+          color: $text-muted;
+          font-style: italic;
+          font-family: inherit;
+        }
+      }
+    }
+  }
+
+  // ====================================
+  // ⚠️ ALERTA LEGAL
+  // ====================================
+  &__alerta {
+    display: flex;
+    gap: $spacing-md;
+    background: rgba($warning-color, 0.1);
+    border: 1px solid rgba($warning-color, 0.3);
+    border-radius: $border-radius-md;
+    padding: $spacing-lg;
+    margin: $spacing-xl 0;
+
+    .alerta-icono {
+      font-size: 2rem;
+      color: $warning-color;
+    }
+
+    .alerta-contenido {
+      flex: 1;
+
+      h4 {
+        color: color.adjust($warning-color, $lightness: -20%);
+        font-size: $font-size-base;
+        font-weight: $font-weight-semibold;
+        margin: 0 0 $spacing-sm;
+      }
+
+      p {
+        margin: 0;
+        font-size: $font-size-sm;
+        color: $text-secondary;
+        line-height: 1.5;
+
+        strong {
+          color: $text-primary;
+          font-weight: $font-weight-semibold;
+        }
+      }
+    }
+  }
+
+  // ====================================
+  // 📋 INFORMACIÓN LEGAL
+  // ====================================
+  &__info-legal {
+    margin-top: $spacing-xl;
+    border-top: 1px solid $border-color;
+    padding-top: $spacing-lg;
+
+    details {
+      summary {
+        cursor: pointer;
+        font-weight: $font-weight-medium;
+        color: $oxitrans-primary;
+        margin-bottom: $spacing-md;
+        transition: color 0.3s ease;
+
+        &:hover {
+          color: $oxitrans-primary-dark;
+        }
+      }
+
+      .info-legal-content {
+        background: $gray-50;
+        padding: $spacing-lg;
+        border-radius: $border-radius-md;
+        border-left: 4px solid $oxitrans-primary;
+
+        h4 {
+          color: $text-primary;
+          font-size: $font-size-base;
+          margin: 0 0 $spacing-md;
+        }
+
+        ul {
+          margin: 0;
+          padding-left: $spacing-lg;
+
+          li {
+            margin-bottom: $spacing-sm;
+            font-size: $font-size-sm;
+            color: $text-secondary;
+            line-height: 1.5;
+
+            strong {
+              color: $text-primary;
+              font-weight: $font-weight-semibold;
+            }
+
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ====================================
+  // 🔄 ESTADOS DE CARGA Y SIN DATOS
+  // ====================================
+  &__loading, &__sin-datos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-3xl;
+    text-align: center;
+    color: $text-secondary;
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid $gray-300;
+      border-top: 4px solid $oxitrans-primary;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: $spacing-lg;
+    }
+
+    .sin-datos-icon {
+      font-size: 4rem;
+      margin-bottom: $spacing-lg;
+      opacity: 0.6;
+    }
+
+    h3 {
+      color: $text-primary;
+      font-size: $font-size-lg;
+      margin: 0 0 $spacing-sm;
+    }
+
+    p {
+      margin: 0;
+      font-size: $font-size-base;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  }
+
+  // ====================================
+  // 📱 RESPONSIVE DESIGN
+  // ====================================
+  @media (max-width: $breakpoint-lg) {
+    &__controles {
+      flex-direction: column;
+      align-items: stretch;
+      gap: $spacing-md;
+
+      .control-grupo {
+        flex: 1;
+        min-width: auto;
+
+        select, input {
+          min-width: auto;
+          width: 100%;
+        }
+      }
+    }
+
+    &__resumen {
+      .resumen-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: $spacing-md;
+      }
+
+      .extras-breakdown {
+        flex-direction: column;
+
+        .extras-item {
+          min-width: auto;
+        }
+      }
+    }
+  }
+
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-lg;
+
+    &__tabla {
+      .tabla-calculos {
+        font-size: $font-size-xs;
+
+        th, td {
+          padding: $spacing-sm;
+        }
+
+        .horas-cell .extras-detalle {
+          flex-direction: column;
+          align-items: flex-end;
+        }
+      }
+    }
+
+    &__resumen {
+      padding: $spacing-lg;
+
+      .resumen-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    &__alerta {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+
+  @media (max-width: $breakpoint-sm) {
+    &__tabla {
+      .tabla-container {
+        border-radius: 0;
+        margin: 0 (-$spacing-lg);
+        box-shadow: none;
+        border: none;
+        border-top: 1px solid $border-color;
+        border-bottom: 1px solid $border-color;
+      }
+    }
+
+    &__resumen .resumen-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

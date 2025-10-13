@@ -40,7 +40,9 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
     '/logs': 'Logs de Actividad',
     '/alertas': 'Alertas',
     '/configuracion': 'Configuración',
-    '/jornada-laboral': 'Jornada Laboral'
+    '/jornada-laboral': 'Jornada Laboral',
+    '/asignar-jornada-laboral': 'Asignar Jornada Laboral',
+    '/consultas-colaboradores': 'Consultas Colaboradores'
   };
 
   // Obtener el título de la página actual

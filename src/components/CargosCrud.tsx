@@ -80,7 +80,7 @@ const CargosCrud: React.FC = () => {
 
   return (
       <div className={styles['cargos-crud']}>
-        <h3 style={{ color: '#c8102e', fontWeight: 700, marginBottom: '0.5rem', fontSize: '1.3rem' }}>Gestionar Cargos</h3>
+        <h3 style={{ color: '#297372', fontWeight: 700, marginBottom: '0.5rem', fontSize: '1.3rem' }}>Gestionar Cargos</h3>
       {successMsg && (
         <div className="flex items-center gap-2 p-2 mb-2 bg-green-100 text-green-700 rounded animate-fade-in">
           <CheckCircle size={18} /> {successMsg}
@@ -99,42 +99,46 @@ const CargosCrud: React.FC = () => {
           createMutation.mutate({ nombre, descripcion });
         }
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <input
-              type="text"
-              placeholder="Nombre del cargo"
-              value={nombre}
-              onChange={e => setNombre(e.target.value)}
-              className={styles['form-input']}
-              required
-              style={{ paddingLeft: '2.2rem' }}
-            />
-            <BriefcaseIcon />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', width: '100%' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <input
+                type="text"
+                placeholder="Nombre del cargo"
+                value={nombre}
+                onChange={e => setNombre(e.target.value)}
+                className={styles['form-input']}
+                required
+                style={{ paddingLeft: '2.2rem' }}
+              />
+              <BriefcaseIcon />
+            </div>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <input
+                type="text"
+                placeholder="Descripción"
+                value={descripcion}
+                onChange={e => setDescripcion(e.target.value)}
+                className={styles['form-input']}
+                style={{ paddingLeft: '2.2rem' }}
+              />
+              <PencilIcon />
+            </div>
           </div>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <input
-              type="text"
-              placeholder="Descripción"
-              value={descripcion}
-              onChange={e => setDescripcion(e.target.value)}
-              className={styles['form-input']}
-              style={{ paddingLeft: '2.2rem' }}
-            />
-            <PencilIcon />
-          </div>
-          <button type="submit" className={styles['edit-btn']}>
-            {editId ? 'Actualizar' : 'Agregar'} <CheckCircle size={16} />
-          </button>
-          {editId && (
-            <button type="button" className={styles['edit-btn']} style={{ background: '#e5e7eb', color: '#222' }} onClick={handleCancel}>
-              Cancelar
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-start' }}>
+            <button type="submit" className={styles['edit-btn']}>
+              {editId ? 'Actualizar' : 'Agregar'} <CheckCircle size={16} />
             </button>
-          )}
+            {editId && (
+              <button type="button" className={styles['edit-btn']} style={{ background: '#e5e7eb', color: '#222' }} onClick={handleCancel}>
+                Cancelar
+              </button>
+            )}
+          </div>
         </div>
       </form>
       <div style={{ marginTop: '2rem' }}>
-        <h2 style={{ color: '#c8102e', fontWeight: 600, fontSize: '1.1rem', marginBottom: '1rem' }}>Cargos creados</h2>
+        <h2 style={{ color: '#297372', fontWeight: 600, fontSize: '1.1rem', marginBottom: '1rem' }}>Cargos creados</h2>
         {isLoading ? (
           <div>Cargando cargos...</div>
         ) : cargos.length === 0 ? (
@@ -179,7 +183,7 @@ const CargosCrud: React.FC = () => {
               ) : (
                 cargosPage.map((cargo: Cargo) => (
                   <tr key={cargo.id.toString()}>
-                    <td style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#c8102e', fontWeight: 600 }}>
+                    <td style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#297372', fontWeight: 600 }}>
                       <Briefcase size={18} />
                       {cargo.nombre}
                     </td>
@@ -211,7 +215,7 @@ const CargosCrud: React.FC = () => {
 
   // Iconos para los inputs
   function BriefcaseIcon() {
-    return <span style={{ position: 'absolute', left: '0.7rem', top: '50%', transform: 'translateY(-50%)', color: '#c8102e' }}><Briefcase size={18} /></span>;
+    return <span style={{ position: 'absolute', left: '0.7rem', top: '50%', transform: 'translateY(-50%)', color: '#297372' }}><Briefcase size={18} /></span>;
   }
   function PencilIcon() {
     return <span style={{ position: 'absolute', left: '0.7rem', top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }}><Pencil size={18} /></span>;

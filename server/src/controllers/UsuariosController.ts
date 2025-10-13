@@ -219,7 +219,16 @@ export class UsuariosController {
         return;
       }
       
-      const usuarioId = await UsuarioModel.create(req.body);
+      // Transformar datos de camelCase a snake_case para el modelo
+      const userData = {
+        ...req.body,
+        tipo_documento: req.body.tipoDocumento,
+        fecha_ingreso: req.body.fechaIngreso
+      };
+      delete userData.tipoDocumento;
+      delete userData.fechaIngreso;
+      
+      const usuarioId = await UsuarioModel.create(userData);
       const nuevoUsuario = await UsuarioModel.findById(usuarioId);
       
       res.status(201).json({

@@ -431,7 +431,9 @@ export class AuthController {
       }
 
       // Verificar si el usuario existe
+      console.log(`🔍 [requestPasswordReset] Buscando documento: "${documento.trim()}"`);
       const usuario = await UsuarioModel.findByDocument(documento.trim());
+      console.log(`🔍 [requestPasswordReset] Usuario encontrado:`, usuario ? 'SÍ' : 'NO');
       
       if (!usuario) {
         // Por seguridad, respondemos exitosamente aunque no exista
@@ -458,14 +460,12 @@ export class AuthController {
       res.status(200).json({
         success: true,
         message: 'Token de restablecimiento generado correctamente',
-        data: {
-          documentExists: true,
-          resetToken,
-          usuario: {
-            nombre: usuario.nombre,
-            apellido: usuario.apellido,
-            documento: usuario.documento
-          }
+        documentExists: true,
+        resetToken,
+        usuario: {
+          nombre: usuario.nombre,
+          apellido: usuario.apellido,
+          documento: usuario.documento
         }
       });
 
@@ -522,10 +522,12 @@ export class AuthController {
   // Restablecer contraseña
   static async resetPassword(req: Request, res: Response): Promise<void> {
     try {
+      console.log('🔒 [resetPassword] Request body:', req.body);
       const { token, password } = req.body;
 
       // Validar datos requeridos
       if (!token || !password) {
+        console.log('⚠️ [resetPassword] Faltan datos:', { token: !!token, password: !!password });
         res.status(400).json({
           success: false,
           message: 'Token y contraseña son requeridos'
@@ -543,9 +545,12 @@ export class AuthController {
       }
 
       // Restablecer contraseña
+      console.log('🔒 [resetPassword] Intentando restablecer con token:', token.substring(0, 8) + '...');
       const success = await UsuarioModel.resetPasswordWithToken(token, password);
+      console.log('🔒 [resetPassword] Resultado del restablecimiento:', success);
 
       if (!success) {
+        console.log('❌ [resetPassword] Token inválido o expirado');
         res.status(400).json({
           success: false,
           message: 'Token inválido o expirado'

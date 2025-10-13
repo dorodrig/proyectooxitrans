@@ -6,6 +6,7 @@ import { LoginPage } from './pages/LoginPage';
 import PremiumLoginPage from './pages/PremiumLoginPage';
 import { RegistroPage } from './pages/RegistroPage';
 import { lazy, Suspense } from 'react';
+import { NotificationProvider } from './components/notifications/NotificationProvider';
 
 // Lazy load admin pages
 const AdminUsuariosPage = lazy(() => import('./pages/AdminUsuariosPage'));
@@ -25,6 +26,10 @@ const ConfiguracionPage = lazy(() => import('./pages/ConfiguracionPage'));
 
 // Lazy load jornada laboral
 const JornadaLaboralPage = lazy(() => import('./pages/JornadaLaboralPage'));
+const AsignarJornadaLaboralPage = lazy(() => import('./pages/AsignarJornadaLaboralPage'));
+
+// Lazy load consultas
+const ConsultasColaboradoresPage = lazy(() => import('./pages/ConsultasColaboradoresPage'));
 
 // Main pages
 import HomePage from './pages/HomePage';
@@ -60,8 +65,9 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router basename={import.meta.env.PROD ? "/proyectooxitrans" : ""}>
-        <div className="App">
+      <NotificationProvider>
+        <Router basename={import.meta.env.PROD ? "/proyectooxitrans" : ""}>
+          <div className="App">
         <Routes>
           <Route 
             path="/login" 
@@ -243,9 +249,30 @@ function App() {
               ) : <Navigate to="/login" replace />
             }
           />
+          <Route
+            path="/asignar-jornada-laboral"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <AsignarJornadaLaboralPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/consultas-colaboradores"
+            element={
+              isAuthenticated ? (
+                <Suspense fallback={<div>Cargando...</div>}>
+                  <ConsultasColaboradoresPage />
+                </Suspense>
+              ) : <Navigate to="/login" replace />
+            }
+          />
         </Routes>
-      </div>
-    </Router>
+          </div>
+        </Router>
+      </NotificationProvider>
     </QueryClientProvider>
   );
 }

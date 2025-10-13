@@ -124,12 +124,19 @@ export class UsuarioModel {
   }
 
   static async findByDocument(documento: string): Promise<Usuario | null> {
+    console.log(`🔍 [UsuarioModel.findByDocument] Buscando documento: "${documento}"`);
     const query = `
       SELECT id, nombre, apellido, email, telefono, documento, tipo_documento, rol, estado, fecha_ingreso, departamento, cargo, codigo_acceso, foto_url, regional_id, tipo_usuario, created_at, updated_at
       FROM usuarios
       WHERE documento = ? AND estado != 'eliminado'
     `;
+    console.log(`🔍 [UsuarioModel.findByDocument] Query:`, query);
+    console.log(`🔍 [UsuarioModel.findByDocument] Parámetros:`, [documento]);
     const results = await executeQuery(query, [documento]) as UserRow[];
+    console.log(`🔍 [UsuarioModel.findByDocument] Resultados encontrados:`, results.length);
+    if (results.length > 0) {
+      console.log(`🔍 [UsuarioModel.findByDocument] Primer resultado:`, results[0]);
+    }
     if (results.length === 0) return null;
     return this.formatUser(results[0]);
   }
@@ -211,25 +218,55 @@ export class UsuarioModel {
   }
 
   static async createPasswordResetToken(userId: number): Promise<string> {
+    console.log('🔑 [createPasswordResetToken] Creando token para usuario:', userId);
     const token = crypto.randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + 3600000);
+    // Formatear fecha como string compatible con MySQL
+    const expiresAt = new Date(Date.now() + 3600000).toISOString().slice(0, 19).replace('T', ' ');
+    console.log('🔑 [createPasswordResetToken] Token generado:', token.substring(0, 8) + '...');
+    console.log('🔑 [createPasswordResetToken] Expira en:', expiresAt);
     
-    const query = `
-      INSERT INTO password_reset_tokens (usuario_id, token, expires_at, created_at)
-      VALUES (?, ?, ?, NOW())
-      ON DUPLICATE KEY UPDATE token = VALUES(token), expires_at = VALUES(expires_at), created_at = NOW()
+    // Primero eliminar tokens anteriores del usuario
+    const deleteQuery = `DELETE FROM password_reset_tokens WHERE usuario_id = ?`;
+    await executeQuery(deleteQuery, [userId]);
+    
+    // Insertar nuevo token
+    const insertQuery = `
+      INSERT INTO password_reset_tokens (usuario_id, token, expires_at, usado, created_at)
+      VALUES (?, ?, ?, FALSE, NOW())
     `;
-    await executeQuery(query, [userId, token, expiresAt]);
-    return token;
+    console.log('🔑 [createPasswordResetToken] Query:', insertQuery);
+    console.log('🔑 [createPasswordResetToken] Parámetros:', [userId, token, expiresAt]);
+    
+    try {
+      const result = await executeQuery(insertQuery, [userId, token, expiresAt]);
+      console.log('🔑 [createPasswordResetToken] Resultado inserción:', result);
+      return token;
+    } catch (error) {
+      console.error('❌ [createPasswordResetToken] Error:', error);
+      throw error;
+    }
   }
 
   static async verifyPasswordResetToken(token: string): Promise<{ valid: boolean; userId?: number }> {
+    console.log('🔍 [verifyPasswordResetToken] Verificando token:', token.substring(0, 8) + '...');
+    
+    // Primero verificar si el token existe sin importar la fecha
+    const checkQuery = `SELECT usuario_id, expires_at, usado FROM password_reset_tokens WHERE token = ?`;
+    const checkResults = await executeQuery(checkQuery, [token]) as { usuario_id: number; expires_at: string; usado: boolean | number }[];
+    console.log('🔍 [verifyPasswordResetToken] Token encontrado:', checkResults.length > 0);
+    if (checkResults.length > 0) {
+      console.log('🔍 [verifyPasswordResetToken] Datos del token:', checkResults[0]);
+    }
+    
     const query = `
       SELECT usuario_id, expires_at
       FROM password_reset_tokens
-      WHERE token = ? AND expires_at > NOW() AND usado = 0
+      WHERE token = ? AND expires_at > NOW() AND (usado = FALSE OR usado = 0)
     `;
+    console.log('🔍 [verifyPasswordResetToken] Query:', query);
+    console.log('🔍 [verifyPasswordResetToken] Parámetros:', [token]);
     const results = await executeQuery(query, [token]) as { usuario_id: number; expires_at: string }[];
+    console.log('🔍 [verifyPasswordResetToken] Resultados válidos:', results);
     
     if (results.length === 0) {
       return { valid: false };
@@ -239,8 +276,11 @@ export class UsuarioModel {
   }
 
   static async resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
+    console.log('🔒 [resetPasswordWithToken] Verificando token:', token.substring(0, 8) + '...');
     const verification = await this.verifyPasswordResetToken(token);
+    console.log('🔒 [resetPasswordWithToken] Resultado verificación:', verification);
     if (!verification.valid || !verification.userId) {
+      console.log('❌ [resetPasswordWithToken] Token no válido o userId faltante');
       return false;
     }
 
@@ -249,11 +289,13 @@ export class UsuarioModel {
     const updatePasswordQuery = `
       UPDATE usuarios SET password_hash = ?, updated_at = NOW() WHERE id = ?
     `;
+    console.log('🔒 [resetPasswordWithToken] Actualizando password para usuario:', verification.userId);
     await executeQuery(updatePasswordQuery, [hashedPassword, verification.userId]);
     
     const markTokenUsedQuery = `
-      UPDATE password_reset_tokens SET usado = 1 WHERE token = ?
+      UPDATE password_reset_tokens SET usado = TRUE, used_at = NOW() WHERE token = ?
     `;
+    console.log('🔒 [resetPasswordWithToken] Marcando token como usado');
     await executeQuery(markTokenUsedQuery, [token]);
     
     return true;

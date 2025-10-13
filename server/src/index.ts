@@ -22,14 +22,14 @@ import cargosRoutes from './routes/cargos';
 import regionalesRoutes from './routes/regionales';
 import novedadesRoutes from './routes/novedades';
 import jornadasRoutes from './routes/jornadas';
+import jornadaConfigRoutes from './routes/jornadaConfig';
+import colaboradoresRoutes from './routes/colaboradores';
 
 // Cargar variables de entorno
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3002;
-
-// Middleware de seguridad
+      const PORT = process.env.PORT || 3002;// Middleware de seguridad
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -83,12 +83,30 @@ app.use(cors({
 // Middleware general
 app.use(compression());
 app.use(morgan('combined'));
+
+// DEBUG: Middleware para capturar todos los requests
+app.use((req, res, next) => {
+  console.log('🌐 [SERVER] Request:', req.method, req.path);
+  console.log('📋 [SERVER] Headers:', req.headers);
+  next();
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// DEBUG: Middleware para ver el body parseado
+app.use((req, res, next) => {
+  if (req.method === 'POST' || req.method === 'PUT') {
+    console.log('💾 [SERVER] Body parseado:', req.body);
+  }
+  next();
+});
+
 // Servir archivos estáticos del frontend en producción
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../../../dist')));
+  const distPath = path.join(__dirname, '../../../dist');
+  console.log(`📁 [server] Sirviendo archivos estáticos desde: ${distPath}`);
+  app.use(express.static(distPath));
 }
 
 // Rutas principales de la API
@@ -100,6 +118,8 @@ app.use('/api/cargos', cargosRoutes);
 app.use('/api/regionales', regionalesRoutes);
 app.use('/api/novedades', novedadesRoutes);
 app.use('/api/jornadas', jornadasRoutes);
+app.use('/api/jornada-config', jornadaConfigRoutes);
+app.use('/api/colaboradores', colaboradoresRoutes);
 
 // Ruta de health check
 app.get('/api/health', (req, res) => {
@@ -164,6 +184,16 @@ app.get('/', (req, res) => {
       novedades: '/api/novedades'
     },
     documentation: 'API REST para el sistema de control de acceso'
+  });
+});
+
+// Middleware para manejar rutas API no encontradas
+app.use('/api/*', (req, res) => {
+  console.log(`🚫 [server] Ruta API no encontrada: ${req.method} ${req.originalUrl}`);
+  res.status(404).json({
+    success: false,
+    message: 'Endpoint no encontrado',
+    endpoint: req.originalUrl
   });
 });
 

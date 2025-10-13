@@ -18,20 +18,53 @@ export const RegionalController = {
 
   async create(req: Request, res: Response): Promise<void> {
     try {
+      console.log('📥 Datos recibidos para crear regional:', req.body);
+      
       const { nombre, descripcion, latitud, longitud } = req.body;
       
-      if (!nombre) {
-        res.status(400).json({ success: false, message: 'Nombre requerido' });
+      // Validaciones mejoradas
+      if (!nombre || typeof nombre !== 'string' || nombre.trim().length === 0) {
+        res.status(400).json({ success: false, message: 'Nombre requerido y debe ser una cadena válida' });
         return;
       }
 
-      const regional = await RegionalModel.create(nombre, descripcion, latitud, longitud);
+      // Validar coordenadas si están presentes
+      let validLatitud: number | undefined = undefined;
+      let validLongitud: number | undefined = undefined;
+
+      if (latitud !== undefined && latitud !== null) {
+        const parsedLat = parseFloat(latitud);
+        if (isNaN(parsedLat) || parsedLat < -90 || parsedLat > 90) {
+          res.status(400).json({ success: false, message: 'Latitud debe ser un número válido entre -90 y 90' });
+          return;
+        }
+        validLatitud = parsedLat;
+      }
+
+      if (longitud !== undefined && longitud !== null) {
+        const parsedLng = parseFloat(longitud);
+        if (isNaN(parsedLng) || parsedLng < -180 || parsedLng > 180) {
+          res.status(400).json({ success: false, message: 'Longitud debe ser un número válido entre -180 y 180' });
+          return;
+        }
+        validLongitud = parsedLng;
+      }
+
+      const regional = await RegionalModel.create(
+        nombre.trim(), 
+        descripcion ? descripcion.trim() : undefined, 
+        validLatitud, 
+        validLongitud
+      );
+      
+      console.log('✅ Regional creada exitosamente:', regional);
       res.json({ success: true, data: regional });
     } catch (error) {
-      console.error('Error en create regional:', error);
+      console.error('❌ Error en create regional:', error);
       res.status(500).json({ 
         success: false, 
-        message: 'Error al crear regional' 
+        message: 'Error interno del servidor al crear regional',
+        error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
       });
     }
   },

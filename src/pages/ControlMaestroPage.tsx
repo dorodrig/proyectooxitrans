@@ -2,7 +2,7 @@
 import React from 'react';
 import NavigationBar from '../components/common/NavigationBar';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, MapPin } from 'lucide-react';
+import { ShieldCheck, MapPin, Clock } from 'lucide-react';
 import '../styles/pages/controlMaestroPage.scss';
 
 const ControlMaestroPage: React.FC = () => {
@@ -38,6 +38,14 @@ const ControlMaestroPage: React.FC = () => {
           </div>
           <h2>Gestionar Cargos</h2>
           <p>Agrega, edita y asigna cargos a los usuarios.</p>
+        </Link>
+        {/* Card: Asignar Jornada Laboral */}
+        <Link to="/asignar-jornada-laboral" className="card-home">
+          <div className="icon">
+            <Clock />
+          </div>
+          <h2>Asignar Jornada Laboral</h2>
+          <p>Configura horarios de trabajo, horas de entrada y salida para empleados.</p>
         </Link>
       </div>
     </div>

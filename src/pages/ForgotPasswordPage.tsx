@@ -34,6 +34,8 @@ const ForgotPasswordPage: React.FC = () => {
 
     try {
       const response = await requestPasswordReset(documento);
+
+      
       if (response.documentExists) {
         setUserData(response.usuario ?? null);
         setResetToken(response.resetToken ?? '');
@@ -43,7 +45,8 @@ const ForgotPasswordPage: React.FC = () => {
         setError('El documento ingresado no se encuentra registrado en el sistema');
       }
     } catch (err: unknown) {
-      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al verificar el documento';
+      console.error('🚨 [ForgotPassword] Error:', err);
+      const errorMessage = (err as { message?: string })?.message || 'Error al verificar el documento';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -72,13 +75,28 @@ const ForgotPasswordPage: React.FC = () => {
     setError('');
 
     try {
+
       await resetPassword(resetToken, newPassword);
+
       setMessage('Contraseña actualizada exitosamente. Serás redirigido al login...');
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (err: unknown) {
-      const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Error al actualizar la contraseña';
+      // Manejar diferentes tipos de errores
+      let errorMessage = 'Error al actualizar la contraseña';
+      
+      if (err && typeof err === 'object') {
+        // Error de axios
+        if ('response' in err && err.response && typeof err.response === 'object') {
+          const response = err.response as { data?: { message?: string } };
+          errorMessage = response.data?.message || errorMessage;
+        }
+        // Error directo
+        else if ('message' in err && typeof err.message === 'string') {
+          errorMessage = err.message;
+        }
+      }
       setError(errorMessage);
     } finally {
       setIsLoading(false);

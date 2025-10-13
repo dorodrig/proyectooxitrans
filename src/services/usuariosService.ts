@@ -107,7 +107,7 @@ export const usuariosService = {
     const formData = new FormData();
     formData.append('photo', file);
     
-    const response = await fetch(`http://localhost:3001/api/usuarios/${id}/photo`, {
+    const response = await fetch(`http://localhost:3002/api/usuarios/${id}/photo`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${localStorage.getItem('auth_token')}`,

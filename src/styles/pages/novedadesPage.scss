@@ -1,13 +1,20 @@
+// ====================================
+// 🗃️ NOVEDADES PAGE - OXITRANS S.A.S
+// Actualizado con la nueva colorimetría corporativa
+// ====================================
+
+@use '../abstracts' as *;
+
 .novedades-page {
   max-width: 700px;
   margin: 2rem auto;
   background: #fff;
   border-radius: 1.25rem;
-  box-shadow: 0 8px 32px rgba(200,16,46,0.08), 0 1.5px 6px rgba(0,0,0,0.04);
+  box-shadow: 0 8px 32px rgba($oxitrans-primary, 0.08), 0 1.5px 6px rgba(0,0,0,0.04);
   padding: 2.5rem 2rem 2rem 2rem;
 
   h1 {
-    color: #e91e63;
+    color: $oxitrans-primary;
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 2rem;
@@ -23,29 +30,29 @@
       gap: 0.5rem;
       label {
         font-weight: 600;
-        color: #e91e63;
+        color: $oxitrans-primary;
       }
       input {
-        border: 1.5px solid #e0e0e0;
+        border: 1.5px solid $gray-200;
         border-radius: 0.5rem;
         padding: 0.7rem 1rem;
         font-size: 1rem;
         background: #fff;
         transition: border 0.2s;
         &:focus {
-          border-color: #e91e63;
+          border-color: $oxitrans-primary;
           outline: none;
         }
       }
       select {
-        border: 1.5px solid #e0e0e0;
+        border: 1.5px solid $gray-200;
         border-radius: 0.5rem;
         padding: 0.7rem 1rem;
         font-size: 1rem;
-        background: #fce4ec;
+        background: rgba($oxitrans-primary, 0.05);
         transition: border 0.2s;
         &:focus {
-          border-color: #e91e63;
+          border-color: $oxitrans-primary;
           outline: none;
         }
       }
@@ -55,7 +62,7 @@
       }
     }
     .btn-primary {
-      background: linear-gradient(135deg, #e91e63 0%, #c8102e 100%);
+      background: linear-gradient(135deg, $oxitrans-primary 0%, $oxitrans-primary-dark 100%);
       color: white;
       border: none;
       border-radius: 0.5rem;
@@ -64,10 +71,10 @@
       font-size: 1rem;
       cursor: pointer;
       transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 8px rgba(200,16,46, 0.08);
+      box-shadow: 0 2px 8px rgba($oxitrans-primary, 0.08);
       &:hover:not(:disabled) {
-        background: #c8102e;
-        box-shadow: 0 4px 16px rgba(200,16,46, 0.12);
+        background: $oxitrans-primary-dark;
+        box-shadow: 0 4px 16px rgba($oxitrans-primary, 0.12);
       }
       &:disabled {
         opacity: 0.6;
@@ -77,22 +84,22 @@
   }
   .msg-success {
     margin-top: 1.5rem;
-    background: #fce4ec;
-    color: #c8102e;
+    background: rgba($oxitrans-primary, 0.1);
+    color: $oxitrans-primary;
     padding: 1rem;
     border-radius: 0.5rem;
     text-align: center;
     font-weight: 600;
-    box-shadow: 0 2px 8px rgba(200,16,46,0.07);
+    box-shadow: 0 2px 8px rgba($oxitrans-primary, 0.07);
   }
     .msg-error {
       margin-top: 1rem;
-      background: #ffeaea;
-      color: #d32f2f;
+      background: rgba($oxitrans-danger, 0.1);
+      color: $oxitrans-danger;
       padding: 0.8rem;
       border-radius: 0.5rem;
       text-align: center;
       font-weight: 600;
-      box-shadow: 0 2px 8px rgba(211,47,47,0.07);
+      box-shadow: 0 2px 8px rgba($oxitrans-danger, 0.07);
     }
 }

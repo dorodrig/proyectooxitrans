@@ -85,7 +85,7 @@ const NovedadesPage: React.FC = () => {
   return (
     <div className="novedades-page">
       <NavigationBar title="Registro de Novedades" />
-      <h1 className="text-2xl font-bold mb-4 text-pink-600">Agregar Novedades a Usuarios</h1>
+      <h1 className="text-2xl font-bold mb-4 text-oxitrans-primary">Agregar Novedades a Usuarios</h1>
       <form className="novedad-form" onSubmit={handleSubmit}>
         {errorMsg && <div className="msg-error">{errorMsg}</div>}
         <div className="form-group">

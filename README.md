@@ -90,6 +90,14 @@ El **Sistema de Control de Acceso de OXITRANS S.A.S** es una solución integral 
 - ✅ Historial de notificaciones
 - ✅ Configuración personalizable
 
+### ⏰ Configuración de Tiempo Laboral Global
+- ✅ **Configuración única** para todos los empleados OXITRANS
+- ✅ **Gestión centralizada** por administradores del sistema
+- ✅ **Horarios estándar** con validaciones laborales colombianas
+- ✅ **Cálculo automático** de horas extras y tiempo de almuerzo
+- ✅ **Sugerencias inteligentes** de horarios comunes
+- ✅ **Migración automática** desde configuraciones individuales
+
 ---
 
 ## 🏗️ Arquitectura del Sistema

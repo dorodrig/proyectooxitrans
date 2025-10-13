@@ -40,6 +40,7 @@ jobs:
         VITE_NODE_ENV: production
         VITE_COMPANY_NAME: OXITRANS S.A.S
         VITE_APP_NAME: Control de Acceso
+        VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
 
     - name: Setup Pages
       uses: actions/configure-pages@v5

@@ -63,7 +63,9 @@ const allowedOrigins = [
   'http://localhost:5174', // Puerto Vite alternativo
   'http://localhost:3000',
   'http://localhost',     // Para EC2 local
-  'http://127.0.0.1'      // Para EC2 local
+  'http://127.0.0.1',     // Para EC2 local
+  'http://ec2-18-218-166-209.us-east-2.compute.amazonaws.com',
+  'https://ec2-18-218-166-209.us-east-2.compute.amazonaws.com'
 ];
 
 app.use(cors({

@@ -13,7 +13,11 @@ const checks = [
     name: 'Manifest',
     check: async () => {
       try {
-        const response = await fetch('/manifest.webmanifest');
+        // Try manifest.json first, then fallback to manifest.webmanifest
+        let response = await fetch('/manifest.json');
+        if (!response.ok) {
+          response = await fetch('/manifest.webmanifest');
+        }
         const manifest = await response.json();
         return manifest.name && manifest.short_name && manifest.icons && manifest.icons.length > 0;
       } catch {

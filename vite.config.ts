@@ -37,36 +37,8 @@ export default defineConfig({
           }
         ]
       },
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
-      manifest: {
-        name: 'OXITRANS Control de Acceso',
-        short_name: 'OXITRANS',
-        description: 'Sistema de control de acceso y jornadas laborales para OXITRANS',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        display: 'standalone',
-        orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
-        icons: [
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ]
-      }
+      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'favicon.svg'],
+      manifest: false, // Usar manifest.json estático de public/
     })
   ],
   base: process.env.NODE_ENV === 'production' ? '/proyectooxitrans/' : '/',

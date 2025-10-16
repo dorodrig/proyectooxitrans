@@ -12,6 +12,9 @@
 // 🧩 Components (botones, cards, forms, etc.)
 @forward 'components';
 
+// 🍭 SweetAlert2 Custom Styles
+@use 'components/sweetalert-custom';
+
 // 📄 Pages (estilos específicos de páginas)
 @forward 'pages';
 

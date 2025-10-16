@@ -1,0 +1,225 @@
+// ====================================
+// 🍭 SWEETALERT2 CUSTOM STYLES - OXITRANS
+// Estilos personalizados para SweetAlert2
+// ====================================
+
+@use '../abstracts' as *;
+
+// Estilos globales para SweetAlert2
+.swal2-popup {
+  border-radius: $border-radius-lg !important;
+  border: none !important;
+  box-shadow: $shadow-xl !important;
+  
+  .swal2-title {
+    color: $oxitrans-dark !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    margin-bottom: $spacing-lg !important;
+  }
+
+  .swal2-html-container {
+    color: $text-primary !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
+  }
+
+  .swal2-confirm {
+    background: linear-gradient(135deg, $oxitrans-primary, lighten($oxitrans-primary, 10%)) !important;
+    border: none !important;
+    border-radius: $border-radius-md !important;
+    font-weight: 600 !important;
+    padding: $spacing-sm $spacing-lg !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s ease !important;
+
+    &:hover {
+      background: linear-gradient(135deg, darken($oxitrans-primary, 5%), $oxitrans-primary) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+
+    &:focus {
+      outline: none !important;
+      box-shadow: 0 0 0 3px rgba($oxitrans-primary, 0.2) !important;
+    }
+  }
+
+  .swal2-cancel {
+    background: linear-gradient(135deg, $danger, lighten($danger, 10%)) !important;
+    border: none !important;
+    border-radius: $border-radius-md !important;
+    font-weight: 600 !important;
+    padding: $spacing-sm $spacing-lg !important;
+    font-size: 0.95rem !important;
+    transition: all 0.3s ease !important;
+    margin-right: $spacing-sm !important;
+
+    &:hover {
+      background: linear-gradient(135deg, darken($danger, 5%), $danger) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: $shadow-lg !important;
+    }
+
+    &:focus {
+      outline: none !important;
+      box-shadow: 0 0 0 3px rgba($danger, 0.2) !important;
+    }
+  }
+
+  .swal2-actions {
+    margin-top: $spacing-xl !important;
+    gap: $spacing-md !important;
+  }
+
+  .swal2-icon {
+    &.swal2-success {
+      border-color: $success !important;
+      color: $success !important;
+
+      .swal2-success-ring {
+        border-color: rgba($success, 0.3) !important;
+      }
+
+      .swal2-success-fix {
+        background-color: $success !important;
+      }
+
+      .swal2-success-line {
+        background-color: $success !important;
+      }
+    }
+
+    &.swal2-error {
+      border-color: $danger !important;
+      color: $danger !important;
+
+      .swal2-x-mark {
+        .swal2-x-mark-line-left,
+        .swal2-x-mark-line-right {
+          background-color: $danger !important;
+        }
+      }
+    }
+
+    &.swal2-warning {
+      border-color: $warning !important;
+      color: $warning !important;
+    }
+
+    &.swal2-info {
+      border-color: $info !important;
+      color: $info !important;
+    }
+  }
+}
+
+// Estilos para toasts (notificaciones pequeñas)
+.swal2-toast {
+  border-radius: $border-radius-md !important;
+  box-shadow: $shadow-lg !important;
+  border-left: 4px solid $oxitrans-primary !important;
+
+  .swal2-title {
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    color: $oxitrans-dark !important;
+  }
+
+  .swal2-html-container {
+    font-size: 0.85rem !important;
+    color: $text-muted !important;
+  }
+
+  .swal2-timer-progress-bar {
+    background: $oxitrans-primary !important;
+  }
+
+  &.swal2-icon-success {
+    border-left-color: $success !important;
+    
+    .swal2-timer-progress-bar {
+      background: $success !important;
+    }
+  }
+
+  &.swal2-icon-error {
+    border-left-color: $danger !important;
+    
+    .swal2-timer-progress-bar {
+      background: $danger !important;
+    }
+  }
+
+  &.swal2-icon-warning {
+    border-left-color: $warning !important;
+    
+    .swal2-timer-progress-bar {
+      background: $warning !important;
+    }
+  }
+}
+
+// Backdrop personalizado
+.swal2-backdrop-show {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+// Animaciones personalizadas
+.swal2-show {
+  animation: swal2SlideInDown 0.3s ease-out !important;
+}
+
+.swal2-hide {
+  animation: swal2SlideOutUp 0.2s ease-in !important;
+}
+
+@keyframes swal2SlideInDown {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -100%, 0) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes swal2SlideOutUp {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -100%, 0) scale(0.9);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .swal2-popup {
+    width: 90% !important;
+    margin: $spacing-md !important;
+    
+    .swal2-title {
+      font-size: 1.25rem !important;
+    }
+
+    .swal2-html-container {
+      font-size: 0.9rem !important;
+    }
+
+    .swal2-confirm,
+    .swal2-cancel {
+      padding: $spacing-sm $spacing-md !important;
+      font-size: 0.9rem !important;
+    }
+  }
+
+  .swal2-toast {
+    width: 90% !important;
+    margin: $spacing-sm !important;
+  }
+}

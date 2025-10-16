@@ -5,29 +5,28 @@
 
 @forward 'variables';
 @forward 'mixins';
-@forward 'variables-premium';
 @forward 'mixins-premium';
 
 // ===================================
 // 🛠️ SISTEMA MODERNO SIN DEPRECACIONES
 // ===================================
 
-@use 'sass:map';
-@use 'variables-premium' as premium;
+// @use 'sass:map';
+// @use 'variables-premium' as premium;
 
-// Funciones modernas usando sass:map (sin deprecaciones)
-@function color($name) {
-  @return map.get(premium.$oxitrans-colors, $name);
-}
+// Funciones modernas usando sass:map (sin deprecaciones) - DESHABILITADO TEMPORALMENTE
+// @function color($name) {
+//   @return map.get(premium.$oxitrans-colors, $name);
+// }
 
-@function gradient($name) {
-  @return map.get(premium.$gradients, $name);
-}
+// @function gradient($name) {
+//   @return map.get(premium.$gradients, $name);
+// }
 
-@function shadow($level) {
-  @return map.get(premium.$shadows, $level);
-}
+// @function shadow($level) {
+//   @return map.get(premium.$shadows, $level);
+// }
 
-@function transition($type: 'all') {
-  @return map.get(premium.$transitions, $type);
-}
+// @function transition($type: 'all') {
+//   @return map.get(premium.$transitions, $type);
+// }

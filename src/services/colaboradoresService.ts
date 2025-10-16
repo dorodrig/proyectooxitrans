@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import type { Usuario } from '../types';
+// import type { Usuario } from '../types'; // No utilizado actualmente
 
 // ====================================
 // 🔍 INTERFACES - MÓDULO COLABORADORES

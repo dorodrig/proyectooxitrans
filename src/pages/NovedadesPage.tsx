@@ -14,6 +14,7 @@ const tiposNovedad = [
   { value: 'lic_maternidad', label: 'Licencia de maternidad' },
   { value: 'lic_paternidad', label: 'Licencia de paternidad' },
   { value: 'dia_familia', label: 'Día de la familia' },
+  { value: 'horas_extra', label: '⏰ Horas Extra' },
 ];
 
 const NovedadesPage: React.FC = () => {

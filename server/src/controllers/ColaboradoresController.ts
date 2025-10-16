@@ -212,6 +212,15 @@ export class ColaboradoresController {
 
         const [jornadas] = await connection.execute(jornadaQuery, queryParams);
 
+        // DEBUG TEMPORAL - Ver datos exactos que se envían
+        console.log('🔍 [BACKEND DEBUG] Query ejecutado:', jornadaQuery);
+        console.log('🔍 [BACKEND DEBUG] Parámetros:', queryParams);
+        console.log('🔍 [BACKEND DEBUG] Jornadas encontradas:', (jornadas as any[]).length);
+        if ((jornadas as any[]).length > 0) {
+          console.log('🔍 [BACKEND DEBUG] Primera jornada:', (jornadas as any[])[0]);
+          console.log('🔍 [BACKEND DEBUG] Últimas 3 fechas:', (jornadas as any[]).slice(0, 3).map(j => j.fecha));
+        }
+
         // Contar total de jornadas
         let countQuery = 'SELECT COUNT(*) as total FROM jornadas_laborales j WHERE j.usuario_id = ?';
         const countParams = [id];

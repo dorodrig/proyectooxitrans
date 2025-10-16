@@ -8,14 +8,30 @@
  * @param fechaISO - Fecha en formato ISO string
  * @returns Fecha formateada en formato colombiano con hora
  */
-export const formatearFechaColombiana = (fechaISO: string | null): string => {
-  if (!fechaISO) return 'No registrada';
+export const formatearFechaColombiana = (fechaISO: string | null | undefined): string => {
+  if (!fechaISO || fechaISO === 'null' || fechaISO === 'undefined') {
+    return 'No registrada';
+  }
   
   try {
-    const fecha = new Date(fechaISO);
+    // Limpiar la fecha de formatos problemáticos
+    let fechaLimpia = fechaISO.toString().trim();
+    
+    // Si es solo fecha (yyyy-mm-dd), agregar hora
+    if (/^\d{4}-\d{2}-\d{2}$/.test(fechaLimpia)) {
+      fechaLimpia += 'T00:00:00';
+    }
+    
+    // Si tiene formato ISO incompleto, completar
+    if (fechaLimpia.includes('T') && !fechaLimpia.includes('Z') && !fechaLimpia.includes('+')) {
+      fechaLimpia += 'Z';
+    }
+    
+    const fecha = new Date(fechaLimpia);
     
     // Verificar que la fecha sea válida
     if (isNaN(fecha.getTime())) {
+      console.warn('Fecha inválida detectada:', fechaISO);
       return 'Fecha inválida';
     }
     
@@ -37,7 +53,7 @@ export const formatearFechaColombiana = (fechaISO: string | null): string => {
     return fechaFormateada.replace(',', '');
     
   } catch (error) {
-    console.error('Error al formatear fecha:', error);
+    console.error('Error al formatear fecha:', error, 'Input:', fechaISO);
     return 'Error en fecha';
   }
 };
@@ -104,15 +120,26 @@ export const formatearSoloHora = (fechaISO: string | null): string => {
 };
 
 /**
- * Formatea una fecha para mostrar en el formato corto: dd/MMM
- * @param fechaISO - Fecha en formato ISO string
- * @returns Fecha en formato corto dd/MMM
+ * Formatea una fecha para mostrar en el formato corto: dd MMM
+ * @param fechaISO - Fecha en formato ISO string (YYYY-MM-DD)
+ * @returns Fecha en formato corto dd MMM
  */
 export const formatearFechaCorta = (fechaISO: string | null): string => {
   if (!fechaISO) return 'No fecha';
   
   try {
-    const fecha = new Date(fechaISO + 'T00:00:00');
+    // Extraer solo la parte de fecha si viene con hora
+    const soloFecha = fechaISO.includes('T') ? fechaISO.split('T')[0] : fechaISO;
+    
+    // Validar formato YYYY-MM-DD
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(soloFecha)) {
+      console.error('Formato de fecha inválido:', fechaISO);
+      return 'Fecha inválida';
+    }
+    
+    // Crear fecha sin problemas de zona horaria
+    const [year, month, day] = soloFecha.split('-').map(Number);
+    const fecha = new Date(year, month - 1, day); // month es 0-indexado
     
     if (isNaN(fecha.getTime())) {
       return 'Fecha inválida';
@@ -120,34 +147,43 @@ export const formatearFechaCorta = (fechaISO: string | null): string => {
     
     return fecha.toLocaleDateString('es-CO', {
       day: 'numeric',
-      month: 'short',
-      timeZone: 'America/Bogota'
+      month: 'short'
     });
     
   } catch (error) {
-    console.error('Error al formatear fecha corta:', error);
+    console.error('Error al formatear fecha corta:', error, fechaISO);
     return 'Error';
   }
 };
 
 /**
  * Formatea una fecha para mostrar el día de la semana
- * @param fechaISO - Fecha en formato ISO string
+ * @param fechaISO - Fecha en formato ISO string (YYYY-MM-DD)
  * @returns Día de la semana en español
  */
 export const formatearDiaSemana = (fechaISO: string | null): string => {
   if (!fechaISO) return 'N/A';
   
   try {
-    const fecha = new Date(fechaISO + 'T00:00:00');
+    // Extraer solo la parte de fecha si viene con hora
+    const soloFecha = fechaISO.includes('T') ? fechaISO.split('T')[0] : fechaISO;
+    
+    // Validar formato YYYY-MM-DD
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(soloFecha)) {
+      console.error('Formato de fecha inválido para día semana:', fechaISO);
+      return 'N/A';
+    }
+    
+    // Crear fecha sin problemas de zona horaria
+    const [year, month, day] = soloFecha.split('-').map(Number);
+    const fecha = new Date(year, month - 1, day); // month es 0-indexado
     
     if (isNaN(fecha.getTime())) {
       return 'Día inválido';
     }
     
     return fecha.toLocaleDateString('es-CO', {
-      weekday: 'short',
-      timeZone: 'America/Bogota'
+      weekday: 'short'
     });
     
   } catch (error) {

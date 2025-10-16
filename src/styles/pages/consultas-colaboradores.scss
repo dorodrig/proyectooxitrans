@@ -718,8 +718,8 @@
   }
 
   .resultados-actions {
-    .btn-toggle-vista {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    .btn-reporte-directo {
+      background: linear-gradient(135deg, #059669, #10b981);
       color: white;
       border: none;
       padding: $spacing-sm $spacing-lg;
@@ -728,10 +728,28 @@
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: $shadow-sm;
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      font-size: 0.9rem;
+      
+      span:first-child {
+        font-size: 1.1em;
+      }
 
       &:hover {
         transform: translateY(-2px);
         box-shadow: $shadow-lg;
+        background: linear-gradient(135deg, #047857, #059669);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      &:focus {
+        outline: 2px solid #10b981;
+        outline-offset: 2px;
       }
     }
   }
@@ -1745,6 +1763,162 @@
           background: $background-color;
           border-color: $oxitrans-primary;
           color: $oxitrans-primary;
+        }
+      }
+    }
+  }
+
+  // ====================================
+  // 📊 SECCIÓN DE REPORTES
+  // ====================================
+  &__reportes {
+    padding: $spacing-xl;
+
+    h2 {
+      color: $text-primary;
+      margin-bottom: $spacing-lg;
+      font-size: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+    }
+
+    .reportes-selector {
+      margin-bottom: $spacing-xl;
+
+      .selector-tabs {
+        display: flex;
+        background: $background-color;
+        border-radius: $border-radius-lg;
+        padding: $spacing-xs;
+        gap: $spacing-xs;
+
+        .selector-tab {
+          flex: 1;
+          padding: $spacing-md $spacing-lg;
+          background: transparent;
+          border: none;
+          border-radius: $border-radius;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          color: $text-secondary;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: $spacing-xs;
+
+          &.active {
+            background: white;
+            color: $oxitrans-primary;
+            box-shadow: $shadow-sm;
+          }
+
+          &:hover:not(:disabled) {
+            color: $oxitrans-primary;
+          }
+
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+        }
+      }
+    }
+
+    .reporte-info {
+      margin-bottom: $spacing-xl;
+
+      .info-card {
+        background: linear-gradient(135deg, $oxitrans-primary-light 0%, $oxitrans-primary 100%);
+        color: white;
+        padding: $spacing-lg;
+        border-radius: $border-radius-lg;
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+
+        .info-icon {
+          font-size: 2rem;
+          background: rgba(255, 255, 255, 0.2);
+          padding: $spacing-md;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .info-text {
+          flex: 1;
+
+          h3 {
+            margin: 0 0 $spacing-xs 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+          }
+
+          p {
+            margin: 0;
+            opacity: 0.9;
+            line-height: 1.4;
+
+            strong {
+              color: white;
+              font-weight: 600;
+            }
+          }
+        }
+      }
+    }
+
+    .reportes-help {
+      margin-top: $spacing-xl;
+
+      .help-card {
+        background: $surface-color;
+        border: 1px solid $border-color;
+        border-radius: $border-radius-lg;
+        padding: $spacing-lg;
+        display: flex;
+        gap: $spacing-md;
+
+        .help-icon {
+          font-size: 1.5rem;
+          background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+          color: #856404;
+          padding: $spacing-sm;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: fit-content;
+        }
+
+        .help-content {
+          flex: 1;
+
+          h4 {
+            margin: 0 0 $spacing-sm 0;
+            color: $text-primary;
+            font-size: 1rem;
+            font-weight: 600;
+          }
+
+          ul {
+            margin: 0;
+            padding-left: $spacing-lg;
+
+            li {
+              color: $text-secondary;
+              margin-bottom: $spacing-xs;
+              line-height: 1.4;
+
+              strong {
+                color: $text-primary;
+              }
+            }
+          }
         }
       }
     }

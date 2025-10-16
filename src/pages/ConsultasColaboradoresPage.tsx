@@ -3,19 +3,20 @@ import NavigationBar from '../components/common/NavigationBar';
 import { useAuthStore } from '../stores/authStore';
 import { useNavigate } from 'react-router-dom';
 import { colaboradoresService } from '../services/colaboradoresService';
-import MapaSimple from '../components/maps/MapaSimple';
+// import MapaSimple from '../components/maps/MapaSimple'; // Removido temporalmente
 import MapaGoogleSimple from '../components/maps/MapaGoogleSimple';
 import GoogleMapsSimpleLoader from '../components/maps/GoogleMapsSimpleLoader';
 import ControlesMapa from '../components/maps/ControlesMapa';
 import CalculadoraHorasExtrasComponent from '../components/calculadora/CalculadoraHorasExtras';
-import GeneradorReportesComponent from '../components/reportes/GeneradorReportes';
+import ReportePorFechasComponent from '../components/reportes/ReportePorFechas';
 import { ValidadorColombiano } from '../services/validadorColombiano';
 import { ManejadorErrores } from '../services/manejadorErrores';
 import { useNotifications } from '../components/notifications/NotificationProvider';
 import '../styles/pages/consultas-colaboradores.scss';
 import '../styles/components/maps.scss';
 import '../styles/components/calculadora-horas-extras.scss';
-import '../styles/components/reportes/GeneradorReportes.scss';
+import '../styles/components/reportes/ReportePorFechas.scss';
+import '../styles/components/reportes/reportes-criticos.css';
 import '../styles/components/notifications.scss';
 import { formatearFechaColombiana, formatearSoloFecha } from '../utils/formatoFechas';
 import type { Colaborador, JornadaLaboral, UbicacionGPS } from '../services/colaboradoresService';
@@ -41,10 +42,10 @@ const ConsultasColaboradoresPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [vistaActiva, setVistaActiva] = useState<'busqueda' | 'detalle' | 'mapa' | 'horas-extras' | 'reportes'>('busqueda');
   
-  // Estados de validación
-  const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
-  const [tipoValidacion, setTipoValidacion] = useState<'error' | 'warning' | 'info' | 'success' | null>(null);
-  const [intentosReintento, setIntentosReintento] = useState(0);
+  // Estados de validación (comentados temporalmente para evitar warnings)
+  // const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
+  // const [tipoValidacion, setTipoValidacion] = useState<'error' | 'warning' | 'info' | 'success' | null>(null);
+  // const [intentosReintento, setIntentosReintento] = useState(0);
   
   // Estados del mapa
   const [fechaFiltroMapa, setFechaFiltroMapa] = useState<string>('');
@@ -56,6 +57,9 @@ const ConsultasColaboradoresPage: React.FC = () => {
   // Estados de validación en tiempo real
   const [estadoValidacion, setEstadoValidacion] = useState<'idle' | 'validating' | 'valid' | 'invalid'>('idle');
   const [mensajeValidacion, setMensajeValidacion] = useState<string>('');
+
+  // Estado para controlar el tipo de reporte activo
+  // Solo reportes generales - no necesitamos estado para tipo
 
   // Ubicaciones filtradas por fecha (corregido para manejar formatos ISO)
   const ubicacionesFiltradas = fechaFiltroMapa 
@@ -82,13 +86,13 @@ const ConsultasColaboradoresPage: React.FC = () => {
   const buscarColaboradores = async (termino: string, pagina = 1) => {
     // Limpiar errores previos
     setError(null);
-    setErrorValidacion(null);
+    // setErrorValidacion(null); // Comentado temporalmente
 
     // Validar término de búsqueda
     const validacionTermino = ValidadorColombiano.validarTerminoBusqueda(termino);
     if (!validacionTermino.esValido) {
-      setErrorValidacion(validacionTermino.mensaje);
-      setTipoValidacion(validacionTermino.tipo);
+      // setErrorValidacion(validacionTermino.mensaje); // Comentado temporalmente
+      // setTipoValidacion(validacionTermino.tipo); // Comentado temporalmente
       
       if (validacionTermino.tipo === 'error') {
         mostrarError('Búsqueda inválida', validacionTermino.mensaje);
@@ -117,7 +121,7 @@ const ConsultasColaboradoresPage: React.FC = () => {
       setResultadosBusqueda(response.data);
       setTotalResultados(response.pagination.total);
       setPaginaBusqueda(pagina);
-      setIntentosReintento(0);
+      // setIntentosReintento(0); // Comentado temporalmente
 
       // Mostrar resultados
       if (response.data.length === 0) {
@@ -509,13 +513,22 @@ const ConsultasColaboradoresPage: React.FC = () => {
                     
                     <div className="resultados-actions">
                       <button 
-                        className="btn-toggle-vista"
+                        className="btn-reporte-directo"
+                        title="Acceso directo al Centro de Reportes para generar reportes Excel de todos los colaboradores por fechas"
                         onClick={() => {
-                          const container = document.querySelector('.consultas-colaboradores__cards-grid');
-                          container?.classList.toggle('vista-compacta');
+                          setVistaActiva('reportes');
+                          // Scroll suave hacia la sección de reportes después de un pequeño delay
+                          setTimeout(() => {
+                            const reportesSection = document.querySelector('.consultas-colaboradores__reportes');
+                            if (reportesSection) {
+                              reportesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                          }, 100);
+                          mostrarExito('Acceso directo', '📊 Centro de Reportes abierto. Genere reportes Excel de todos los colaboradores por fechas.');
                         }}
                       >
-                        📋 Vista Compacta
+                        <span>📊</span>
+                        <span>Reporte General</span>
                       </button>
                     </div>
                   </div>
@@ -859,28 +872,59 @@ const ConsultasColaboradoresPage: React.FC = () => {
                   <div className="consultas-colaboradores__horas-extras">
                     <h2>⏰ Cálculo de Horas Extras</h2>
                     
-                    {jornadasColaborador.length > 0 ? (
+                    {colaboradorSeleccionado ? (
                       <CalculadoraHorasExtrasComponent
                         jornadas={jornadasColaborador}
+                        colaboradorId={colaboradorSeleccionado.id}
                         loading={loadingDetalle}
                       />
                     ) : (
                       <div className="consultas-colaboradores__no-data">
-                        📊 No hay jornadas disponibles para calcular horas extras
+                        📊 Selecciona un colaborador para calcular horas extras
                       </div>
                     )}
                   </div>
                 )}
 
-                {vistaActiva === 'reportes' && (
-                  <GeneradorReportesComponent
-                    colaborador={colaboradorSeleccionado}
-                    jornadas={jornadasColaborador}
-                    ubicaciones={ubicacionesGPS}
-                    loading={loadingDetalle || loadingUbicaciones}
-                  />
-                )}
+              </div>
+            </div>
+          )}
 
+          {/* VISTA DE REPORTES - INDEPENDIENTE DE COLABORADOR SELECCIONADO */}
+          {vistaActiva === 'reportes' && (
+            <div className="consultas-colaboradores__reportes">
+              <h2>📊 Centro de Reportes</h2>
+              
+              {/* REPORTE GENERAL POR FECHAS */}
+              <div className="reporte-general">
+                <div className="reporte-info">
+                  <div className="info-card">
+                    <div className="info-icon">📈</div>
+                    <div className="info-text">
+                      <h3>Reporte General por Fechas</h3>
+                      <p>
+                        Genera reportes consolidados de todos los colaboradores en un rango de fechas específico
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <ReportePorFechasComponent />
+              </div>
+              
+              {/* INFORMACIÓN ADICIONAL */}
+              <div className="reportes-help">
+                <div className="help-card">
+                  <div className="help-icon">💡</div>
+                  <div className="help-content">
+                    <h4>Información sobre los reportes:</h4>
+                    <ul>
+                      <li><strong>Formato Excel:</strong> Descarga directa en formato .xlsx con datos consolidados</li>
+                      <li><strong>Filtros por fecha:</strong> Selecciona el rango de fechas para generar el reporte</li>
+                      <li><strong>Datos incluidos:</strong> Jornadas laborales, horas trabajadas, novedades y ubicaciones GPS</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           )}

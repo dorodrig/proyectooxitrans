@@ -9,6 +9,7 @@ export interface JornadaDiaria {
   salida: string;
   descanso_minutos?: number;
   observaciones?: string;
+  horas_calculadas?: number; // Horas ya calculadas desde la base de datos
 }
 
 export interface CalculoDetallado {
@@ -85,19 +86,51 @@ export class CalculadoraHorasExtras {
    * Calcula horas extras para una jornada específica
    */
   static calcularJornada(jornada: JornadaDiaria, valorHoraOrdinaria?: number): CalculoDetallado {
-    const horasDetalladas = this.analizarHoras(jornada.entrada, jornada.salida, jornada.descanso_minutos || 0);
     const observaciones: string[] = [];
 
-    // Calcular horas ordinarias (máximo 8 horas)
-    const totalHorasTrabajadas = horasDetalladas.ordinarias_diurnas + horasDetalladas.ordinarias_nocturnas + 
-                                horasDetalladas.extras_diurnas + horasDetalladas.extras_nocturnas;
+    // Validación de horas
+    const validarHoras = (valor: number): number => {
+      if (isNaN(valor) || valor < 0 || valor === null || valor === undefined) return 0;
+      return valor;
+    };
 
+    let totalHorasTrabajadas: number;
+    let horasDetalladas: DesglosePorHoras;
+
+    // Si tenemos horas calculadas desde la BD, las usamos; sino calculamos desde entrada/salida
+    if (jornada.horas_calculadas !== undefined && jornada.horas_calculadas > 0) {
+      totalHorasTrabajadas = validarHoras(jornada.horas_calculadas);
+      
+      // Para horas precalculadas, asumimos que son diurnas ordinarias por defecto
+      horasDetalladas = {
+        ordinarias_diurnas: Math.min(totalHorasTrabajadas, this.JORNADA_DIARIA_MAXIMA),
+        ordinarias_nocturnas: 0,
+        extras_diurnas: Math.max(0, totalHorasTrabajadas - this.JORNADA_DIARIA_MAXIMA),
+        extras_nocturnas: 0
+      };
+      
+      observaciones.push('✅ Usando horas calculadas desde base de datos');
+    } else {
+      // Cálculo tradicional desde entrada/salida
+      horasDetalladas = this.analizarHoras(jornada.entrada, jornada.salida, jornada.descanso_minutos || 0);
+      
+      totalHorasTrabajadas = validarHoras(horasDetalladas.ordinarias_diurnas) + 
+                            validarHoras(horasDetalladas.ordinarias_nocturnas) + 
+                            validarHoras(horasDetalladas.extras_diurnas) + 
+                            validarHoras(horasDetalladas.extras_nocturnas);
+      
+      observaciones.push('📊 Calculado desde horarios de entrada/salida');
+    }
+
+    // Las horas ordinarias son todas las horas trabajadas hasta el límite de 8 horas
     const horasOrdinarias = Math.min(totalHorasTrabajadas, this.JORNADA_DIARIA_MAXIMA);
+    
+    // Las horas extras son las que exceden las 8 horas diarias
     const horasExtrasTotal = Math.max(0, totalHorasTrabajadas - this.JORNADA_DIARIA_MAXIMA);
 
-    // Las horas extras pueden ser diurnas o nocturnas
-    const horasExtrasDiurnas = horasDetalladas.extras_diurnas;
-    const horasExtrasNocturnas = horasDetalladas.extras_nocturnas;
+    // Las horas extras pueden ser diurnas o nocturnas - sumamos todas las extras
+    const horasExtrasDiurnas = validarHoras(horasDetalladas.extras_diurnas);
+    const horasExtrasNocturnas = validarHoras(horasDetalladas.extras_nocturnas);
 
     // Calcular valores monetarios si se proporciona tarifa
     let valorExtrasDiurnas, valorExtrasNocturnas, totalDia;
@@ -123,6 +156,9 @@ export class CalculadoraHorasExtras {
       observaciones.push('🌙 Incluye trabajo nocturno ordinario.');
     }
 
+    // Debug temporal - esto se puede quitar después
+    console.log(`[DEBUG] ${jornada.fecha}: Trabajadas=${totalHorasTrabajadas}, Ordinarias=${horasOrdinarias}, ExtrasDiurnas=${horasExtrasDiurnas}, ExtrasNocturnas=${horasExtrasNocturnas}`);
+    
     return {
       fecha: jornada.fecha,
       entrada: jornada.entrada,
@@ -246,14 +282,29 @@ export class CalculadoraHorasExtras {
   private static generarResumen(calculos: CalculoDetallado[], jornadas: JornadaDiaria[]): ResumenPeriodo {
     const fechas = jornadas.map(j => j.fecha).sort();
     
-    const totales = calculos.reduce((acc, calculo) => ({
-      horas_ordinarias: acc.horas_ordinarias + calculo.horas_ordinarias,
-      horas_extras_diurnas: acc.horas_extras_diurnas + calculo.horas_extras_diurnas,
-      horas_extras_nocturnas: acc.horas_extras_nocturnas + calculo.horas_extras_nocturnas,
-      valor_ordinarias: acc.valor_ordinarias + (calculo.valor_hora_ordinaria ? calculo.horas_ordinarias * calculo.valor_hora_ordinaria : 0),
-      valor_extras: acc.valor_extras + (calculo.valor_extras_diurnas || 0) + (calculo.valor_extras_nocturnas || 0),
-      total_periodo: acc.total_periodo + (calculo.total_dia || 0)
-    }), {
+    // Validar que los cálculos tengan valores válidos antes de sumar
+    const totales = calculos.reduce((acc, calculo) => {
+      // Validar horas ordinarias
+      const horasOrdinarias = (calculo.horas_ordinarias && !isNaN(calculo.horas_ordinarias) && calculo.horas_ordinarias >= 0) ? 
+        calculo.horas_ordinarias : 0;
+      
+      // Validar horas extras diurnas  
+      const horasExtrasDiurnas = (calculo.horas_extras_diurnas && !isNaN(calculo.horas_extras_diurnas) && calculo.horas_extras_diurnas >= 0) ? 
+        calculo.horas_extras_diurnas : 0;
+        
+      // Validar horas extras nocturnas
+      const horasExtrasNocturnas = (calculo.horas_extras_nocturnas && !isNaN(calculo.horas_extras_nocturnas) && calculo.horas_extras_nocturnas >= 0) ? 
+        calculo.horas_extras_nocturnas : 0;
+      
+      return {
+        horas_ordinarias: acc.horas_ordinarias + horasOrdinarias,
+        horas_extras_diurnas: acc.horas_extras_diurnas + horasExtrasDiurnas,
+        horas_extras_nocturnas: acc.horas_extras_nocturnas + horasExtrasNocturnas,
+        valor_ordinarias: acc.valor_ordinarias + (calculo.valor_hora_ordinaria ? horasOrdinarias * calculo.valor_hora_ordinaria : 0),
+        valor_extras: acc.valor_extras + (calculo.valor_extras_diurnas || 0) + (calculo.valor_extras_nocturnas || 0),
+        total_periodo: acc.total_periodo + (calculo.total_dia || 0)
+      };
+    }, {
       horas_ordinarias: 0,
       horas_extras_diurnas: 0,
       horas_extras_nocturnas: 0,
@@ -264,7 +315,26 @@ export class CalculadoraHorasExtras {
 
     const totalHorasExtras = totales.horas_extras_diurnas + totales.horas_extras_nocturnas;
     const diasConExtras = calculos.filter(c => c.horas_extras_diurnas + c.horas_extras_nocturnas > 0).length;
-    const promedioHorasDia = calculos.reduce((sum, c) => sum + c.horas_trabajadas, 0) / calculos.length;
+    
+    // Debug temporal - esto se puede quitar después
+    console.log('[DEBUG RESUMEN] Totales:', totales);
+    console.log(`[DEBUG RESUMEN] Horas ordinarias total: ${totales.horas_ordinarias}, Horas extras total: ${totalHorasExtras}`);
+    
+    // Calcular promedio de horas dia con validaciones
+    let promedioHorasDia = 0;
+    if (calculos.length > 0) {
+      const horasValidas = calculos.filter(c => 
+        c.horas_trabajadas !== undefined && 
+        c.horas_trabajadas !== null && 
+        !isNaN(c.horas_trabajadas) && 
+        c.horas_trabajadas >= 0
+      );
+      
+      if (horasValidas.length > 0) {
+        const sumaHoras = horasValidas.reduce((sum, c) => sum + c.horas_trabajadas, 0);
+        promedioHorasDia = Math.round((sumaHoras / horasValidas.length) * 100) / 100;
+      }
+    }
 
     return {
       fecha_inicio: fechas[0],
@@ -277,7 +347,7 @@ export class CalculadoraHorasExtras {
       valor_total_ordinarias: totales.valor_ordinarias > 0 ? totales.valor_ordinarias : undefined,
       valor_total_extras: totales.valor_extras > 0 ? totales.valor_extras : undefined,
       valor_total_periodo: totales.total_periodo > 0 ? totales.total_periodo : undefined,
-      promedio_horas_dia: Math.round(promedioHorasDia * 100) / 100,
+      promedio_horas_dia: promedioHorasDia,
       dias_con_extras: diasConExtras
     };
   }
@@ -285,20 +355,44 @@ export class CalculadoraHorasExtras {
   /**
    * Formatea horas decimales a HH:MM
    */
-  static formatearHoras(horas: number): string {
-    const h = Math.floor(horas);
-    const m = Math.round((horas - h) * 60);
+  static formatearHoras(horas: number | undefined | null): string {
+    // Validar entrada y prevenir NaN
+    if (horas === undefined || horas === null || isNaN(horas) || horas < 0) {
+      return '00:00';
+    }
+    
+    const horasValidas = Math.max(0, horas);
+    const h = Math.floor(horasValidas);
+    const m = Math.round((horasValidas - h) * 60);
+    
+    // Validar que los valores calculados sean correctos
+    if (isNaN(h) || isNaN(m)) {
+      return '00:00';
+    }
+    
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
   }
 
   /**
    * Formatea valores monetarios
    */
-  static formatearValor(valor: number): string {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(valor);
+  static formatearValor(valor: number | undefined | null): string {
+    // Validar entrada y prevenir NaN
+    if (valor === undefined || valor === null || isNaN(valor) || valor < 0) {
+      return '$0';
+    }
+    
+    const valorValido = Math.max(0, valor);
+    
+    try {
+      return new Intl.NumberFormat('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0
+      }).format(valorValido);
+    } catch (error) {
+      console.error('Error formateando valor:', error, 'Valor:', valor);
+      return '$0';
+    }
   }
 }

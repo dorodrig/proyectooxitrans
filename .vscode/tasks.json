@@ -76,6 +76,38 @@
 				"tests/production-check.mjs"
 			],
 			"group": "test"
+		},
+		{
+			"label": "Simulación Realista Empleados",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/simulacion-empleados-realista.mjs"
+			],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			},
+			"problemMatcher": []
+		},
+		{
+			"label": "Setup Completo + Simulación Jornadas",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"tests/setup-completo-jornadas.mjs"
+			],
+			"group": "test",
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new"
+			},
+			"problemMatcher": []
 		}
 	]
 }

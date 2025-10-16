@@ -106,7 +106,7 @@ const MapaGoogleSimple: React.FC<MapaGoogleSimpleProps> = ({
         ubicacionesAgrupadas.forEach((ubicacionesEnPunto, coordKey) => {
           const [lat, lng] = coordKey.split(',').map(Number);
           
-          ubicacionesEnPunto.forEach((ubicacion, index) => {
+          ubicacionesEnPunto.forEach((ubicacion: any, index: number) => {
             // Aplicar offset pequeño si hay múltiples ubicaciones en el mismo punto
             const offsetDistance = 0.0001; // ~10 metros
             const angle = (index * 120) * (Math.PI / 180); // Separar en círculo

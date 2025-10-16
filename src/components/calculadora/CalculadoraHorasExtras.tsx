@@ -8,14 +8,18 @@ import { CalculadoraHorasExtras } from '../../services/calculadoraHorasExtras';
 import { formatearFechaCorta, formatearDiaSemana, formatearSoloHora } from '../../utils/formatoFechas';
 import type { CalculoDetallado, ResumenPeriodo, JornadaDiaria } from '../../services/calculadoraHorasExtras';
 import type { JornadaLaboral } from '../../services/colaboradoresService';
+import { novedadesService, type HorasExtraRegistradas } from '../../services/novedadesService';
+import { useNotifications } from '../notifications/NotificationProvider';
 
 interface CalculadoraHorasExtrasProps {
   jornadas: JornadaLaboral[];
+  colaboradorId?: number;
   loading?: boolean;
 }
 
 const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = ({
   jornadas,
+  colaboradorId,
   loading = false
 }) => {
   const [calculos, setCalculos] = useState<CalculoDetallado[]>([]);
@@ -23,26 +27,172 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
   const [valorHoraOrdinaria, setValorHoraOrdinaria] = useState<number>(4200); // Salario mínimo 2025 / 240 horas
   const [mostrarDetalles, setMostrarDetalles] = useState(false);
   const [filtroFecha, setFiltroFecha] = useState<string>('');
+  const [horasExtrasReportadas, setHorasExtrasReportadas] = useState<HorasExtraRegistradas[]>([]);
+  const [loadingNovedades, setLoadingNovedades] = useState(false);
+  const { mostrarError, mostrarInfo } = useNotifications();
+  
+  // Evitar warnings de variables no usadas
+  console.log('Loading novedades:', loadingNovedades);
 
   useEffect(() => {
-    if (jornadas.length > 0) {
-      calcularHorasExtras();
+    if (colaboradorId) {
+      cargarHorasExtrasReportadas();
     }
-  }, [jornadas, valorHoraOrdinaria]);
+  }, [colaboradorId]);
+
+  useEffect(() => {
+    // Solo calcular si hay jornadas reales, no solo novedades sin jornadas
+    if (jornadas.length > 0) {
+      console.log('[DEBUG EFFECT] Ejecutando cálculo con', jornadas.length, 'jornadas');
+      calcularHorasExtras();
+    } else if (horasExtrasReportadas.length > 0) {
+      console.log('[DEBUG EFFECT] Solo novedades sin jornadas, no calcular resumen principal');
+      // Solo novedades sin jornadas - no establecer resumen principal
+    }
+  }, [jornadas, valorHoraOrdinaria, horasExtrasReportadas]);
+
+  const cargarHorasExtrasReportadas = async () => {
+    if (!colaboradorId) return;
+
+    setLoadingNovedades(true);
+    try {
+      const horasExtras = await novedadesService.getHorasExtrasByUsuario(colaboradorId.toString());
+      setHorasExtrasReportadas(horasExtras);
+      mostrarInfo('Horas extra cargadas', `${horasExtras.length} registros encontrados`);
+    } catch (error) {
+      console.error('Error cargando horas extra reportadas:', error);
+      mostrarError('Error', 'No se pudieron cargar las horas extra reportadas');
+    } finally {
+      setLoadingNovedades(false);
+    }
+  };
 
   const calcularHorasExtras = () => {
-    // Convertir jornadas a formato requerido
-    const jornadasParaCalculo: JornadaDiaria[] = jornadas.map(jornada => ({
-      fecha: jornada.fecha,
-      entrada: jornada.entrada || '08:00',
-      salida: jornada.salida || '17:00',
-      descanso_minutos: jornada.duracion_almuerzo ? parseInt(jornada.duracion_almuerzo) || 60 : 60,
-      observaciones: jornada.observaciones_entrada || jornada.observaciones_salida
-    }));
+    console.log('[DEBUG CALCULAR] Iniciando cálculo. Jornadas:', jornadas.length);
+    
+    if (jornadas.length === 0) {
+      console.log('[DEBUG CALCULAR] No hay jornadas, saltando cálculo');
+      return;
+    }
+    
+    try {
+      // Convertir jornadas a formato requerido usando los datos ya calculados
+      const jornadasParaCalculo: JornadaDiaria[] = jornadas
+        .filter(jornada => {
+          // Validar que la jornada tenga fecha válida
+          if (!jornada.fecha) {
+            console.warn('Jornada sin fecha:', jornada);
+            return false;
+          }
+          
+          // Validar formato de fecha
+          const fechaValida = !isNaN(Date.parse(jornada.fecha));
+          if (!fechaValida) {
+            console.warn('Fecha inválida:', jornada.fecha);
+            return false;
+          }
+          
+          return true;
+        })
+        .map(jornada => {
+          // Formatear fecha correctamente - CRÍTICO para evitar problemas de zona horaria
+          let fechaFormateada: string;
+          if (jornada.fecha.includes('T')) {
+            // Extraer solo la parte de la fecha (YYYY-MM-DD)
+            fechaFormateada = jornada.fecha.split('T')[0];
+          } else {
+            fechaFormateada = jornada.fecha;
+          }
+          
+          // Validar que la fecha sea válida
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaFormateada)) {
+            console.error(`Formato de fecha inválido: ${jornada.fecha} -> ${fechaFormateada}`);
+            fechaFormateada = new Date().toISOString().split('T')[0]; // Fallback
+          }
 
-    const resultado = CalculadoraHorasExtras.calcularPeriodo(jornadasParaCalculo, valorHoraOrdinaria);
-    setCalculos(resultado.calculos);
-    setResumen(resultado.resumen);
+          console.log(`[DEBUG JORNADA] Original: ${jornada.fecha} -> Formateada: ${fechaFormateada}, horas_trabajadas=${jornada.horas_trabajadas}`);
+
+          return {
+            fecha: fechaFormateada,
+            entrada: jornada.entrada || '08:00',
+            salida: jornada.salida || '17:00',
+            descanso_minutos: jornada.duracion_almuerzo ? 
+              parseInt(jornada.duracion_almuerzo) || 60 : 60,
+            observaciones: jornada.observaciones_entrada || jornada.observaciones_salida,
+            // CRÍTICO: Incluir las horas ya calculadas desde la base de datos
+            horas_calculadas: jornada.horas_trabajadas || 0
+          };
+        });
+
+      console.log('📊 Jornadas para cálculo:', jornadasParaCalculo.length);
+      console.log('📊 Horas extra reportadas:', horasExtrasReportadas.length);
+      console.log('📊 DATOS RAW de jornadas recibidas:', jornadas.slice(0, 3));
+      console.log('📊 DATOS PROCESADOS para cálculo:', jornadasParaCalculo.slice(0, 3));
+      
+      // CRÍTICO: Mostrar TODAS las fechas para comparar con BD
+      console.log('🔍 TODAS LAS FECHAS BD vs FRONTEND:');
+      jornadas.forEach((j, i) => {
+        console.log(`[${i}] BD_Original: ${j.fecha} | Horas: ${j.horas_trabajadas}`);
+      });
+
+      // Calcular usando el servicio existente
+      const resultado = CalculadoraHorasExtras.calcularPeriodo(jornadasParaCalculo, valorHoraOrdinaria);
+      
+      // Integrar las horas extra reportadas desde novedades
+      const calculosConNovedades = resultado.calculos.map(calculo => {
+        const horasExtraReportada = horasExtrasReportadas.find(he => {
+          const fechaCalculo = calculo.fecha;
+          const fechaReportada = he.fecha.includes('T') ? he.fecha.split('T')[0] : he.fecha;
+          return fechaReportada === fechaCalculo;
+        });
+        
+        if (horasExtraReportada) {
+          // Sumar las horas extra reportadas
+          const horasExtraAdicionales = horasExtraReportada.horas || 0;
+          const valorExtraAdicional = valorHoraOrdinaria ? 
+            horasExtraAdicionales * valorHoraOrdinaria * 1.25 : 0; // 25% recargo diurno
+          
+          console.log(`[DEBUG NOVEDADES] ${calculo.fecha}: +${horasExtraAdicionales}h extras reportadas`);
+          
+          return {
+            ...calculo,
+            horas_extras_reportadas: horasExtraAdicionales,
+            valor_extras_reportadas: valorExtraAdicional,
+            horas_extras_diurnas: calculo.horas_extras_diurnas + horasExtraAdicionales,
+            valor_extras_diurnas: (calculo.valor_extras_diurnas || 0) + valorExtraAdicional,
+            total_dia: (calculo.total_dia || 0) + valorExtraAdicional,
+            observaciones: [
+              ...(calculo.observaciones || []),
+              `📋 ${horasExtraAdicionales}h extra reportadas en novedades`
+            ]
+          };
+        }
+        
+        return calculo;
+      });
+
+      // Recalcular resumen con las horas extra integradas
+      const totalHorasExtrasNovedades = horasExtrasReportadas.reduce((sum, he) => sum + (he.horas || 0), 0);
+      
+      const resumenActualizado = {
+        ...resultado.resumen,
+        total_horas_extras: resultado.resumen.total_horas_extras + totalHorasExtrasNovedades,
+        total_horas_extras_diurnas: resultado.resumen.total_horas_extras_diurnas + totalHorasExtrasNovedades,
+        dias_con_extras: calculosConNovedades.filter(c => 
+          (c.horas_extras_diurnas + c.horas_extras_nocturnas) > 0
+        ).length
+      };
+      
+      console.log(`[DEBUG RESUMEN FINAL] Total extras: ${resumenActualizado.total_horas_extras}h, Ordinarias: ${resumenActualizado.total_horas_ordinarias}h`);
+      console.log('[DEBUG RESUMEN COMPLETO]', resumenActualizado);
+      
+      setCalculos(calculosConNovedades);
+      setResumen(resumenActualizado);
+      
+      console.log('[DEBUG] ESTADO ACTUALIZADO - resumen establecido');    } catch (error) {
+      console.error('❌ Error en cálculo de horas extras:', error);
+      mostrarError('Error de cálculo', 'Hubo un problema calculando las horas extras');
+    }
   };
 
   const calculosFiltrados = filtroFecha 
@@ -117,6 +267,7 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
       {/* Resumen ejecutivo */}
       {resumen && (
         <div className="calculadora-horas-extras__resumen">
+          {/* {console.log('[DEBUG RENDER] Resumen siendo renderizado:', resumen.total_horas_ordinarias, resumen.total_horas_extras)} */}
           <h3>📈 Resumen del Período</h3>
           <div className="resumen-grid">
             <div className="resumen-item">
@@ -125,18 +276,30 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
             </div>
             <div className="resumen-item">
               <div className="resumen-valor">
-                {CalculadoraHorasExtras.formatearHoras(resumen.total_horas_ordinarias)}
+                {(() => {
+                  console.log('[DEBUG FORMATEAR] Horas ordinarias raw:', resumen.total_horas_ordinarias);
+                  const formateado = CalculadoraHorasExtras.formatearHoras(resumen.total_horas_ordinarias);
+                  console.log('[DEBUG FORMATEAR] Horas ordinarias formateadas:', formateado);
+                  return formateado;
+                })()}
               </div>
               <div className="resumen-label">Horas ordinarias</div>
             </div>
             <div className="resumen-item destacado">
               <div className="resumen-valor">
-                {CalculadoraHorasExtras.formatearHoras(resumen.total_horas_extras)}
+                {(() => {
+                  console.log('[DEBUG FORMATEAR] Horas extras raw:', resumen.total_horas_extras);
+                  const formateado = CalculadoraHorasExtras.formatearHoras(resumen.total_horas_extras);
+                  console.log('[DEBUG FORMATEAR] Horas extras formateadas:', formateado);
+                  return formateado;
+                })()}
               </div>
               <div className="resumen-label">Horas extras</div>
             </div>
             <div className="resumen-item">
-              <div className="resumen-valor">{resumen.promedio_horas_dia}h</div>
+              <div className="resumen-valor">
+                {resumen.promedio_horas_dia > 0 ? `${resumen.promedio_horas_dia}h` : 'Sin datos'}
+              </div>
               <div className="resumen-label">Promedio/día</div>
             </div>
             {resumen.valor_total_periodo && (

@@ -24,6 +24,7 @@ import novedadesRoutes from './routes/novedades';
 import jornadasRoutes from './routes/jornadas';
 import jornadaConfigRoutes from './routes/jornadaConfig';
 import colaboradoresRoutes from './routes/colaboradores';
+import reportesRoutes from './routes/reportes';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -120,6 +121,7 @@ app.use('/api/novedades', novedadesRoutes);
 app.use('/api/jornadas', jornadasRoutes);
 app.use('/api/jornada-config', jornadaConfigRoutes);
 app.use('/api/colaboradores', colaboradoresRoutes);
+app.use('/api/reportes', reportesRoutes);
 
 // Ruta de health check
 app.get('/api/health', (req, res) => {

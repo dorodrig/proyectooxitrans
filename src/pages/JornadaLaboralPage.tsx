@@ -11,6 +11,7 @@ import { useGPSStore } from '../services/gpsService';
 import { tiempoLaboralService, obtenerTimestampColombia, formatearHoraUI } from '../services/tiempoLaboralService';
 import { notificacionesService } from '../services/notificacionesService';
 import JornadaTimeline from '../components/jornada/JornadaTimeline';
+import Swal from 'sweetalert2';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -120,7 +121,7 @@ const JornadaLaboralPage: React.FC = () => {
         const ubicacionNombre = data.ubicacion?.nombre || 'tu ubicación de trabajo';
         const distancia = Math.round(data.distancia);
         
-        // Solo mostrar notificación si la distancia es menor a cierto umbral
+        // Solo mostrar notificación silenciosa si la distancia es menor a cierto umbral
         if (distancia < 100) {
           notificacionesService.mostrar(
             `Ubicación validada: ${ubicacionNombre} (${distancia}m)`, 
@@ -128,17 +129,15 @@ const JornadaLaboralPage: React.FC = () => {
             3000
           );
         }
-        alert(`✅ Ubicación válida!\n\nEstás a ${distancia}m de ${ubicacionNombre}.\nPuedes registrar entrada/salida.`);
+        // Alert removido - la confirmación se maneja ahora con SweetAlert2 en registrarEvento()
       } else {
-        const distancia = Math.round(data.distancia);
-        const tolerancia = data.tolerancia;
-        const ubicacionNombre = data.ubicacion?.nombre || 'tu ubicación de trabajo';
-        alert(`❌ Ubicación fuera de rango!\n\nEstás a ${distancia}m de ${ubicacionNombre}.\nDistancia máxima permitida: ${tolerancia}m\n\nAcércate más para poder registrar.`);
+        // Alert removido - la validación se maneja ahora con SweetAlert2 en registrarEvento()
+        // La validación de distancia se mantiene para uso interno
       }
     },
     onError: (error: Error) => {
       console.error('Error validando ubicación:', error);
-      alert('Error al validar ubicación. Verifica tu conexión e inténtalo de nuevo.');
+      // Error se maneja ahora con SweetAlert2 en registrarEvento()
     }
   });
 
@@ -150,7 +149,7 @@ const JornadaLaboralPage: React.FC = () => {
     },
     onError: (error: Error) => {
       console.error('Error registrando tiempo:', error);
-      alert(error.message || 'Error registrando tiempo');
+      // Error se maneja ahora con SweetAlert2 en registrarEvento()
     }
   });
 
@@ -211,99 +210,270 @@ const JornadaLaboralPage: React.FC = () => {
     }
   }, [usuario]); // Ejecutar cuando el usuario esté disponible
 
-  // Función para registrar evento
+  // Función para mostrar confirmación con SweetAlert2
+  const mostrarConfirmacionAccion = async (tipo: RegistroTiempo['tipo']): Promise<boolean> => {
+    const acciones = {
+      'entrada': {
+        titulo: '🕐 Iniciar Jornada Laboral',
+        texto: '¿Está seguro que desea registrar su entrada?',
+        icono: '🟢',
+        confirmText: 'Sí, registrar entrada',
+        successTitle: '¡Entrada registrada!',
+        successText: 'Su jornada laboral ha iniciado correctamente'
+      },
+      'descanso_manana_inicio': {
+        titulo: '☕ Iniciar Descanso Mañana',
+        texto: '¿Está seguro que desea iniciar su descanso de la mañana?',
+        icono: '🟡',
+        confirmText: 'Sí, iniciar descanso',
+        successTitle: '¡Descanso iniciado!',
+        successText: 'Disfrute su descanso de la mañana'
+      },
+      'descanso_manana_fin': {
+        titulo: '☕ Finalizar Descanso Mañana',
+        texto: '¿Está seguro que desea finalizar su descanso de la mañana?',
+        icono: '🔙',
+        confirmText: 'Sí, finalizar descanso',
+        successTitle: '¡Descanso finalizado!',
+        successText: 'Continuando con la jornada laboral'
+      },
+      'almuerzo_inicio': {
+        titulo: '🍽️ Iniciar Almuerzo',
+        texto: '¿Está seguro que desea iniciar su hora de almuerzo?',
+        icono: '🔵',
+        confirmText: 'Sí, iniciar almuerzo',
+        successTitle: '¡Almuerzo iniciado!',
+        successText: 'Disfrute su almuerzo'
+      },
+      'almuerzo_fin': {
+        titulo: '🍽️ Finalizar Almuerzo',
+        texto: '¿Está seguro que desea finalizar su hora de almuerzo?',
+        icono: '🔙',
+        confirmText: 'Sí, finalizar almuerzo',
+        successTitle: '¡Almuerzo finalizado!',
+        successText: 'Continuando con la jornada laboral'
+      },
+      'descanso_tarde_inicio': {
+        titulo: '☕ Iniciar Descanso Tarde',
+        texto: '¿Está seguro que desea iniciar su descanso de la tarde?',
+        icono: '🟡',
+        confirmText: 'Sí, iniciar descanso',
+        successTitle: '¡Descanso iniciado!',
+        successText: 'Disfrute su descanso de la tarde'
+      },
+      'descanso_tarde_fin': {
+        titulo: '☕ Finalizar Descanso Tarde',
+        texto: '¿Está seguro que desea finalizar su descanso de la tarde?',
+        icono: '🔙',
+        confirmText: 'Sí, finalizar descanso',
+        successTitle: '¡Descanso finalizado!',
+        successText: 'Continuando con la jornada laboral'
+      },
+      'salida': {
+        titulo: '🔴 Finalizar Jornada Laboral',
+        texto: '¿Está seguro que desea registrar su salida?',
+        icono: '🔴',
+        confirmText: 'Sí, registrar salida',
+        successTitle: '¡Salida registrada!',
+        successText: 'Su jornada laboral ha finalizado correctamente'
+      }
+    };
+
+    const accion = acciones[tipo];
+    
+    const result = await Swal.fire({
+      title: accion.titulo,
+      html: `
+        <div style="text-align: center; padding: 20px;">
+          <div style="font-size: 48px; margin-bottom: 15px;">${accion.icono}</div>
+          <p style="font-size: 18px; color: #374151; margin-bottom: 20px;">
+            ${accion.texto}
+          </p>
+          <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-top: 15px;">
+            <p style="margin: 0; color: #6b7280; font-size: 14px;">
+              📍 Ubicación validada correctamente<br/>
+              ⏰ ${new Date().toLocaleTimeString('es-CO', { hour12: false })}
+            </p>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonColor: '#059669',
+      cancelButtonColor: '#dc2626',
+      confirmButtonText: accion.confirmText,
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+      focusConfirm: false,
+      customClass: {
+        popup: 'swal2-popup-custom',
+        title: 'swal2-title-custom',
+        confirmButton: 'swal2-confirm-custom',
+        cancelButton: 'swal2-cancel-custom'
+      }
+    });
+
+    return result.isConfirmed;
+  };
+
+  // Función para mostrar éxito después del registro
+  const mostrarExitoRegistro = async (tipo: RegistroTiempo['tipo']) => {
+    const acciones = {
+      'entrada': { title: '¡Entrada registrada!', text: 'Su jornada laboral ha iniciado correctamente' },
+      'descanso_manana_inicio': { title: '¡Descanso iniciado!', text: 'Disfrute su descanso de la mañana' },
+      'descanso_manana_fin': { title: '¡Descanso finalizado!', text: 'Continuando con la jornada laboral' },
+      'almuerzo_inicio': { title: '¡Almuerzo iniciado!', text: 'Disfrute su almuerzo' },
+      'almuerzo_fin': { title: '¡Almuerzo finalizado!', text: 'Continuando con la jornada laboral' },
+      'descanso_tarde_inicio': { title: '¡Descanso iniciado!', text: 'Disfrute su descanso de la tarde' },
+      'descanso_tarde_fin': { title: '¡Descanso finalizado!', text: 'Continuando con la jornada laboral' },
+      'salida': { title: '¡Salida registrada!', text: 'Su jornada laboral ha finalizado correctamente' }
+    };
+
+    const accion = acciones[tipo];
+    
+    await Swal.fire({
+      title: accion.title,
+      text: accion.text,
+      icon: 'success',
+      timer: 3000,
+      timerProgressBar: true,
+      showConfirmButton: false,
+      toast: true,
+      position: 'top-end'
+    });
+  };
+
+  // Función para registrar evento con confirmación
   const registrarEvento = async (tipo: RegistroTiempo['tipo']) => {
     if (!ubicacionActual) {
-      alert('Esperando ubicación GPS...');
+      await Swal.fire({
+        title: 'GPS no disponible',
+        text: 'Esperando ubicación GPS... Por favor intente de nuevo en unos segundos.',
+        icon: 'warning',
+        confirmButtonColor: '#059669'
+      });
       return;
     }
 
     // Validar ubicación para entrada y salida antes de registrar
-    // Para entrada y salida necesitamos validación estricta, para descansos podemos ser más flexibles
     const necesitaValidacionEstricta = tipo === 'entrada' || tipo === 'salida';
     
-    if (necesitaValidacionEstricta) {
-      try {
-        // Para entrada y salida, forzamos validación siempre para mayor seguridad
-        const validacion = await validarUbicacionMutation.mutateAsync({
-          latitude: ubicacionActual.latitude,
-          longitude: ubicacionActual.longitude,
-          forzarValidacion: true // Forzar validación para momentos críticos (entrada/salida)
-        });
+    try {
+      // Validar ubicación
+      const validacion = await validarUbicacionMutation.mutateAsync({
+        latitude: ubicacionActual.latitude,
+        longitude: ubicacionActual.longitude,
+        forzarValidacion: necesitaValidacionEstricta
+      });
+      
+      if (!validacion.valida) {
+        const distancia = Math.round(validacion.distancia);
+        const tolerancia = validacion.tolerancia;
+        const ubicacionNombre = validacion.ubicacion?.nombre || 'tu ubicación de trabajo';
         
-        if (!validacion.valida) {
-          const distancia = Math.round(validacion.distancia);
-          const tolerancia = validacion.tolerancia;
-          const ubicacionNombre = validacion.ubicacion?.nombre || 'tu ubicación de trabajo';
-          
-          alert(`Estás muy lejos de ${ubicacionNombre}.\n\nDistancia actual: ${distancia}m\nDistancia máxima permitida: ${tolerancia}m\n\nDebes estar dentro de ${tolerancia} metros para registrar entrada/salida.`);
+        if (necesitaValidacionEstricta) {
+          // Para entrada y salida, mostrar error y no permitir continuar
+          await Swal.fire({
+            title: 'Ubicación fuera de rango',
+            html: `
+              <div style="text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 15px;">📍</div>
+                <p>Estás muy lejos de <strong>${ubicacionNombre}</strong></p>
+                <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <p style="margin: 0; color: #dc2626;">
+                    <strong>Distancia actual:</strong> ${distancia}m<br/>
+                    <strong>Distancia máxima:</strong> ${tolerancia}m
+                  </p>
+                </div>
+                <p style="color: #6b7280;">Debes estar dentro de ${tolerancia} metros para registrar entrada/salida.</p>
+              </div>
+            `,
+            icon: 'error',
+            confirmButtonColor: '#dc2626'
+          });
           return;
-        }
-      } catch (error) {
-        console.error('Error validando ubicación:', error);
-        alert('Error al validar ubicación. Inténtalo de nuevo.');
-        return;
-      }
-    } else {
-      // Para descansos, usar la cache si está disponible (no tan crítico)
-      try {
-        const validacion = await validarUbicacionMutation.mutateAsync({
-          latitude: ubicacionActual.latitude,
-          longitude: ubicacionActual.longitude,
-          forzarValidacion: false // Usar cache si disponible
-        });
-        
-        if (!validacion.valida) {
-          // Para descansos, solo mostrar advertencia pero permitir continuar
-          const distancia = Math.round(validacion.distancia);
-          const tolerancia = validacion.tolerancia;
-          const ubicacionNombre = validacion.ubicacion?.nombre || 'tu ubicación de trabajo';
+        } else {
+          // Para descansos, permitir continuar con advertencia
+          const result = await Swal.fire({
+            title: 'Advertencia de ubicación',
+            html: `
+              <div style="text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 15px;">⚠️</div>
+                <p>Estás a <strong>${distancia}m</strong> de ${ubicacionNombre}</p>
+                <p>Fuera del rango permitido de <strong>${tolerancia}m</strong></p>
+                <p style="color: #6b7280;">¿Deseas continuar de todos modos?</p>
+              </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f59e0b',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Continuar de todos modos',
+            cancelButtonText: 'Cancelar'
+          });
           
-          const continuar = window.confirm(
-            `Advertencia: Estás a ${distancia}m de ${ubicacionNombre}, fuera del rango permitido de ${tolerancia}m.\n\n` +
-            `¿Deseas continuar de todos modos?`
-          );
-          
-          if (!continuar) return;
+          if (!result.isConfirmed) return;
         }
-      } catch (error) {
-        console.error('Error validando ubicación para descanso:', error);
-        // En caso de error en validación de descanso, permitir continuar con advertencia
-        const continuar = window.confirm(
-          'No se pudo validar tu ubicación. ¿Deseas continuar de todos modos?'
-        );
-        
-        if (!continuar) return;
       }
+    } catch (error) {
+      console.error('Error validando ubicación:', error);
+      const result = await Swal.fire({
+        title: 'Error de validación',
+        text: 'No se pudo validar tu ubicación. ¿Deseas continuar de todos modos?',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonColor: '#059669',
+        cancelButtonColor: '#dc2626',
+        confirmButtonText: 'Continuar',
+        cancelButtonText: 'Cancelar'
+      });
+      
+      if (!result.isConfirmed) return;
     }
 
-    const timestamp = obtenerTimestampColombia();
-    
-    // Validación adicional para salida - evitar error de backend
+    // Validación adicional para salida
     if (tipo === 'salida' && jornada?.entrada) {
+      const timestamp = obtenerTimestampColombia();
       try {
         const entradaTime = new Date(jornada.entrada).getTime();
         const salidaTime = new Date(timestamp).getTime();
         
         if (salidaTime <= entradaTime) {
-          alert('Error: No se puede registrar salida antes o al mismo tiempo que la entrada. ' +
-                'Verifica que tengas la hora correcta en tu dispositivo.');
+          await Swal.fire({
+            title: 'Error de horario',
+            text: 'No se puede registrar salida antes o al mismo tiempo que la entrada. Verifica la hora de tu dispositivo.',
+            icon: 'error',
+            confirmButtonColor: '#dc2626'
+          });
           return;
         }
         
-        // Validación adicional: diferencia mínima de 1 minuto
         const diferenciaMinutos = (salidaTime - entradaTime) / (1000 * 60);
         if (diferenciaMinutos < 1) {
-          alert('Error: Debe haber al menos 1 minuto de diferencia entre entrada y salida.');
+          await Swal.fire({
+            title: 'Tiempo insuficiente',
+            text: 'Debe haber al menos 1 minuto de diferencia entre entrada y salida.',
+            icon: 'error',
+            confirmButtonColor: '#dc2626'
+          });
           return;
         }
       } catch (error) {
         console.error('Error validando timestamps:', error);
-        alert('Error validando horarios. Por favor intenta de nuevo.');
+        await Swal.fire({
+          title: 'Error',
+          text: 'Error validando horarios. Por favor intenta de nuevo.',
+          icon: 'error',
+          confirmButtonColor: '#dc2626'
+        });
         return;
       }
     }
 
+    // Mostrar confirmación con SweetAlert2
+    const confirmado = await mostrarConfirmacionAccion(tipo);
+    if (!confirmado) return;
+
+    const timestamp = obtenerTimestampColombia();
     const registro: RegistroTiempo = {
       tipo,
       timestamp,
@@ -311,7 +481,22 @@ const JornadaLaboralPage: React.FC = () => {
       observaciones: ''
     };
 
-    registrarTiempoMutation.mutate(registro);
+    // Registrar el evento
+    registrarTiempoMutation.mutate(registro, {
+      onSuccess: () => {
+        // Mostrar mensaje de éxito
+        mostrarExitoRegistro(tipo);
+      },
+      onError: (error) => {
+        console.error('Error registrando evento:', error);
+        Swal.fire({
+          title: 'Error al registrar',
+          text: error instanceof Error ? error.message : 'Error desconocido al registrar el evento',
+          icon: 'error',
+          confirmButtonColor: '#dc2626'
+        });
+      }
+    });
   };
 
   // Usando la función obtenerTimestampColombia del tiempoLaboralService

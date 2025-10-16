@@ -5,14 +5,14 @@ import NavigationBar from '../components/common/NavigationBar';
 import OverviewCardNew from '../components/dashboard/OverviewCardNew';
 import { useAuthStore } from '../stores/authStore';
 import { AlertTriangle, Bell, CheckCircle, XCircle, Clock, Search, Filter } from 'lucide-react';
-import { useResponsive, getResponsiveLayoutStyles } from '../hooks/useResponsive';
+import { useResponsive } from '../hooks/useResponsive';
 
 const AlertasPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTipo, setFilterTipo] = useState('todas');
   const [filterEstado, setFilterEstado] = useState('todas');
-  const { isMobile } = useResponsive();
+  const {} = useResponsive();
   
   // Obtener datos del usuario autenticado
   const { usuario } = useAuthStore();

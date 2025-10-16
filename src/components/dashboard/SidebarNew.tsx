@@ -12,7 +12,7 @@ interface SidebarProps {
  * Navegación lateral con logo y menú de OXITRANS
  */
 const SidebarNew: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const { isMobile, isDesktop } = useResponsive();
+  const { isDesktop } = useResponsive();
   const location = useLocation();
   
   const menuSections = [

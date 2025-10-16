@@ -16,7 +16,7 @@ export const BackendTestComponent: React.FC = () => {
 
     // Test 1: Health Check
     try {
-      const healthResponse = await fetch('https://oxitrans-backend.onrender.com/api/health');
+      const healthResponse = await fetch('/api/health');
       const healthData = await healthResponse.json();
       results.push({
         test: 'Health Check',
@@ -33,7 +33,7 @@ export const BackendTestComponent: React.FC = () => {
 
     // Test 2: Cargos
     try {
-      const cargosResponse = await fetch('https://oxitrans-backend.onrender.com/api/cargos');
+      const cargosResponse = await fetch('/api/cargos');
       const cargosData = await cargosResponse.json();
       results.push({
         test: 'Cargos Endpoint',
@@ -50,7 +50,7 @@ export const BackendTestComponent: React.FC = () => {
 
     // Test 3: Regionales
     try {
-      const regionalesResponse = await fetch('https://oxitrans-backend.onrender.com/api/regionales');
+      const regionalesResponse = await fetch('/api/regionales');
       const regionalesData = await regionalesResponse.json();
       results.push({
         test: 'Regionales Endpoint',

@@ -9,9 +9,11 @@ import RecentActivityNew from '../components/dashboard/RecentActivityNew';
 import AccessChart from '../components/dashboard/AccessChart';
 import { useEstadisticasAcceso, useEmpleadosPresentes } from '../hooks/useDashboardData';
 import { useAuthStore } from '../stores/authStore';
+import { useResponsive, getResponsiveLayoutStyles } from '../hooks/useResponsive';
 
 const HomePage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { isMobile } = useResponsive();
   
   // Hooks para datos reales
   const { data: estadisticas, isLoading: loadingStats } = useEstadisticasAcceso();
@@ -35,27 +37,20 @@ const HomePage: React.FC = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const layoutStyles = getResponsiveLayoutStyles(isMobile);
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
       {/* Sidebar */}
       <SidebarNew isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
-      {/* Main Content con margen para el sidebar */}
-      <div style={{ 
-        marginLeft: '16rem', // Espacio para sidebar fijo
-        display: 'flex', 
-        flexDirection: 'column', 
-        minWidth: 0 
-      }}>
+      {/* Main Content responsive */}
+      <div style={layoutStyles.mainContent}>
         {/* Header */}
         <HeaderNew onToggleSidebar={toggleSidebar} user={userForHeader} />
           
           {/* Dashboard Content */}
-          <div style={{ 
-            padding: '1.5rem',
-            minHeight: 'calc(100vh - 70px)',
-            backgroundColor: '#f8fafc'
-          }}>
+          <div style={layoutStyles.pageContent}>
             <div style={{ width: '100%', maxWidth: 'none' }}>
               {/* Dashboard Title */}
               <div style={{ marginBottom: '2rem' }}>

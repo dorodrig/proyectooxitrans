@@ -83,12 +83,23 @@
 }
 // Estilos para la página de administración de usuarios
 .admin-usuarios-page {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 2rem auto;
   background: white;
   border-radius: 1.25rem;
   box-shadow: 0 8px 32px rgba($oxitrans-red, 0.08), 0 1.5px 6px rgba(0,0,0,0.04);
   padding: 2.5rem 2rem 2rem 2rem;
+  
+  @media (max-width: 768px) {
+    margin: 1rem 0.5rem;
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+  
+  @media (min-width: 769px) and (max-width: 1024px) {
+    margin: 1.5rem 1rem;
+    padding: 1.5rem;
+  }
 
   h1 {
     color: $oxitrans-red;
@@ -193,15 +204,278 @@
   }
 }
 
-@media (max-width: 700px) {
+// Badges para estados y roles
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  
+  &.badge-primary {
+    background-color: $oxitrans-red;
+    color: white;
+  }
+  
+  &.badge-secondary {
+    background-color: $gray-500;
+    color: white;
+  }
+  
+  &.badge-success {
+    background-color: $success-color;
+    color: white;
+  }
+  
+  &.badge-warning {
+    background-color: $warning-color;
+    color: $oxitrans-black;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 0.625rem;
+    padding: 0.125rem 0.5rem;
+  }
+}
+
+// Estadísticas
+.table-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  
+  .stat-card {
+    background: linear-gradient(135deg, $oxitrans-red, color.adjust($oxitrans-red, $lightness: 10%));
+    color: white;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba($oxitrans-red, 0.2);
+    
+    .stat-number {
+      display: block;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    
+    .stat-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-top: 0.25rem;
+      opacity: 0.9;
+    }
+    
+    @media (max-width: 768px) {
+      padding: 0.75rem;
+      
+      .stat-number {
+        font-size: 1.5rem;
+      }
+      
+      .stat-label {
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+// Vista de tarjetas para móvil
+.users-cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  
+  .user-card {
+    background: white;
+    border: 1px solid $gray-200;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba($oxitrans-red, 0.05);
+    transition: box-shadow 0.2s ease;
+    
+    &:hover {
+      box-shadow: 0 4px 8px rgba($oxitrans-red, 0.1);
+    }
+    
+    .user-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid $gray-100;
+      
+      .user-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: $oxitrans-black;
+        margin: 0;
+      }
+    }
+    
+    .user-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      
+      .user-field {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 32px;
+        
+        .field-label {
+          font-size: 0.875rem;
+          font-weight: 500;
+          color: $gray-600;
+        }
+        
+        .field-value {
+          font-size: 0.875rem;
+          color: $oxitrans-black;
+          font-weight: 500;
+        }
+        
+        .cargo-select-mobile {
+          padding: 0.375rem 0.5rem;
+          border: 1px solid $gray-300;
+          border-radius: 0.5rem;
+          font-size: 0.875rem;
+          background: white;
+          color: $oxitrans-black;
+          min-width: 120px;
+          
+          &:focus {
+            outline: none;
+            border-color: $oxitrans-red;
+            box-shadow: 0 0 0 2px rgba($oxitrans-red, 0.1);
+          }
+        }
+      }
+    }
+    
+    .user-card-footer {
+      padding-top: 0.75rem;
+      border-top: 1px solid $gray-100;
+      
+      .btn-full-width {
+        width: 100%;
+        justify-content: center;
+        min-height: 44px;
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Estados de carga y error
+.loading-container,
+.error-container,
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  
+  p {
+    font-size: 1rem;
+    color: $gray-600;
+    text-align: center;
+  }
+}
+
+// Tabla para desktop
+.users-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid $gray-100;
+  }
+  
+  th {
+    background: $gray-50;
+    font-weight: 600;
+    color: $oxitrans-red;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  tr:hover {
+    background: rgba($oxitrans-red, 0.02);
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+// Responsive improvements
+@media (max-width: 768px) {
   .admin-usuarios-page {
     padding: 1rem 0.5rem;
+    
     h1 {
       font-size: 1.25rem;
+      margin-bottom: 1rem;
     }
-    table th, table td {
-      padding: 0.5rem 0.5rem;
-      font-size: 0.95rem;
+    
+    .acciones-usuarios {
+      flex-direction: column;
+      gap: 1rem;
+      
+      form {
+        max-width: none;
+      }
+      
+      .asignar-roles-btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
+    // Estilos específicos para tablas responsive
+    .lista-cargos-usuario {
+      .cargo-item {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.5rem;
+        min-width: 100px;
+      }
+    }
+    
+    .btn {
+      font-size: 0.75rem;
+      padding: 0.375rem 0.75rem;
+      min-height: 36px;
+    }
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .admin-usuarios-page {
+    padding: 1.5rem 1rem;
+    max-width: 100%;
+    
+    .acciones-usuarios {
+      gap: 1rem;
+      
+      form {
+        max-width: 400px;
+      }
     }
   }
 }

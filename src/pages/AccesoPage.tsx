@@ -5,11 +5,13 @@ import NavigationBar from '../components/common/NavigationBar';
 import OverviewCardNew from '../components/dashboard/OverviewCardNew';
 import { useAuthStore } from '../stores/authStore';
 import { Clock, LogIn, LogOut, Users, Search, Filter } from 'lucide-react';
+import { useResponsive, getResponsiveLayoutStyles } from '../hooks/useResponsive';
 
 const AccesoPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTipo, setFilterTipo] = useState('todos');
+  const { isMobile } = useResponsive();
   
   // Obtener datos del usuario autenticado
   const { usuario } = useAuthStore();
@@ -70,27 +72,20 @@ const AccesoPage: React.FC = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const layoutStyles = getResponsiveLayoutStyles(isMobile);
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
       {/* Sidebar */}
       <SidebarNew isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       {/* Main Content */}
-      <div style={{ 
-        marginLeft: '16rem',
-        display: 'flex', 
-        flexDirection: 'column', 
-        minWidth: 0 
-      }}>
+      <div style={layoutStyles.mainContent}>
         {/* Header */}
         <HeaderNew onToggleSidebar={toggleSidebar} user={userForHeader} />
           
         {/* Page Content */}
-        <div style={{ 
-          padding: '1.5rem',
-          minHeight: 'calc(100vh - 70px)',
-          backgroundColor: '#f8fafc'
-        }}>
+        <div style={layoutStyles.pageContent}>
           {/* Navigation Bar */}
           <NavigationBar title="Control de Acceso" />
 

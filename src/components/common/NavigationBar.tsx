@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, Home, ChevronRight, RefreshCw, Download } from 'lucide-react';
 import { promptPWAInstall, isAppInstalled, isPWASupported } from '../../utils/pwaUtils';
+import { useResponsive } from '../../hooks/useResponsive';
 
 interface NavigationBarProps {
   title?: string;
@@ -24,6 +25,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { isMobile, isTablet } = useResponsive();
 
   // Mapeo de rutas para breadcrumbs
   const routeMap: { [key: string]: string } = {
@@ -90,118 +92,120 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
 
   const breadcrumbs = generateBreadcrumbs();
 
+  // Estilos adaptativos basados en el tamaño de pantalla
+  const getButtonStyles = (baseColor: string, textColor = 'white') => ({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: isMobile ? '0.25rem' : '0.5rem',
+    padding: isMobile ? '0.5rem 0.75rem' : (isTablet ? '0.5rem 0.875rem' : '0.5rem 1rem'),
+    backgroundColor: baseColor,
+    border: `1px solid ${baseColor}`,
+    borderRadius: '8px',
+    color: textColor,
+    fontSize: isMobile ? '0.75rem' : '0.875rem',
+    fontWeight: '500',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    minWidth: isMobile ? '44px' : 'auto', // Botones táctiles accesibles
+    flex: isMobile ? '1' : 'none' // En móvil se distribuyen equitativamente
+  });
+
   return (
     <div style={{
       backgroundColor: 'white',
       borderBottom: '1px solid #e5e7eb',
-      padding: '1rem 1.5rem',
+      padding: isMobile ? '0.75rem' : (isTablet ? '1rem' : '1rem 1.5rem'),
       marginBottom: '1.5rem',
       boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
     }}>
-      {/* Botones de navegación */}
+      {/* Contenedor principal responsive */}
       <div style={{
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: showBreadcrumb ? '0.75rem' : '0'
+        flexDirection: isMobile ? 'column' : 'row',
+        alignItems: isMobile ? 'stretch' : 'center',
+        justifyContent: isMobile ? 'center' : 'space-between',
+        gap: isMobile ? '0.75rem' : '1rem'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        
+        {/* Botones de navegación */}
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: isMobile ? '0.5rem' : '0.75rem',
+          flexWrap: isMobile ? 'wrap' : 'nowrap',
+          justifyContent: isMobile ? 'space-between' : 'flex-start',
+          order: isMobile ? 2 : 1
+        }}>
           {showBackButton && (
             <button
               onClick={handleBack}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#f3f4f6',
-                border: '1px solid #d1d5db',
-                borderRadius: '8px',
-                color: '#374151',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
+              style={getButtonStyles('#f3f4f6', '#374151')}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#e5e7eb';
-                e.currentTarget.style.color = '#1f2937';
-                e.currentTarget.style.transform = 'translateY(-1px)';
+                if (!isMobile) {
+                  e.currentTarget.style.backgroundColor = '#e5e7eb';
+                  e.currentTarget.style.color = '#1f2937';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#f3f4f6';
-                e.currentTarget.style.color = '#374151';
-                e.currentTarget.style.transform = 'translateY(0)';
+                if (!isMobile) {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6';
+                  e.currentTarget.style.color = '#374151';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }
               }}
             >
               <ArrowLeft style={{ width: '16px', height: '16px' }} />
-              Volver
+              {!isMobile && 'Volver'}
             </button>
           )}
 
           {showHomeButton && (
             <button
               onClick={handleHome}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#3b82f6',
-                border: '1px solid #3b82f6',
-                borderRadius: '8px',
-                color: 'white',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
+              style={getButtonStyles('#3b82f6')}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#2563eb';
-                e.currentTarget.style.borderColor = '#2563eb';
-                e.currentTarget.style.transform = 'translateY(-1px)';
+                if (!isMobile) {
+                  e.currentTarget.style.backgroundColor = '#2563eb';
+                  e.currentTarget.style.borderColor = '#2563eb';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#3b82f6';
-                e.currentTarget.style.borderColor = '#3b82f6';
-                e.currentTarget.style.transform = 'translateY(0)';
+                if (!isMobile) {
+                  e.currentTarget.style.backgroundColor = '#3b82f6';
+                  e.currentTarget.style.borderColor = '#3b82f6';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }
               }}
             >
               <Home style={{ width: '16px', height: '16px' }} />
-              Dashboard
+              {!isMobile && 'Dashboard'}
             </button>
           )}
 
           {showRefreshButton && (
             <button
               onClick={handleRefresh}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#10b981',
-                border: '1px solid #10b981',
-                borderRadius: '8px',
-                color: 'white',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
+              style={getButtonStyles('#10b981')}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#059669';
-                e.currentTarget.style.borderColor = '#059669';
-                e.currentTarget.style.transform = 'translateY(-1px)';
+                if (!isMobile) {
+                  e.currentTarget.style.backgroundColor = '#059669';
+                  e.currentTarget.style.borderColor = '#059669';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#10b981';
-                e.currentTarget.style.borderColor = '#10b981';
-                e.currentTarget.style.transform = 'translateY(0)';
+                if (!isMobile) {
+                  e.currentTarget.style.backgroundColor = '#10b981';
+                  e.currentTarget.style.borderColor = '#10b981';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }
               }}
             >
               <RefreshCw style={{ width: '16px', height: '16px' }} />
-              Actualizar
+              {!isMobile && 'Actualizar'}
             </button>
           )}
 
@@ -209,72 +213,76 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
           {isPWASupported() && !isAppInstalled() && (
             <button
               onClick={promptPWAInstall}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#006445',
-                border: '1px solid #006445',
-                borderRadius: '8px',
-                color: 'white',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
+              style={getButtonStyles('#006445')}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#005537';
-                e.currentTarget.style.borderColor = '#005537';
-                e.currentTarget.style.transform = 'translateY(-1px)';
+                if (!isMobile) {
+                  e.currentTarget.style.backgroundColor = '#005537';
+                  e.currentTarget.style.borderColor = '#005537';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#006445';
-                e.currentTarget.style.borderColor = '#006445';
-                e.currentTarget.style.transform = 'translateY(0)';
+                if (!isMobile) {
+                  e.currentTarget.style.backgroundColor = '#006445';
+                  e.currentTarget.style.borderColor = '#006445';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                }
               }}
             >
               <Download style={{ width: '16px', height: '16px' }} />
-              Instalar App
+              {!isMobile && 'Instalar App'}
             </button>
           )}
         </div>
 
         {/* Título de la página */}
         <h1 style={{
-          fontSize: '1.5rem',
+          fontSize: isMobile ? '1.25rem' : (isTablet ? '1.375rem' : '1.5rem'),
           fontWeight: '700',
           color: '#1f2937',
           margin: 0,
-          textAlign: 'center'
+          textAlign: isMobile ? 'center' : 'center',
+          order: isMobile ? 1 : 2,
+          flex: isMobile ? 'none' : '1'
         }}>
           {currentPageTitle}
         </h1>
 
-        <div style={{ width: '200px' }}></div> {/* Spacer para centrar el título */}
+        {/* Spacer para mantener el diseño en desktop */}
+        {!isMobile && (
+          <div style={{ width: '200px', order: 3 }}></div>
+        )}
       </div>
 
       {/* Breadcrumbs */}
-      {showBreadcrumb && breadcrumbs.length > 1 && (
+      {showBreadcrumb && breadcrumbs.length > 1 && !isMobile && (
         <nav style={{
           display: 'flex',
           alignItems: 'center',
           gap: '0.5rem',
           fontSize: '0.875rem',
-          color: '#6b7280'
+          color: '#6b7280',
+          flexWrap: 'wrap',
+          marginTop: '0.5rem'
         }}>
           {breadcrumbs.map((crumb, index) => (
             <React.Fragment key={crumb.path}>
               {index > 0 && (
-                <ChevronRight style={{ width: '14px', height: '14px', color: '#9ca3af' }} />
+                <ChevronRight style={{ 
+                  width: '14px', 
+                  height: '14px', 
+                  color: '#9ca3af',
+                  flexShrink: 0
+                }} />
               )}
               {index === breadcrumbs.length - 1 ? (
                 <span style={{ 
                   color: '#1f2937', 
                   fontWeight: '500',
-                  padding: '0.25rem 0.5rem',
+                  padding: isMobile ? '0.25rem' : '0.25rem 0.5rem',
                   backgroundColor: '#f3f4f6',
-                  borderRadius: '4px'
+                  borderRadius: '4px',
+                  fontSize: isTablet ? '0.75rem' : '0.875rem'
                 }}>
                   {crumb.label}
                 </span>
@@ -287,18 +295,23 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                     color: '#3b82f6',
                     cursor: 'pointer',
                     textDecoration: 'none',
-                    fontSize: '0.875rem',
-                    padding: '0.25rem 0.5rem',
+                    fontSize: isTablet ? '0.75rem' : '0.875rem',
+                    padding: isMobile ? '0.25rem' : '0.25rem 0.5rem',
                     borderRadius: '4px',
-                    transition: 'all 0.2s ease'
+                    transition: 'all 0.2s ease',
+                    whiteSpace: 'nowrap'
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.color = '#2563eb';
-                    e.currentTarget.style.backgroundColor = '#eff6ff';
+                    if (!isMobile) {
+                      e.currentTarget.style.color = '#2563eb';
+                      e.currentTarget.style.backgroundColor = '#eff6ff';
+                    }
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.color = '#3b82f6';
-                    e.currentTarget.style.backgroundColor = 'transparent';
+                    if (!isMobile) {
+                      e.currentTarget.style.color = '#3b82f6';
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                    }
                   }}
                 >
                   {crumb.label}
@@ -312,12 +325,13 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
       {/* Información adicional de la página */}
       <div style={{
         marginTop: '0.75rem',
-        padding: '0.75rem',
+        padding: isMobile ? '0.5rem' : '0.75rem',
         backgroundColor: '#f8fafc',
         borderRadius: '6px',
-        fontSize: '0.875rem',
+        fontSize: isMobile ? '0.75rem' : '0.875rem',
         color: '#6b7280',
-        borderLeft: '3px solid #3b82f6'
+        borderLeft: '3px solid #3b82f6',
+        display: isMobile ? 'none' : 'block' // Ocultamos el tip en móvil para ahorrar espacio
       }}>
         💡 <strong>Tip:</strong> Usa "Volver" para navegar a la página anterior o "Dashboard" para ir al inicio. 
         El botón "Actualizar" recarga los datos de esta página.

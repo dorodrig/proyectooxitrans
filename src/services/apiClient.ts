@@ -5,45 +5,42 @@ import { Capacitor } from '@capacitor/core';
 console.log('🔥 [apiClient] MÓDULO RECARGADO - PUERTO 3001 CONFIRMADO - ' + new Date().toISOString());
 
 function getApiBaseUrl() {
-  // PUERTO CORREGIDO: 3001 (timestamp: 2025-10-05)
-  const BACKEND_PORT = '3001'; // ✅ PUERTO CORRECTO DEL BACKEND
+  const BACKEND_PORT = '3001'; // Puerto del backend en la misma máquina
   
   // Debug en desarrollo para verificar configuración
   if (import.meta.env.DEV) {
-    console.log('[apiClient] 🔧 Configuración de entorno ACTUALIZADA:', {
+    console.log('[apiClient] 🔧 Configuración EC2 Single Server:', {
       NODE_ENV: import.meta.env.NODE_ENV,
       MODE: import.meta.env.MODE,
       VITE_API_URL: import.meta.env.VITE_API_URL,
       BACKEND_PORT: BACKEND_PORT,
       hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
-      isNative: Capacitor.isNativePlatform(),
-      timestamp: '2025-10-05'
+      isNative: Capacitor.isNativePlatform()
     });
   }
 
-  // Si está en móvil y en desarrollo, usar IP local
-  if (Capacitor.isNativePlatform() && import.meta.env.MODE === 'development') {
-    return `http://192.168.1.21:${BACKEND_PORT}/api`; // IP local del PC - Puerto 3001
+  // Si está en móvil, usar la IP/dominio del servidor EC2
+  if (Capacitor.isNativePlatform()) {
+    // En producción móvil, usar el dominio/IP del servidor EC2
+    const serverHost = import.meta.env.VITE_SERVER_HOST || 'localhost';
+    return `http://${serverHost}:${BACKEND_PORT}/api`;
   }
-  // En web, usar localhost para desarrollo
-  if (!Capacitor.isNativePlatform() && import.meta.env.MODE === 'development') {
-    console.log(`[apiClient] 🎯 Usando backend en puerto ${BACKEND_PORT}`);
-    return `http://localhost:${BACKEND_PORT}/api`; // Puerto 3001 CONFIRMADO
+
+  // Desarrollo local - usar localhost
+  if (import.meta.env.MODE === 'development') {
+    console.log(`[apiClient] 🎯 Desarrollo local - puerto ${BACKEND_PORT}`);
+    return `http://localhost:${BACKEND_PORT}/api`;
   }
   
-  // En producción, usar variable de entorno
+  // Producción - usar variable de entorno o mismo servidor
   if (import.meta.env.VITE_API_URL) {
+    console.log(`[apiClient] 🚀 Usando VITE_API_URL: ${import.meta.env.VITE_API_URL}`);
     return import.meta.env.VITE_API_URL;
   }
-  
-  // Fallback para GitHub Pages
-  if (typeof window !== 'undefined' && window.location.hostname === 'dorodrig.github.io') {
-    return 'https://oxitrans-backend.onrender.com/api';
-  }
-  
-  // Fallback por defecto
-  console.log(`[apiClient] 🔄 Fallback a puerto ${BACKEND_PORT}`);
-  return `http://localhost:${BACKEND_PORT}/api`; // Puerto 3001 CONFIRMADO
+
+  // EC2 Single Server - Backend en la misma máquina
+  console.log(`[apiClient] �️  EC2 Single Server - puerto ${BACKEND_PORT}`);
+  return `/api`; // Usar ruta relativa - nginx proxy
 }
 
 const API_BASE_URL = getApiBaseUrl();

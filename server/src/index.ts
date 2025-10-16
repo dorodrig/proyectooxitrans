@@ -61,8 +61,9 @@ app.use(globalLimiter);
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174', // Puerto Vite alternativo
-  'http://localhost:3000', 
-  'https://dorodrig.github.io'
+  'http://localhost:3000',
+  'http://localhost',     // Para EC2 local
+  'http://127.0.0.1'      // Para EC2 local
 ];
 
 app.use(cors({

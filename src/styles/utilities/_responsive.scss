@@ -1,0 +1,338 @@
+// ====================================
+// 📱 UTILITIES RESPONSIVE OXITRANS S.A.S
+// Utilidades para manejo responsive en toda la aplicación
+// ====================================
+
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// 🔄 LAYOUT RESPONSIVE UTILITIES
+
+// Ocultar elementos en diferentes breakpoints
+.hide-mobile {
+  @include mobile-only {
+    display: none !important;
+  }
+}
+
+.hide-tablet {
+  @include tablet-only {
+    display: none !important;
+  }
+}
+
+.hide-desktop {
+  @include desktop-only {
+    display: none !important;
+  }
+}
+
+// Mostrar solo en breakpoints específicos
+.show-mobile-only {
+  display: none !important;
+  
+  @include mobile-only {
+    display: block !important;
+  }
+}
+
+.show-tablet-only {
+  display: none !important;
+  
+  @include tablet-only {
+    display: block !important;
+  }
+}
+
+.show-desktop-only {
+  display: none !important;
+  
+  @include desktop-only {
+    display: block !important;
+  }
+}
+
+// 📐 SPACING RESPONSIVE
+.p-responsive {
+  padding: $spacing-md;
+  
+  @include mobile-only {
+    padding: $spacing-sm;
+  }
+}
+
+.m-responsive {
+  margin: $spacing-md;
+  
+  @include mobile-only {
+    margin: $spacing-sm;
+  }
+}
+
+// 📝 TEXT RESPONSIVE
+.text-responsive {
+  font-size: $font-size-base;
+  
+  @include mobile-only {
+    font-size: $font-size-sm;
+  }
+}
+
+.heading-responsive {
+  font-size: $font-size-2xl;
+  
+  @include mobile-only {
+    font-size: $font-size-xl;
+  }
+  
+  @include tablet-only {
+    font-size: $font-size-xl;
+  }
+}
+
+// 🎨 GRID RESPONSIVE
+.grid-responsive {
+  display: grid;
+  gap: $spacing-lg;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  
+  @include mobile-only {
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+  }
+}
+
+.grid-responsive-2 {
+  display: grid;
+  gap: $spacing-lg;
+  grid-template-columns: repeat(2, 1fr);
+  
+  @include mobile-only {
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+  }
+}
+
+.grid-responsive-3 {
+  display: grid;
+  gap: $spacing-lg;
+  grid-template-columns: repeat(3, 1fr);
+  
+  @include tablet-only {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include mobile-only {
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+  }
+}
+
+.grid-responsive-4 {
+  display: grid;
+  gap: $spacing-lg;
+  grid-template-columns: repeat(4, 1fr);
+  
+  @include tablet-only {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include mobile-only {
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+  }
+}
+
+// 📦 FLEX RESPONSIVE
+.flex-responsive {
+  display: flex;
+  gap: $spacing-md;
+  
+  @include mobile-only {
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+}
+
+.flex-responsive-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: $spacing-md;
+  
+  @include mobile-only {
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+}
+
+// 🎯 WIDTH RESPONSIVE
+.width-responsive {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  @include mobile-only {
+    padding: 0 $spacing-sm;
+  }
+}
+
+// 📊 TABLE RESPONSIVE
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  table {
+    width: 100%;
+    min-width: 600px;
+  }
+  
+  @include mobile-only {
+    table {
+      min-width: 500px;
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+// 🔘 BUTTON RESPONSIVE
+.btn-responsive {
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-base;
+  
+  @include mobile-only {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
+    width: 100%;
+  }
+}
+
+// 📱 FORM RESPONSIVE
+.form-responsive {
+  .form-group {
+    margin-bottom: $spacing-md;
+    
+    @include mobile-only {
+      margin-bottom: $spacing-sm;
+    }
+  }
+  
+  .form-row {
+    display: flex;
+    gap: $spacing-md;
+    
+    @include mobile-only {
+      flex-direction: column;
+      gap: $spacing-sm;
+    }
+  }
+  
+  input, select, textarea {
+    @include mobile-only {
+      font-size: 16px; // Previene zoom en iOS
+    }
+  }
+}
+
+// 🎨 CARD RESPONSIVE
+.card-responsive {
+  @include card;
+  padding: $spacing-lg;
+  
+  @include mobile-only {
+    padding: $spacing-md;
+    border-radius: $border-radius-sm;
+  }
+}
+
+// 🌐 CONTAINER RESPONSIVE
+.container-responsive {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 $spacing-lg;
+  
+  @include mobile-only {
+    padding: 0 $spacing-md;
+  }
+}
+
+// 📝 MODAL RESPONSIVE
+.modal-responsive {
+  .modal-content {
+    margin: $spacing-xl;
+    
+    @include mobile-only {
+      margin: $spacing-sm;
+      width: calc(100% - #{$spacing-md});
+    }
+  }
+}
+
+// 🔄 SIDEBAR RESPONSIVE
+.sidebar-responsive {
+  width: 16rem;
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  transform: translateX(0);
+  transition: transform 0.3s ease-in-out;
+  z-index: 50;
+  
+  @include mobile-tablet {
+    transform: translateX(-100%);
+    
+    &.open {
+      transform: translateX(0);
+    }
+  }
+}
+
+.main-content-responsive {
+  margin-left: 16rem;
+  transition: margin-left 0.3s ease-in-out;
+  
+  @include mobile-tablet {
+    margin-left: 0;
+  }
+}
+
+// 📊 DASHBOARD RESPONSIVE
+.dashboard-grid {
+  display: grid;
+  gap: $spacing-lg;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  
+  @include mobile-only {
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+  }
+}
+
+.stat-card-responsive {
+  @include card;
+  padding: $spacing-lg;
+  text-align: center;
+  
+  @include mobile-only {
+    padding: $spacing-md;
+  }
+  
+  .stat-number {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    
+    @include mobile-only {
+      font-size: $font-size-2xl;
+    }
+  }
+  
+  .stat-label {
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    
+    @include mobile-only {
+      font-size: $font-size-xs;
+    }
+  }
+}

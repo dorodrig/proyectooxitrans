@@ -41,7 +41,7 @@ export default defineConfig({
       manifest: false, // Usar manifest.json estático de public/
     })
   ],
-  base: process.env.NODE_ENV === 'production' ? '/proyectooxitrans/' : '/',
+  base: '/', // EC2 Single Server - servir desde raíz
   server: {
     host: 'localhost',
     port: 5173,

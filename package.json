@@ -1,7 +1,7 @@
 {
   "name": "control-acceso-oxitrans",
   "private": true,
-  "homepage": "https://dorodrig.github.io/proyectooxitrans",
+  "homepage": "./",
   "version": "1.0.0",
   "type": "module",
   "description": "Sistema de Control de Acceso de Empleados para OXITRANS S.A.S",
@@ -14,17 +14,16 @@
     "build:server": "cd server && npm run build",
     "build:fullstack": "npm run build && npm run build:server",
     "start": "npm run build:fullstack && node server/dist/index.js",
+    "start:prod": "node server/dist/index.js",
     "lint": "eslint .",
     "preview": "vite preview",
+    "preview:local": "vite preview --mode preview",
+    "ec2:build": "npm run build:fullstack",
+    "ec2:deploy": "chmod +x deploy-ec2.sh && ./deploy-ec2.sh",
     "mobile:init": "npx cap init",
     "mobile:build": "npm run build && npx cap sync",
     "mobile:android": "npx cap open android",
-    "mobile:ios": "npx cap open ios",
-    "pwa:build": "npm run build && npx workbox generateSW",
-    "predeploy": "npm run build",
-    "deploy": "node deploy-windows.mjs",
-    "deploy:gh-pages": "gh-pages -d dist --dotfiles --dest . --add",
-    "deploy:github-actions": "git add . && git commit -m \"Deploy: Update for GitHub Actions\" && git push origin main"
+    "mobile:ios": "npx cap open ios"
   },
   "dependencies": {
     "@googlemaps/react-wrapper": "^1.2.0",

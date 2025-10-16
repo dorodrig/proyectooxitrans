@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useResponsive } from '../../hooks/useResponsive';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface SidebarProps {
  * Navegación lateral con logo y menú de OXITRANS
  */
 const SidebarNew: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const { isMobile, isDesktop } = useResponsive();
   const location = useLocation();
   
   const menuSections = [
@@ -89,14 +91,13 @@ const SidebarNew: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           top: 0,
           height: '100vh',
           width: '16rem',
-          transform: 'translateX(0)', // Siempre visible
+          transform: isDesktop ? 'translateX(0)' : (isOpen ? 'translateX(0)' : 'translateX(-100%)'),
           transition: 'transform 0.3s ease-in-out',
           zIndex: 50,
           boxShadow: '2px 0 8px rgba(0, 0, 0, 0.05)',
           display: 'flex',
           flexDirection: 'column'
         }}
-        className="lg:translate-x-0" // Siempre visible en desktop
       >
         {/* Logo Section */}
         <div style={{

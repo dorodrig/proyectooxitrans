@@ -1,0 +1,489 @@
+// ====================================
+// 📝 FORMULARIOS RESPONSIVE OXITRANS S.A.S
+// Estilos para formularios que funcionen perfectamente en mobile
+// ====================================
+
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// 📝 FORMULARIO BASE RESPONSIVE
+.form-responsive {
+  width: 100%;
+  max-width: 600px;
+  
+  @include mobile-only {
+    max-width: 100%;
+    padding: 0 $spacing-sm;
+  }
+  
+  // GRUPO DE CAMPOS
+  .form-group {
+    margin-bottom: $spacing-lg;
+    
+    @include mobile-only {
+      margin-bottom: $spacing-md;
+    }
+    
+    // LABEL
+    label {
+      display: block;
+      margin-bottom: $spacing-sm;
+      font-weight: $font-weight-medium;
+      color: $text-primary;
+      font-size: $font-size-sm;
+      
+      &.required::after {
+        content: ' *';
+        color: $error-color;
+      }
+    }
+    
+    // INPUTS BÁSICOS
+    input, select, textarea {
+      width: 100%;
+      padding: $spacing-md;
+      border: 1px solid $gray-300;
+      border-radius: $border-radius-md;
+      font-size: $font-size-base;
+      background-color: white;
+      transition: all 0.2s ease;
+      
+      @include mobile-only {
+        font-size: 16px; // Previene zoom en iOS
+        padding: $spacing-md $spacing-sm;
+      }
+      
+      &:focus {
+        outline: none;
+        border-color: $oxitrans-primary;
+        box-shadow: 0 0 0 3px rgba(41, 115, 114, 0.1);
+      }
+      
+      &:disabled {
+        background-color: $gray-100;
+        color: $text-muted;
+        cursor: not-allowed;
+      }
+      
+      &.error {
+        border-color: $error-color;
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      }
+      
+      &.success {
+        border-color: $success-color;
+        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+      }
+    }
+    
+    // TEXTAREA ESPECÍFICO
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+      
+      @include mobile-only {
+        min-height: 80px;
+      }
+    }
+    
+    // MENSAJE DE ERROR
+    .error-message {
+      margin-top: $spacing-xs;
+      color: $error-color;
+      font-size: $font-size-sm;
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      
+      &::before {
+        content: '⚠️';
+      }
+    }
+    
+    // MENSAJE DE AYUDA
+    .help-text {
+      margin-top: $spacing-xs;
+      color: $text-muted;
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+// 📝 FORMULARIO EN GRID RESPONSIVE
+.form-grid-responsive {
+  display: grid;
+  gap: $spacing-lg;
+  grid-template-columns: repeat(2, 1fr);
+  
+  @include mobile-only {
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+  }
+  
+  // Para campos que deben ocupar toda la fila
+  .form-group-full {
+    grid-column: 1 / -1;
+  }
+}
+
+// 📝 FORMULARIO HORIZONTAL (Label a la izquierda)
+.form-horizontal-responsive {
+  .form-group {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: $spacing-md;
+    align-items: start;
+    
+    @include mobile-only {
+      grid-template-columns: 1fr;
+      gap: $spacing-sm;
+    }
+    
+    label {
+      margin-bottom: 0;
+      padding-top: $spacing-md;
+      
+      @include mobile-only {
+        padding-top: 0;
+      }
+    }
+    
+    .error-message, .help-text {
+      grid-column: 2;
+      
+      @include mobile-only {
+        grid-column: 1;
+      }
+    }
+  }
+}
+
+// 📝 BOTONES DE FORMULARIO RESPONSIVE
+.form-actions-responsive {
+  display: flex;
+  gap: $spacing-md;
+  justify-content: flex-end;
+  margin-top: $spacing-xl;
+  padding-top: $spacing-lg;
+  border-top: 1px solid $gray-200;
+  
+  @include mobile-only {
+    flex-direction: column-reverse;
+    gap: $spacing-sm;
+  }
+  
+  .btn {
+    padding: $spacing-md $spacing-xl;
+    font-size: $font-size-base;
+    font-weight: $font-weight-medium;
+    border-radius: $border-radius-md;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    @include mobile-only {
+      width: 100%;
+      padding: $spacing-lg;
+    }
+    
+    &.btn-primary {
+      background-color: $oxitrans-primary;
+      color: white;
+      
+      &:hover {
+        background-color: $oxitrans-primary-dark;
+      }
+      
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+    
+    &.btn-secondary {
+      background-color: transparent;
+      color: $text-secondary;
+      border: 1px solid $gray-300;
+      
+      &:hover {
+        background-color: $gray-100;
+      }
+    }
+    
+    &.btn-danger {
+      background-color: $error-color;
+      color: white;
+      
+      &:hover {
+        background-color: darken($error-color, 10%);
+      }
+    }
+  }
+}
+
+// 📝 CHECKBOX Y RADIO RESPONSIVE
+.form-check-responsive {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+  
+  input[type="checkbox"], 
+  input[type="radio"] {
+    width: auto;
+    margin: 0;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  
+  label {
+    margin-bottom: 0;
+    cursor: pointer;
+    
+    @include mobile-only {
+      font-size: $font-size-base;
+    }
+  }
+}
+
+// 📝 GRUPO DE CHECKBOXES/RADIOS
+.form-check-group-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: $spacing-sm;
+  
+  @include mobile-only {
+    grid-template-columns: 1fr;
+  }
+}
+
+// 📝 INPUT CON ICONO
+.form-input-with-icon {
+  position: relative;
+  
+  input {
+    padding-left: $spacing-xl;
+  }
+  
+  .icon {
+    position: absolute;
+    left: $spacing-md;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $gray-400;
+    pointer-events: none;
+  }
+}
+
+// 📝 SELECT MÚLTIPLE RESPONSIVE
+.form-select-multiple {
+  select[multiple] {
+    min-height: 120px;
+    
+    @include mobile-only {
+      min-height: 100px;
+    }
+  }
+}
+
+// 📝 FORMULARIO DE ARCHIVO
+.form-file-responsive {
+  .file-input {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    width: 100%;
+    
+    input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    
+    .file-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: $spacing-sm;
+      padding: $spacing-lg;
+      border: 2px dashed $gray-300;
+      border-radius: $border-radius-md;
+      background-color: $gray-50;
+      color: $text-secondary;
+      font-size: $font-size-sm;
+      transition: all 0.2s ease;
+      
+      @include mobile-only {
+        padding: $spacing-md;
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      &:hover {
+        border-color: $oxitrans-primary;
+        background-color: rgba(41, 115, 114, 0.05);
+        color: $oxitrans-primary;
+      }
+      
+      &::before {
+        content: '📁';
+        font-size: $font-size-lg;
+      }
+    }
+    
+    &.has-file .file-label {
+      border-color: $success-color;
+      background-color: rgba(34, 197, 94, 0.05);
+      color: $success-color;
+      
+      &::before {
+        content: '✅';
+      }
+    }
+  }
+  
+  .file-info {
+    margin-top: $spacing-sm;
+    font-size: $font-size-sm;
+    color: $text-muted;
+  }
+}
+
+// 📝 FORMULARIO DE BÚSQUEDA
+.form-search-responsive {
+  position: relative;
+  max-width: 400px;
+  
+  @include mobile-only {
+    max-width: 100%;
+  }
+  
+  input {
+    padding-right: $spacing-xl;
+  }
+  
+  .search-icon {
+    position: absolute;
+    right: $spacing-md;
+    top: 50%;
+    transform: translateY(-50%);
+    color: $gray-400;
+    pointer-events: none;
+  }
+  
+  .clear-btn {
+    position: absolute;
+    right: $spacing-md;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: $gray-400;
+    cursor: pointer;
+    padding: $spacing-xs;
+    
+    &:hover {
+      color: $error-color;
+    }
+  }
+}
+
+// 📝 FORMULARIO MODAL RESPONSIVE
+.form-modal-responsive {
+  @include mobile-only {
+    .modal-content {
+      margin: $spacing-sm;
+      width: calc(100% - #{$spacing-md});
+    }
+  }
+  
+  .modal-body {
+    padding: $spacing-xl;
+    
+    @include mobile-only {
+      padding: $spacing-md;
+    }
+  }
+}
+
+// 📝 VALIDACIÓN VISUAL
+.form-validation {
+  .form-group {
+    &.valid {
+      input, select, textarea {
+        border-color: $success-color;
+        
+        &:focus {
+          box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+        }
+      }
+      
+      .validation-icon {
+        color: $success-color;
+        
+        &::before {
+          content: '✓';
+        }
+      }
+    }
+    
+    &.invalid {
+      input, select, textarea {
+        border-color: $error-color;
+        
+        &:focus {
+          box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+      }
+      
+      .validation-icon {
+        color: $error-color;
+        
+        &::before {
+          content: '✗';
+        }
+      }
+    }
+  }
+  
+  .validation-icon {
+    position: absolute;
+    right: $spacing-md;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: bold;
+  }
+}
+
+// 📝 LOADING STATE
+.form-loading {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $border-radius-md;
+  }
+  
+  &::before {
+    content: '⟳';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: $font-size-xl;
+    color: $oxitrans-primary;
+    animation: spin 1s linear infinite;
+    z-index: 10;
+  }
+}

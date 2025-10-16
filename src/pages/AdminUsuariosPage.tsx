@@ -3,6 +3,8 @@ import NavigationBar from '../components/common/NavigationBar';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usuariosService } from '../services/usuariosService';
 import { cargosService } from '../services/cargosService';
+import ResponsiveTable from '../components/ui/ResponsiveTable';
+import { useResponsive } from '../hooks/useResponsive';
 interface Cargo {
   id: string;
   nombre: string;
@@ -18,6 +20,7 @@ const AdminUsuariosPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sessionExpired, setSessionExpired] = useState(false);
   const [accionError, setAccionError] = useState<string | null>(null);
+  const { isMobile } = useResponsive();
   const queryClient = useQueryClient();
   const logout = useAuthStore(state => state.logout);
   const isAuthenticated = useAuthStore(state => state.isAuthenticated);
@@ -159,63 +162,162 @@ const AdminUsuariosPage: React.FC = () => {
           Asignar Roles
         </button>
       </div>
+      {/* Estadísticas */}
+      {!isLoading && !error && (
+        <div className="table-stats">
+          <div className="stat-card">
+            <span className="stat-number">{usuarios.length}</span>
+            <span className="stat-label">Total</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-number">{usuarios.filter(u => u.estado === 'activo').length}</span>
+            <span className="stat-label">Activos</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-number">{usuarios.filter(u => u.estado === 'inactivo').length}</span>
+            <span className="stat-label">Inactivos</span>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
-        <p>Cargando usuarios...</p>
+        <div className="loading-container">
+          <p>Cargando usuarios...</p>
+        </div>
       ) : error ? (
-        <p className="text-red-500">Error al cargar usuarios</p>
-      ) : (
-        <table className="w-full table-auto border">
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Documento</th>
-              <th>Rol</th>
-              <th>Cargo</th>
-              <th>Estado</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            {usuarios.length > 0 ? (
-              usuarios.map((usuario: Usuario) => (
-                <tr key={usuario.id}>
-                  <td>{usuario.nombre} {usuario.apellido}</td>
-                  <td>{usuario.documento}</td>
-                  <td>{usuario.rol}</td>
-                  <td>
-                    <div className="lista-cargos-usuario">
-                      <select
-                        value={usuario.cargo || ''}
-                        onChange={e => asignarCargoMutation.mutate({ id: usuario.id, cargo: e.target.value })}
-                        className="cargo-item"
-                        disabled={asignarCargoMutation.isPending}
-                      >
-                        <option value="">Sin cargo</option>
-                        {cargos.map((cargo: Cargo) => (
-                          <option key={cargo.id} value={cargo.nombre}>{cargo.nombre}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </td>
-                  <td>{usuario.estado}</td>
-                  <td>
-                    <button
-                      className={`btn ${usuario.estado === 'activo' ? 'btn-danger' : 'btn-success'}`}
-                      onClick={() => handleToggleEstado(usuario)}
-                      disabled={mutation.isPending}
+        <div className="error-container">
+          <p className="text-red-500">Error al cargar usuarios</p>
+        </div>
+      ) : isMobile ? (
+        // Vista de tarjetas para móvil
+        <div className="users-cards-container">
+          {usuarios.length > 0 ? (
+            usuarios.map((usuario: Usuario) => (
+              <div key={usuario.id} className="user-card">
+                <div className="user-card-header">
+                  <h3 className="user-name">{usuario.nombre} {usuario.apellido}</h3>
+                  <span className={`badge ${usuario.estado === 'activo' ? 'badge-success' : 'badge-secondary'}`}>
+                    {usuario.estado}
+                  </span>
+                </div>
+                
+                <div className="user-card-body">
+                  <div className="user-field">
+                    <span className="field-label">Documento:</span>
+                    <span className="field-value">{usuario.documento}</span>
+                  </div>
+                  
+                  <div className="user-field">
+                    <span className="field-label">Rol:</span>
+                    <span className={`badge badge-${usuario.rol === 'admin' ? 'primary' : usuario.rol === 'supervisor' ? 'warning' : 'secondary'}`}>
+                      {usuario.rol}
+                    </span>
+                  </div>
+                  
+                  <div className="user-field">
+                    <span className="field-label">Cargo:</span>
+                    <select
+                      value={usuario.cargo || ''}
+                      onChange={e => asignarCargoMutation.mutate({ id: usuario.id, cargo: e.target.value })}
+                      className="cargo-select-mobile"
+                      disabled={asignarCargoMutation.isPending}
                     >
-                      {usuario.estado === 'activo' ? 'Desactivar' : 'Activar'}
-                    </button>
-                  </td>
-                </tr>
-              ))
-            ) : (
+                      <option value="">Sin cargo</option>
+                      {cargos.map((cargo: Cargo) => (
+                        <option key={cargo.id} value={cargo.nombre}>{cargo.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="user-card-footer">
+                  <button
+                    className={`btn ${usuario.estado === 'activo' ? 'btn-danger' : 'btn-success'} btn-full-width`}
+                    onClick={() => handleToggleEstado(usuario)}
+                    disabled={mutation.isPending}
+                  >
+                    {usuario.estado === 'activo' ? 'Desactivar' : 'Activar'}
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="empty-state">
+              <p>No se encontraron usuarios</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        // Vista de tabla para desktop
+        <ResponsiveTable
+          variant="default"
+          stats={[
+            { label: 'Total', value: usuarios.length },
+            { label: 'Activos', value: usuarios.filter(u => u.estado === 'activo').length },
+            { label: 'Inactivos', value: usuarios.filter(u => u.estado === 'inactivo').length }
+          ]}
+        >
+          <table className="users-table">
+            <thead>
               <tr>
-                <td colSpan={5} className="text-center">No se encontraron usuarios</td>
+                <th>Nombre</th>
+                <th>Documento</th>
+                <th>Rol</th>
+                <th>Cargo</th>
+                <th>Estado</th>
+                <th>Acción</th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {usuarios.length > 0 ? (
+                usuarios.map((usuario: Usuario) => (
+                  <tr key={usuario.id}>
+                    <td>{usuario.nombre} {usuario.apellido}</td>
+                    <td>{usuario.documento}</td>
+                    <td>
+                      <span className={`badge badge-${usuario.rol === 'admin' ? 'primary' : usuario.rol === 'supervisor' ? 'warning' : 'secondary'}`}>
+                        {usuario.rol}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="lista-cargos-usuario">
+                        <select
+                          value={usuario.cargo || ''}
+                          onChange={e => asignarCargoMutation.mutate({ id: usuario.id, cargo: e.target.value })}
+                          className="cargo-item"
+                          disabled={asignarCargoMutation.isPending}
+                        >
+                          <option value="">Sin cargo</option>
+                          {cargos.map((cargo: Cargo) => (
+                            <option key={cargo.id} value={cargo.nombre}>{cargo.nombre}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`badge ${usuario.estado === 'activo' ? 'badge-success' : 'badge-secondary'}`}>
+                        {usuario.estado}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className={`btn ${usuario.estado === 'activo' ? 'btn-danger' : 'btn-success'}`}
+                        onClick={() => handleToggleEstado(usuario)}
+                        disabled={mutation.isPending}
+                      >
+                        {usuario.estado === 'activo' ? 'Desactivar' : 'Activar'}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="text-center">No se encontraron usuarios</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </ResponsiveTable>
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuthStore } from '../../stores/authStore';
 import { useNavigate } from 'react-router-dom';
+import { useResponsive } from '../../hooks/useResponsive';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -23,6 +24,7 @@ const Header: React.FC<HeaderProps> = ({
   const { logout } = useAuthStore();
   const navigate = useNavigate();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isMobile } = useResponsive();
 
   const handleLogout = async () => {
     try {
@@ -63,7 +65,7 @@ const Header: React.FC<HeaderProps> = ({
         gap: '1rem' 
       }}>
         
-        {/* Menu Toggle con Icono Hamburguesa */}
+        {/* Menu Toggle con Icono Hamburguesa - Solo visible en mobile/tablet */}
         <button
           onClick={onToggleSidebar}
           style={{
@@ -73,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({
             background: 'transparent',
             cursor: 'pointer',
             transition: 'background-color 0.2s ease',
-            display: 'flex',
+            display: isMobile ? 'flex' : 'none', // Solo visible en mobile
             alignItems: 'center',
             justifyContent: 'center'
           }}
@@ -265,28 +267,30 @@ const Header: React.FC<HeaderProps> = ({
             }}>
               {user.initials}
             </div>
-            <div style={{ 
-              display: 'flex',
-              flexDirection: 'column', 
-              textAlign: 'left',
-              minWidth: '120px'
-            }}>
-              <span style={{ 
-                fontSize: '0.875rem', 
-                fontWeight: '600', 
-                color: '#1f2937',
-                lineHeight: '1.25'
+            {!isMobile && (
+              <div style={{ 
+                display: 'flex',
+                flexDirection: 'column', 
+                textAlign: 'left',
+                minWidth: '120px'
               }}>
-                {user.name}
-              </span>
-              <span style={{ 
-                fontSize: '0.75rem', 
-                color: '#6b7280',
-                lineHeight: '1.25'
-              }}>
-                {user.role}
-              </span>
-            </div>
+                <span style={{ 
+                  fontSize: '0.875rem', 
+                  fontWeight: '600', 
+                  color: '#1f2937',
+                  lineHeight: '1.25'
+                }}>
+                  {user.name}
+                </span>
+                <span style={{ 
+                  fontSize: '0.75rem', 
+                  color: '#6b7280',
+                  lineHeight: '1.25'
+                }}>
+                  {user.role}
+                </span>
+              </div>
+            )}
             <div style={{ 
               color: '#9ca3af',
               fontSize: '0.875rem',

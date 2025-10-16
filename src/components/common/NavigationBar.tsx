@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, Home, ChevronRight, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Home, ChevronRight, RefreshCw, Download } from 'lucide-react';
+import { promptPWAInstall, isAppInstalled, isPWASupported } from '../../utils/pwaUtils';
 
 interface NavigationBarProps {
   title?: string;
@@ -201,6 +202,40 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
             >
               <RefreshCw style={{ width: '16px', height: '16px' }} />
               Actualizar
+            </button>
+          )}
+
+          {/* Botón de instalación PWA */}
+          {isPWASupported() && !isAppInstalled() && (
+            <button
+              onClick={promptPWAInstall}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.5rem 1rem',
+                backgroundColor: '#006445',
+                border: '1px solid #006445',
+                borderRadius: '8px',
+                color: 'white',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#005537';
+                e.currentTarget.style.borderColor = '#005537';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#006445';
+                e.currentTarget.style.borderColor = '#006445';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
+            >
+              <Download style={{ width: '16px', height: '16px' }} />
+              Instalar App
             </button>
           )}
         </div>

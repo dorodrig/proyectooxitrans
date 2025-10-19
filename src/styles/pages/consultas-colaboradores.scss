@@ -189,6 +189,101 @@
     }
   }
 
+  // ====================================
+  // 📅 CAMPOS DE FECHA OBLIGATORIOS
+  // ====================================
+  .fecha-filters-required {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-md;
+    margin-top: $spacing-md;
+    margin-bottom: $spacing-md;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .fecha-filter-group {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: $border-radius-lg;
+      padding: $spacing-md;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+
+      .fecha-label {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        margin-bottom: $spacing-xs;
+        font-size: $font-size-sm;
+        font-weight: $font-weight-medium;
+        color: rgba(255, 255, 255, 0.9);
+
+        .fecha-icon {
+          font-size: $font-size-base;
+        }
+
+        .fecha-text {
+          flex: 1;
+        }
+
+        .fecha-required {
+          color: #ff6b6b;
+          font-weight: $font-weight-bold;
+        }
+      }
+
+      .fecha-input {
+        width: 100%;
+        padding: $spacing-sm $spacing-md;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: $border-radius-md;
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        font-size: $font-size-sm;
+        outline: none;
+        transition: all 0.3s ease;
+
+        &:focus {
+          border-color: rgba(255, 255, 255, 0.6);
+          background: rgba(255, 255, 255, 0.25);
+          box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+
+        &::-webkit-calendar-picker-indicator {
+          filter: invert(1);
+          cursor: pointer;
+        }
+      }
+    }
+  }
+
+  .search-requirements {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    margin-top: $spacing-md;
+    padding: $spacing-md;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: $border-radius-md;
+    border-left: 4px solid rgba(255, 255, 255, 0.4);
+
+    .requirement-item {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      font-size: $font-size-sm;
+      color: rgba(255, 255, 255, 0.9);
+
+      .requirement-icon {
+        font-size: $font-size-base;
+      }
+
+      .requirement-text {
+        font-weight: $font-weight-medium;
+      }
+    }
+  }
+
   &__search-btn {
     padding: $spacing-md $spacing-lg;
     background: white;
@@ -230,6 +325,41 @@
 
     &-header {
       margin-bottom: $spacing-lg;
+    }
+  }
+
+  // ====================================
+  // 📅 INFORMACIÓN DEL PERÍODO ACTIVO
+  // ====================================
+  .periodo-info {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+    border: 1px solid rgba(74, 144, 226, 0.2);
+    border-radius: $border-radius-lg;
+    padding: $spacing-md;
+    margin-bottom: $spacing-lg;
+    
+    .periodo-badge {
+      display: flex;
+      align-items: center;
+      gap: $spacing-xs;
+      margin-bottom: $spacing-xs;
+      
+      .periodo-icon {
+        font-size: $font-size-lg;
+      }
+      
+      .periodo-text {
+        font-weight: $font-weight-semibold;
+        color: $oxitrans-primary;
+        font-size: $font-size-base;
+      }
+    }
+    
+    .periodo-note {
+      font-size: $font-size-sm;
+      color: $gray-600;
+      font-style: italic;
+      padding-left: calc(#{$font-size-lg} + #{$spacing-xs});
     }
   }
 

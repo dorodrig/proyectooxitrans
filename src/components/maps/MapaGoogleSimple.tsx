@@ -30,6 +30,7 @@ const MapaGoogleSimple: React.FC<MapaGoogleSimpleProps> = ({
   const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
   const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
   const [loadingError, setLoadingError] = useState<string | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
 
   // Verificar si Google Maps está disponible
   useEffect(() => {
@@ -47,11 +48,22 @@ const MapaGoogleSimple: React.FC<MapaGoogleSimpleProps> = ({
     checkGoogleMaps();
   }, []);
 
-  // Crear el mapa cuando Google Maps esté disponible
+  // Crear/actualizar el mapa cuando cambien las ubicaciones
   useEffect(() => {
-    if (isGoogleMapsLoaded && mapRef.current && !mapInstance && ubicaciones.length > 0) {
+    if (isGoogleMapsLoaded && mapRef.current) {
+      // Limpiar marcadores existentes
+      markersRef.current.forEach(marker => {
+        marker.setMap(null);
+      });
+      markersRef.current = [];
+
+      // Si no hay ubicaciones, solo limpiar marcadores
+      if (ubicaciones.length === 0) {
+        return;
+      }
+      
       try {
-        console.log('🗺️ Creando mapa con ubicaciones:', ubicaciones.length);
+        console.log('🗺️ Actualizando mapa con ubicaciones:', ubicaciones.length);
         console.log('🔍 Datos de ubicaciones:', ubicaciones.slice(0, 2)); // Debug
 
         // Validar y convertir coordenadas a números
@@ -79,14 +91,19 @@ const MapaGoogleSimple: React.FC<MapaGoogleSimpleProps> = ({
           throw new Error('No se pudo calcular el centro del mapa');
         }
 
-        // Crear el mapa
-        const map = new google.maps.Map(mapRef.current, {
-          zoom: 13,
-          center: { lat: centerLat, lng: centerLng },
-          mapTypeId: google.maps.MapTypeId.ROADMAP,
-        });
-
-        setMapInstance(map);
+        // Crear o actualizar el mapa
+        let map = mapInstance;
+        if (!map) {
+          map = new google.maps.Map(mapRef.current, {
+            zoom: 13,
+            center: { lat: centerLat, lng: centerLng },
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+          });
+          setMapInstance(map);
+        } else {
+          // Actualizar centro del mapa existente
+          map.setCenter({ lat: centerLat, lng: centerLng });
+        }
 
         // Agrupar ubicaciones por coordenadas para manejar entrada/salida en mismo lugar
         const ubicacionesAgrupadas = new Map();
@@ -103,6 +120,8 @@ const MapaGoogleSimple: React.FC<MapaGoogleSimpleProps> = ({
         });
 
         // Crear marcadores con offset para ubicaciones superpuestas
+        const newMarkers: google.maps.Marker[] = [];
+        
         ubicacionesAgrupadas.forEach((ubicacionesEnPunto, coordKey) => {
           const [lat, lng] = coordKey.split(',').map(Number);
           
@@ -153,8 +172,13 @@ const MapaGoogleSimple: React.FC<MapaGoogleSimpleProps> = ({
             marker.addListener('click', () => {
               infoWindow.open(map, marker);
             });
+
+            newMarkers.push(marker);
           });
         });
+
+        // Guardar los nuevos marcadores
+        markersRef.current = newMarkers;
 
         console.log('✅ Mapa creado exitosamente con', ubicacionesValidas.length, 'marcadores');
 
@@ -164,6 +188,15 @@ const MapaGoogleSimple: React.FC<MapaGoogleSimpleProps> = ({
       }
     }
   }, [isGoogleMapsLoaded, mapInstance, ubicaciones]);
+
+  // Cleanup: limpiar marcadores al desmontar el componente
+  useEffect(() => {
+    return () => {
+      markersRef.current.forEach(marker => {
+        marker.setMap(null);
+      });
+    };
+  }, []);
 
   if (loading) {
     return (

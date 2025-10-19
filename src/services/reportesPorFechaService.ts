@@ -26,6 +26,7 @@ export interface FiltrosReporte {
   fechaInicio: string;  // formato YYYY-MM-DD
   fechaFin: string;     // formato YYYY-MM-DD
   formato?: 'xlsx' | 'csv';
+  colaboradorId?: number; // ID del colaborador para filtrar (opcional)
 }
 
 export interface PreviewReporte {
@@ -47,6 +48,11 @@ export class ReportesPorFechaService {
         fechaInicio: filtros.fechaInicio,
         fechaFin: filtros.fechaFin
       });
+
+      // Agregar colaboradorId si está presente
+      if (filtros.colaboradorId) {
+        queryParams.append('colaboradorId', filtros.colaboradorId.toString());
+      }
 
       const response = await apiClient.get(`/reportes/preview-jornadas?${queryParams.toString()}`);
 
@@ -78,6 +84,11 @@ export class ReportesPorFechaService {
         fechaFin: filtros.fechaFin,
         formato: filtros.formato || 'xlsx'
       });
+
+      // Agregar colaboradorId si está presente
+      if (filtros.colaboradorId) {
+        queryParams.append('colaboradorId', filtros.colaboradorId.toString());
+      }
 
       // Para descargas de archivos, necesitamos usar fetch directamente
       const fullUrl = `${window.location.protocol}//${window.location.hostname}:3001/api/reportes/jornadas-completo?${queryParams.toString()}`;

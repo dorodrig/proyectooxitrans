@@ -3,13 +3,13 @@ import HeaderNew from '../components/dashboard/HeaderNew';
 import SidebarNew from '../components/dashboard/SidebarNew';
 import NavigationBar from '../components/common/NavigationBar';
 import OverviewCardNew from '../components/dashboard/OverviewCardNew';
+import ReportePorFechasComponent from '../components/reportes/ReportePorFechas';
 import { useAuthStore } from '../stores/authStore';
-import { BarChart3, Download, Calendar, Users, FileText, TrendingUp } from 'lucide-react';
+import { BarChart3, Users, FileText, TrendingUp } from 'lucide-react';
+import '../styles/components/reportes/ReportePorFechas.scss';
 
 const ReportesPage: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedReport, setSelectedReport] = useState('asistencia');
-  const [dateRange, setDateRange] = useState('ultima-semana');
   
   // Obtener datos del usuario autenticado
   const { usuario } = useAuthStore();
@@ -25,22 +25,7 @@ const ReportesPage: React.FC = () => {
     initials: 'UO'
   };
 
-  const reportTypes = [
-    { id: 'asistencia', name: 'Reporte de Asistencia', icon: '👥' },
-    { id: 'accesos', name: 'Reporte de Accesos', icon: '🔑' },
-    { id: 'tardanzas', name: 'Reporte de Tardanzas', icon: '⏰' },
-    { id: 'departamentos', name: 'Por Departamentos', icon: '🏢' },
-    { id: 'visitantes', name: 'Reporte de Visitantes', icon: '👤' },
-    { id: 'horas-extra', name: 'Horas Extra', icon: '⏱️' }
-  ];
 
-  const dateRanges = [
-    { value: 'hoy', label: 'Hoy' },
-    { value: 'ayer', label: 'Ayer' },
-    { value: 'ultima-semana', label: 'Última Semana' },
-    { value: 'ultimo-mes', label: 'Último Mes' },
-    { value: 'personalizado', label: 'Personalizado' }
-  ];
 
   // Datos mock para reportes
   const reportData = {
@@ -55,13 +40,7 @@ const ReportesPage: React.FC = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleGenerateReport = () => {
-    console.log(`Generando reporte: ${selectedReport} para periodo: ${dateRange}`);
-  };
 
-  const handleDownloadReport = (format: string) => {
-    console.log(`Descargando reporte en formato: ${format}`);
-  };
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
@@ -161,218 +140,40 @@ const ReportesPage: React.FC = () => {
 
           {/* Report Generator */}
           <OverviewCardNew
-            title="Generador de Reportes"
-            subtitle="Configura y genera reportes personalizados"
+            title="🎯 Generador de Reportes General"
+            subtitle="Genera reportes consolidados de todos los colaboradores por rango de fechas"
           >
-            <div style={{ 
-              display: 'grid', 
-              gridTemplateColumns: '1fr 1fr', 
-              gap: '2rem',
-              marginBottom: '2rem'
-            }}>
-              {/* Configuración */}
-              <div>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '1rem' }}>
-                  Configuración del Reporte
-                </h3>
-                
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                    Tipo de Reporte
-                  </label>
-                  <select
-                    value={selectedReport}
-                    onChange={(e) => setSelectedReport(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '0.875rem',
-                      backgroundColor: 'white'
-                    }}
-                  >
-                    {reportTypes.map(type => (
-                      <option key={type.id} value={type.id}>
-                        {type.icon} {type.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                    Periodo
-                  </label>
-                  <select
-                    value={dateRange}
-                    onChange={(e) => setDateRange(e.target.value)}
-                    style={{
-                      width: '100%',
-                      padding: '0.75rem',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '0.875rem',
-                      backgroundColor: 'white'
-                    }}
-                  >
-                    {dateRanges.map(range => (
-                      <option key={range.value} value={range.value}>
-                        {range.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {dateRange === 'personalizado' && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                        Fecha Inicio
-                      </label>
-                      <input
-                        type="date"
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: '1px solid #d1d5db',
-                          borderRadius: '8px',
-                          fontSize: '0.875rem'
-                        }}
-                      />
-                    </div>
-                    <div>
-                      <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500', color: '#374151', marginBottom: '0.5rem' }}>
-                        Fecha Fin
-                      </label>
-                      <input
-                        type="date"
-                        style={{
-                          width: '100%',
-                          padding: '0.75rem',
-                          border: '1px solid #d1d5db',
-                          borderRadius: '8px',
-                          fontSize: '0.875rem'
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  onClick={handleGenerateReport}
-                  style={{
-                    backgroundColor: '#3b82f6',
+            <div style={{ marginBottom: '2rem' }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                padding: '1.5rem',
+                borderRadius: '12px',
+                border: '1px solid #0ea5e9',
+                marginBottom: '1.5rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                  <div style={{
+                    background: '#0ea5e9',
                     color: 'white',
-                    padding: '0.75rem 1.5rem',
+                    padding: '0.5rem',
                     borderRadius: '8px',
-                    border: 'none',
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.5rem',
-                    width: '100%',
-                    justifyContent: 'center'
-                  }}
-                >
-                  <BarChart3 style={{ width: '16px', height: '16px' }} />
-                  Generar Reporte
-                </button>
-              </div>
-
-              {/* Vista Previa */}
-              <div>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#1f2937', marginBottom: '1rem' }}>
-                  Vista Previa
-                </h3>
-                
-                <div style={{
-                  backgroundColor: '#f9fafb',
-                  border: '2px dashed #d1d5db',
-                  borderRadius: '8px',
-                  padding: '2rem',
-                  textAlign: 'center',
-                  color: '#6b7280'
-                }}>
-                  <Calendar style={{ width: '48px', height: '48px', margin: '0 auto 1rem', color: '#9ca3af' }} />
-                  <p style={{ margin: 0, fontSize: '0.875rem' }}>
-                    Selecciona un tipo de reporte y periodo para ver la vista previa
-                  </p>
-                </div>
-
-                <div style={{ marginTop: '1rem' }}>
-                  <h4 style={{ fontSize: '0.875rem', fontWeight: '600', color: '#374151', marginBottom: '0.5rem' }}>
-                    Opciones de Descarga
-                  </h4>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button
-                      onClick={() => handleDownloadReport('pdf')}
-                      style={{
-                        flex: 1,
-                        backgroundColor: '#ef4444',
-                        color: 'white',
-                        padding: '0.5rem',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '0.75rem',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <Download style={{ width: '14px', height: '14px' }} />
-                      PDF
-                    </button>
-                    <button
-                      onClick={() => handleDownloadReport('excel')}
-                      style={{
-                        flex: 1,
-                        backgroundColor: '#10b981',
-                        color: 'white',
-                        padding: '0.5rem',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '0.75rem',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <Download style={{ width: '14px', height: '14px' }} />
-                      Excel
-                    </button>
-                    <button
-                      onClick={() => handleDownloadReport('csv')}
-                      style={{
-                        flex: 1,
-                        backgroundColor: '#6b7280',
-                        color: 'white',
-                        padding: '0.5rem',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '0.75rem',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                        justifyContent: 'center'
-                      }}
-                    >
-                      <Download style={{ width: '14px', height: '14px' }} />
-                      CSV
-                    </button>
+                    fontSize: '1.2rem'
+                  }}>
+                    📊
+                  </div>
+                  <div>
+                    <h3 style={{ margin: 0, color: '#0c4a6e', fontSize: '1.1rem', fontWeight: '600' }}>
+                      Reporte Completo por Fechas
+                    </h3>
+                    <p style={{ margin: 0, color: '#075985', fontSize: '0.9rem' }}>
+                      Incluye: Jornadas, horas trabajadas, horas extras, novedades y ubicaciones GPS
+                    </p>
                   </div>
                 </div>
               </div>
+              
+              {/* Componente de reporte integrado */}
+              <ReportePorFechasComponent />
             </div>
           </OverviewCardNew>
 

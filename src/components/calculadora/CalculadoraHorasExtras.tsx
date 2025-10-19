@@ -24,7 +24,6 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
 }) => {
   const [calculos, setCalculos] = useState<CalculoDetallado[]>([]);
   const [resumen, setResumen] = useState<ResumenPeriodo | null>(null);
-  const [valorHoraOrdinaria, setValorHoraOrdinaria] = useState<number>(4200); // Salario mínimo 2025 / 240 horas
   const [mostrarDetalles, setMostrarDetalles] = useState(false);
   const [filtroFecha, setFiltroFecha] = useState<string>('');
   const [horasExtrasReportadas, setHorasExtrasReportadas] = useState<HorasExtraRegistradas[]>([]);
@@ -49,7 +48,7 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
       console.log('[DEBUG EFFECT] Solo novedades sin jornadas, no calcular resumen principal');
       // Solo novedades sin jornadas - no establecer resumen principal
     }
-  }, [jornadas, valorHoraOrdinaria, horasExtrasReportadas]);
+  }, [jornadas, horasExtrasReportadas]);
 
   const cargarHorasExtrasReportadas = async () => {
     if (!colaboradorId) return;
@@ -136,7 +135,7 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
       });
 
       // Calcular usando el servicio existente
-      const resultado = CalculadoraHorasExtras.calcularPeriodo(jornadasParaCalculo, valorHoraOrdinaria);
+      const resultado = CalculadoraHorasExtras.calcularPeriodo(jornadasParaCalculo);
       
       // Integrar las horas extra reportadas desde novedades
       const calculosConNovedades = resultado.calculos.map(calculo => {
@@ -149,18 +148,13 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
         if (horasExtraReportada) {
           // Sumar las horas extra reportadas
           const horasExtraAdicionales = horasExtraReportada.horas || 0;
-          const valorExtraAdicional = valorHoraOrdinaria ? 
-            horasExtraAdicionales * valorHoraOrdinaria * 1.25 : 0; // 25% recargo diurno
           
           console.log(`[DEBUG NOVEDADES] ${calculo.fecha}: +${horasExtraAdicionales}h extras reportadas`);
           
           return {
             ...calculo,
             horas_extras_reportadas: horasExtraAdicionales,
-            valor_extras_reportadas: valorExtraAdicional,
             horas_extras_diurnas: calculo.horas_extras_diurnas + horasExtraAdicionales,
-            valor_extras_diurnas: (calculo.valor_extras_diurnas || 0) + valorExtraAdicional,
-            total_dia: (calculo.total_dia || 0) + valorExtraAdicional,
             observaciones: [
               ...(calculo.observaciones || []),
               `📋 ${horasExtraAdicionales}h extra reportadas en novedades`
@@ -225,21 +219,6 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
       {/* Controles */}
       <div className="calculadora-horas-extras__controles">
         <div className="control-grupo">
-          <label htmlFor="valor-hora">💰 Valor hora ordinaria:</label>
-          <div className="input-moneda">
-            <span className="moneda-signo">$</span>
-            <input
-              id="valor-hora"
-              type="number"
-              value={valorHoraOrdinaria}
-              onChange={(e) => setValorHoraOrdinaria(Number(e.target.value))}
-              min="0"
-              step="100"
-            />
-          </div>
-        </div>
-
-        <div className="control-grupo">
           <label htmlFor="filtro-fecha">📅 Filtrar por fecha:</label>
           <select
             id="filtro-fecha"
@@ -302,14 +281,6 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
               </div>
               <div className="resumen-label">Promedio/día</div>
             </div>
-            {resumen.valor_total_periodo && (
-              <div className="resumen-item monetario">
-                <div className="resumen-valor">
-                  {CalculadoraHorasExtras.formatearValor(resumen.valor_total_periodo)}
-                </div>
-                <div className="resumen-label">Total período</div>
-              </div>
-            )}
           </div>
 
           {/* Desglose de horas extras */}
@@ -323,13 +294,6 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
                   <span className="extras-cantidad">
                     {CalculadoraHorasExtras.formatearHoras(resumen.total_horas_extras_diurnas)}
                   </span>
-                  {resumen.valor_total_extras && valorHoraOrdinaria && (
-                    <span className="extras-valor">
-                      {CalculadoraHorasExtras.formatearValor(
-                        resumen.total_horas_extras_diurnas * valorHoraOrdinaria * 1.25
-                      )}
-                    </span>
-                  )}
                 </div>
                 <div className="extras-item nocturnas">
                   <span className="extras-icono">🌙</span>
@@ -337,13 +301,6 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
                   <span className="extras-cantidad">
                     {CalculadoraHorasExtras.formatearHoras(resumen.total_horas_extras_nocturnas)}
                   </span>
-                  {resumen.valor_total_extras && valorHoraOrdinaria && (
-                    <span className="extras-valor">
-                      {CalculadoraHorasExtras.formatearValor(
-                        resumen.total_horas_extras_nocturnas * valorHoraOrdinaria * 1.75
-                      )}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
@@ -371,7 +328,6 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
                 <th>H. Ordinarias</th>
                 <th>H. Extras</th>
                 {mostrarDetalles && <th>Desglose</th>}
-                <th>Valor Día</th>
               </tr>
             </thead>
             <tbody>
@@ -441,24 +397,6 @@ const CalculadoraHorasExtrasComponent: React.FC<CalculadoraHorasExtrasProps> = (
                         </div>
                       </td>
                     )}
-                    <td className="valor-cell">
-                      {calculo.total_dia ? (
-                        <div className="valor-breakdown">
-                          <span className="valor-total">
-                            {CalculadoraHorasExtras.formatearValor(calculo.total_dia)}
-                          </span>
-                          {(calculo.valor_extras_diurnas || calculo.valor_extras_nocturnas) && (
-                            <span className="valor-extras">
-                              +{CalculadoraHorasExtras.formatearValor(
-                                (calculo.valor_extras_diurnas || 0) + (calculo.valor_extras_nocturnas || 0)
-                              )} extras
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="sin-valor">No configurado</span>
-                      )}
-                    </td>
                   </tr>
                 );
               })}

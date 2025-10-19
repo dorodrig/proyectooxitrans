@@ -8,14 +8,23 @@ import { ReportesPorFechaService, type FiltrosReporte } from '../../services/rep
 import { useNotifications } from '../notifications/NotificationProvider';
 import '../../styles/components/reportes/ReportePorFechas.scss';
 
-const ReportePorFechasComponent: React.FC = () => {
+interface ReportePorFechasProps {
+  colaboradorId?: number;
+  colaboradorNombre?: string;
+}
+
+const ReportePorFechasComponent: React.FC<ReportePorFechasProps> = ({ 
+  colaboradorId, 
+  colaboradorNombre 
+}) => {
   const { mostrarExito, mostrarError, mostrarAdvertencia, mostrarInfo } = useNotifications();
 
   // Estados del componente
   const [filtros, setFiltros] = useState<FiltrosReporte>({
     fechaInicio: '',
     fechaFin: '',
-    formato: 'xlsx'
+    formato: 'xlsx',
+    colaboradorId: colaboradorId // Agregar filtro por colaborador
   });
 
   const [descargandoReporte, setDescargandoReporte] = useState(false);
@@ -30,9 +39,10 @@ const ReportePorFechasComponent: React.FC = () => {
     setFiltros(prev => ({
       ...prev,
       fechaInicio: ReportesPorFechaService.formatearFechaAPI(haceSemana),
-      fechaFin: ReportesPorFechaService.formatearFechaAPI(hoy)
+      fechaFin: ReportesPorFechaService.formatearFechaAPI(hoy),
+      colaboradorId: colaboradorId // Incluir colaboradorId al inicializar
     }));
-  }, []);
+  }, [colaboradorId]);
 
   // Validar filtros cuando cambien
   useEffect(() => {
@@ -105,9 +115,17 @@ const ReportePorFechasComponent: React.FC = () => {
         <div className="header-content">
           <div className="header-icon">📊</div>
           <div className="header-text">
-            <h2 className="header-title">Reporte General por Fechas</h2>
+            <h2 className="header-title">
+              {colaboradorId ? 
+                `Reporte de ${colaboradorNombre}` : 
+                'Reporte General por Fechas'
+              }
+            </h2>
             <p className="header-subtitle">
-              Genere reportes completos de jornadas laborales por rango de fechas
+              {colaboradorId ? 
+                `Reporte específico de jornadas laborales para ${colaboradorNombre}` :
+                'Genere reportes completos de jornadas laborales por rango de fechas'
+              }
             </p>
           </div>
         </div>

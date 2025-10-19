@@ -5,6 +5,7 @@
 
 @use '../abstracts/variables' as *;
 @use 'sass:color';
+@use 'mapa-controles';
 
 // ====================================
 // 🔄 LOADER Y ESTADOS DE CARGA
@@ -379,69 +380,8 @@
 
 // ====================================
 // 🎛️ CONTROLES DEL MAPA
+// Estilos importados al inicio del archivo
 // ====================================
-.mapa-controles {
-  display: flex;
-  gap: $spacing-sm;
-  margin-bottom: $spacing-md;
-  flex-wrap: wrap;
-
-  &__filtro {
-    display: flex;
-    align-items: center;
-    gap: $spacing-xs;
-
-    label {
-      font-size: $font-size-sm;
-      color: $text-secondary;
-      font-weight: $font-weight-medium;
-    }
-
-    select, input {
-      padding: $spacing-xs $spacing-sm;
-      border: 1px solid $border-color;
-      border-radius: $border-radius-sm;
-      font-size: $font-size-sm;
-      background: white;
-
-      &:focus {
-        outline: none;
-        border-color: $oxitrans-primary;
-        box-shadow: 0 0 0 2px rgba($oxitrans-primary, 0.2);
-      }
-    }
-  }
-
-  &__boton {
-    padding: $spacing-xs $spacing-sm;
-    background: $oxitrans-primary;
-    color: white;
-    border: none;
-    border-radius: $border-radius-sm;
-    font-size: $font-size-sm;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover:not(:disabled) {
-      background: $oxitrans-primary-dark;
-    }
-
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    &.secundario {
-      background: white;
-      color: $oxitrans-primary;
-      border: 1px solid $oxitrans-primary;
-
-      &:hover:not(:disabled) {
-        background: $gray-50;
-      }
-    }
-  }
-}
 
 // ====================================
 // 📱 RESPONSIVE DESIGN
@@ -461,14 +401,7 @@
     }
   }
 
-  .mapa-controles {
-    justify-content: center;
-    
-    &__filtro {
-      flex: 1;
-      min-width: 200px;
-    }
-  }
+
 
   .maps-config-warning__instructions {
     ol {

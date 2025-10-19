@@ -30,6 +30,8 @@ const ConsultasColaboradoresPage: React.FC = () => {
 
   // Estado del componente
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
+  const [fechaInicio, setFechaInicio] = useState('');
+  const [fechaFin, setFechaFin] = useState('');
   const [resultadosBusqueda, setResultadosBusqueda] = useState<Colaborador[]>([]);
   const [colaboradorSeleccionado, setColaboradorSeleccionado] = useState<Colaborador | null>(null);
   const [jornadasColaborador, setJornadasColaborador] = useState<JornadaLaboral[]>([]);
@@ -49,6 +51,11 @@ const ConsultasColaboradoresPage: React.FC = () => {
   
   // Estados del mapa
   const [fechaFiltroMapa, setFechaFiltroMapa] = useState<string>('');
+
+  // Función para actualizar mapa manualmente
+  const actualizarMapa = (fecha: string) => {
+    setFechaFiltroMapa(fecha);
+  };
 
   // Paginación
   const [paginaBusqueda, setPaginaBusqueda] = useState(1);
@@ -83,7 +90,7 @@ const ConsultasColaboradoresPage: React.FC = () => {
   }, [isAuthenticated, userRole, navigate]);
 
   // Función de búsqueda con validaciones robustas
-  const buscarColaboradores = async (termino: string, pagina = 1) => {
+  const buscarColaboradores = async (termino: string, fechaIni: string, fechaFinal: string, pagina = 1) => {
     // Limpiar errores previos
     setError(null);
     // setErrorValidacion(null); // Comentado temporalmente
@@ -105,6 +112,24 @@ const ConsultasColaboradoresPage: React.FC = () => {
         return;
       }
       return;
+    }
+
+    // Validar fechas obligatorias
+    if (!fechaIni || !fechaFinal) {
+      mostrarError('Fechas requeridas', 'Debe seleccionar fecha de inicio y fecha final para realizar la búsqueda');
+      return;
+    }
+
+    // Validar que fecha inicio no sea mayor que fecha fin
+    if (new Date(fechaIni) > new Date(fechaFinal)) {
+      mostrarError('Fechas inválidas', 'La fecha de inicio no puede ser mayor que la fecha final');
+      return;
+    }
+
+    // Validar que no se busque más de 90 días
+    const diferenciaDias = Math.ceil((new Date(fechaFinal).getTime() - new Date(fechaIni).getTime()) / (1000 * 60 * 60 * 24));
+    if (diferenciaDias > 90) {
+      mostrarAdvertencia('Rango amplio', 'Para mejor rendimiento, se recomienda buscar períodos menores a 90 días');
     }
 
     setLoadingBusqueda(true);
@@ -236,7 +261,11 @@ const ConsultasColaboradoresPage: React.FC = () => {
       let jornadasCargadas = false;
       try {
         const jornadasResponse = await ManejadorErrores.reintentar(
-          () => colaboradoresService.getHistorialJornadas(colaborador.id, { limit: 10 }),
+          () => colaboradoresService.getHistorialJornadas(colaborador.id, { 
+            limit: 50,
+            fechaInicio: fechaInicio,
+            fechaFin: fechaFin
+          }),
           3
         );
         setJornadasColaborador(jornadasResponse.data.jornadas);
@@ -252,7 +281,11 @@ const ConsultasColaboradoresPage: React.FC = () => {
       let ubicacionesCargadas = false;
       try {
         const ubicacionesResponse = await ManejadorErrores.reintentar(
-          () => colaboradoresService.getUbicacionesGPS(colaborador.id, { limit: 20 }),
+          () => colaboradoresService.getUbicacionesGPS(colaborador.id, { 
+            limit: 100,
+            fechaInicio: fechaInicio,
+            fechaFin: fechaFin
+          }),
           3
         );
         setUbicacionesGPS(ubicacionesResponse.data.ubicaciones);
@@ -313,7 +346,7 @@ const ConsultasColaboradoresPage: React.FC = () => {
                       Búsqueda Inteligente de Colaboradores
                     </h1>
                     <p className="consultas-colaboradores__subtitle">
-                      Encuentra empleados por documento o apellidos • Ver jornadas • Ubicaciones GPS • Horas extras
+                      Encuentra empleados por documento o apellidos + período de búsqueda • Ver jornadas • Ubicaciones GPS • Horas extras
                     </p>
                   </div>
                   
@@ -343,8 +376,8 @@ const ConsultasColaboradoresPage: React.FC = () => {
                           value={terminoBusqueda}
                           onChange={(e) => manejarCambioTermino(e.target.value)}
                           onKeyPress={(e) => {
-                            if (e.key === 'Enter' && estadoValidacion === 'valid') {
-                              buscarColaboradores(terminoBusqueda);
+                            if (e.key === 'Enter' && estadoValidacion === 'valid' && fechaInicio && fechaFin) {
+                              buscarColaboradores(terminoBusqueda, fechaInicio, fechaFin);
                             }
                           }}
                         />
@@ -382,12 +415,58 @@ const ConsultasColaboradoresPage: React.FC = () => {
                         </div>
                       </div>
                       
+                      {/* Campos de fecha obligatorios */}
+                      <div className="fecha-filters-required">
+                        <div className="fecha-filter-group">
+                          <label className="fecha-label">
+                            <span className="fecha-icon">📅</span>
+                            <span className="fecha-text">Fecha Inicio</span>
+                            <span className="fecha-required">*</span>
+                          </label>
+                          <input
+                            type="date"
+                            className="fecha-input"
+                            value={fechaInicio}
+                            onChange={(e) => setFechaInicio(e.target.value)}
+                            max={fechaFin || undefined}
+                            required
+                          />
+                        </div>
+                        
+                        <div className="fecha-filter-group">
+                          <label className="fecha-label">
+                            <span className="fecha-icon">📅</span>
+                            <span className="fecha-text">Fecha Final</span>
+                            <span className="fecha-required">*</span>
+                          </label>
+                          <input
+                            type="date"
+                            className="fecha-input"
+                            value={fechaFin}
+                            onChange={(e) => setFechaFin(e.target.value)}
+                            min={fechaInicio || undefined}
+                            required
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="search-requirements">
+                        <div className="requirement-item">
+                          <span className="requirement-icon">👤</span>
+                          <span className="requirement-text">Documento o nombre del colaborador</span>
+                        </div>
+                        <div className="requirement-item">
+                          <span className="requirement-icon">📅</span>
+                          <span className="requirement-text">Período de búsqueda (obligatorio)</span>
+                        </div>
+                      </div>
+                      
                       <div className="button-group">
                         <button
                           type="button"
                           className="consultas-colaboradores__search-btn primary"
-                          onClick={() => buscarColaboradores(terminoBusqueda)}
-                          disabled={loadingBusqueda || estadoValidacion !== 'valid'}
+                          onClick={() => buscarColaboradores(terminoBusqueda, fechaInicio, fechaFin)}
+                          disabled={loadingBusqueda || estadoValidacion !== 'valid' || !fechaInicio || !fechaFin}
                         >
                           <span className="btn-icon">
                             {loadingBusqueda ? '⏳' : '�'}
@@ -400,14 +479,18 @@ const ConsultasColaboradoresPage: React.FC = () => {
                           </div>
                         </button>
 
-                        {terminoBusqueda && (
+                        {(terminoBusqueda || fechaInicio || fechaFin) && (
                           <button
                             type="button"
                             className="consultas-colaboradores__search-btn secondary"
                             onClick={() => {
                               setTerminoBusqueda('');
+                              setFechaInicio('');
+                              setFechaFin('');
                               setResultadosBusqueda([]);
                               setError(null);
+                              setEstadoValidacion('idle');
+                              setMensajeValidacion('');
                             }}
                           >
                             <span className="btn-icon">🗑️</span>
@@ -509,27 +592,6 @@ const ConsultasColaboradoresPage: React.FC = () => {
                         <span className="badge-count">{totalResultados}</span>
                         <span className="badge-text">colaboradores</span>
                       </div>
-                    </div>
-                    
-                    <div className="resultados-actions">
-                      <button 
-                        className="btn-reporte-directo"
-                        title="Acceso directo al Centro de Reportes para generar reportes Excel de todos los colaboradores por fechas"
-                        onClick={() => {
-                          setVistaActiva('reportes');
-                          // Scroll suave hacia la sección de reportes después de un pequeño delay
-                          setTimeout(() => {
-                            const reportesSection = document.querySelector('.consultas-colaboradores__reportes');
-                            if (reportesSection) {
-                              reportesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            }
-                          }, 100);
-                          mostrarExito('Acceso directo', '📊 Centro de Reportes abierto. Genere reportes Excel de todos los colaboradores por fechas.');
-                        }}
-                      >
-                        <span>📊</span>
-                        <span>Reporte General</span>
-                      </button>
                     </div>
                   </div>
 
@@ -647,7 +709,7 @@ const ConsultasColaboradoresPage: React.FC = () => {
                     <div className="consultas-colaboradores__pagination">
                       <button
                         className="pagination-btn prev"
-                        onClick={() => buscarColaboradores(terminoBusqueda, paginaBusqueda - 1)}
+                        onClick={() => buscarColaboradores(terminoBusqueda, fechaInicio, fechaFin, paginaBusqueda - 1)}
                         disabled={paginaBusqueda <= 1 || loadingBusqueda}
                       >
                         <span className="btn-icon">⬅️</span>
@@ -661,7 +723,7 @@ const ConsultasColaboradoresPage: React.FC = () => {
                       
                       <button
                         className="pagination-btn next"
-                        onClick={() => buscarColaboradores(terminoBusqueda, paginaBusqueda + 1)}
+                        onClick={() => buscarColaboradores(terminoBusqueda, fechaInicio, fechaFin, paginaBusqueda + 1)}
                         disabled={resultadosBusqueda.length < 10 || loadingBusqueda}
                       >
                         <span>Siguiente</span>
@@ -762,7 +824,7 @@ const ConsultasColaboradoresPage: React.FC = () => {
                   className={`tab-btn ${vistaActiva === 'horas-extras' ? 'active' : ''}`}
                   onClick={() => setVistaActiva('horas-extras')}
                 >
-                  ⏰ Horas Extras
+                📄 Resumen del colaborador
                 </button>
                 <button
                   className={`tab-btn ${vistaActiva === 'reportes' ? 'active' : ''}`}
@@ -774,10 +836,23 @@ const ConsultasColaboradoresPage: React.FC = () => {
 
               <div className="consultas-colaboradores__tab-content">
                 
+                {/* INFORMACIÓN DEL PERÍODO ACTIVO */}
+                <div className="periodo-info">
+                  <div className="periodo-badge">
+                    <span className="periodo-icon">📅</span>
+                    <span className="periodo-text">
+                      Período: {fechaInicio ? new Date(fechaInicio).toLocaleDateString('es-CO') : 'N/A'} - {fechaFin ? new Date(fechaFin).toLocaleDateString('es-CO') : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="periodo-note">
+                    Los datos mostrados corresponden únicamente al período seleccionado en la búsqueda
+                  </div>
+                </div>
+                
                 {/* JORNADAS RECIENTES */}
                 {vistaActiva === 'detalle' && (
                   <div className="consultas-colaboradores__jornadas">
-                    <h2>📅 Jornadas Laborales Recientes</h2>
+                    <h2>📅 Jornadas Laborales del Período</h2>
                     
                     {loadingDetalle ? (
                       <div className="consultas-colaboradores__loading">
@@ -834,7 +909,7 @@ const ConsultasColaboradoresPage: React.FC = () => {
                   return true;
                 })() && (
                   <div className="consultas-colaboradores__ubicaciones">
-                    <h2>🗺️ Ubicaciones GPS</h2>
+                    <h2>🗺️ Ubicaciones GPS del Período</h2>
                     
                     {/* Controles del mapa - PRIMERO para que el usuario seleccione fecha */}
                     {ubicacionesGPS.length > 0 ? (
@@ -843,6 +918,7 @@ const ConsultasColaboradoresPage: React.FC = () => {
                           fechas={[...new Set(ubicacionesGPS.map(u => u.fecha?.split('T')[0]))].sort().reverse()}
                           fechaSeleccionada={fechaFiltroMapa}
                           onFechaChange={setFechaFiltroMapa}
+                          onActualizarMapa={actualizarMapa}
                           totalUbicaciones={ubicacionesFiltradas.length}
                           loading={loadingUbicaciones}
                         />
@@ -870,7 +946,7 @@ const ConsultasColaboradoresPage: React.FC = () => {
 
                 {vistaActiva === 'horas-extras' && (
                   <div className="consultas-colaboradores__horas-extras">
-                    <h2>⏰ Cálculo de Horas Extras</h2>
+                    <h2>📄 Resumen del colaborador</h2>
                     
                     {colaboradorSeleccionado ? (
                       <CalculadoraHorasExtrasComponent
@@ -883,6 +959,48 @@ const ConsultasColaboradoresPage: React.FC = () => {
                         📊 Selecciona un colaborador para calcular horas extras
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* REPORTES ESPECÍFICOS DEL COLABORADOR */}
+                {vistaActiva === 'reportes' && colaboradorSeleccionado && (
+                  <div className="consultas-colaboradores__reportes-colaborador">
+                    <h2>📊 Reportes de {colaboradorSeleccionado.nombre} {colaboradorSeleccionado.apellido}</h2>
+                    
+                    {/* REPORTE ESPECÍFICO DEL COLABORADOR */}
+                    <div className="reporte-colaborador">
+                      <div className="reporte-info">
+                        <div className="info-card">
+                          <div className="info-icon">👤</div>
+                          <div className="info-text">
+                            <h3>Reporte Individual</h3>
+                            <p>
+                              Genera reportes específicos para {colaboradorSeleccionado.nombre} {colaboradorSeleccionado.apellido} en un rango de fechas
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <ReportePorFechasComponent 
+                        colaboradorId={colaboradorSeleccionado.id}
+                        colaboradorNombre={`${colaboradorSeleccionado.nombre} ${colaboradorSeleccionado.apellido}`}
+                      />
+                    </div>
+                    
+                    {/* INFORMACIÓN ADICIONAL */}
+                    <div className="reportes-help">
+                      <div className="help-card">
+                        <div className="help-icon">💡</div>
+                        <div className="help-content">
+                          <h4>Información sobre el reporte individual:</h4>
+                          <ul>
+                            <li><strong>Datos específicos:</strong> Solo jornadas y novedades de {colaboradorSeleccionado.nombre}</li>
+                            <li><strong>Formato Excel:</strong> Descarga directa en formato .xlsx</li>
+                            <li><strong>Contenido:</strong> Jornadas laborales, horas trabajadas, horas extras y ubicaciones GPS</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 

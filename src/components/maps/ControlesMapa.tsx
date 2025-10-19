@@ -10,6 +10,7 @@ interface ControlesMapaProps {
   fechas: string[];
   fechaSeleccionada?: string;
   onFechaChange: (fecha: string) => void;
+  onActualizarMapa?: (fecha: string) => void;  // Nueva función para actualizar mapa manualmente
   onCentrarMapa?: () => void;
   onExportarUbicaciones?: () => void;
   loading?: boolean;
@@ -20,12 +21,14 @@ const ControlesMapa: React.FC<ControlesMapaProps> = ({
   fechas,
   fechaSeleccionada,
   onFechaChange,
+  onActualizarMapa,
   onCentrarMapa,
   onExportarUbicaciones,
   loading = false,
   totalUbicaciones
 }) => {
   const [mostrarTodos, setMostrarTodos] = useState(false);
+  const [fechaPendiente, setFechaPendiente] = useState<string>('');
 
   // Formatear fechas para mostrar usando utilidades robustas
   const formatearFecha = (fecha: string) => {
@@ -46,21 +49,39 @@ const ControlesMapa: React.FC<ControlesMapaProps> = ({
     const valor = e.target.value;
     if (valor === 'todas') {
       setMostrarTodos(true);
+      setFechaPendiente('');
+      // "Todas las fechas" se actualiza automáticamente
       onFechaChange('');
     } else {
       setMostrarTodos(false);
-      onFechaChange(valor);
+      setFechaPendiente(valor);
+      // Para fechas específicas, solo guardamos la fecha pero no actualizamos automáticamente
     }
   };
+
+  // Manejar actualización manual del mapa
+  const handleActualizarMapa = () => {
+    if (fechaPendiente && onActualizarMapa) {
+      onActualizarMapa(fechaPendiente);
+      onFechaChange(fechaPendiente); // Actualizar la fecha seleccionada
+    }
+  };
+
+  // Verificar si hay una fecha pendiente de aplicar
+  const hayFechaPendiente = fechaPendiente && fechaPendiente !== fechaSeleccionada;
 
   // Obtener estadísticas de ubicaciones
   const getEstadisticas = () => {
     if (fechaSeleccionada) {
-      return `Mostrando ubicaciones del ${formatearFecha(fechaSeleccionada)}`;
+      return `Mostrando ubicaciones del ${formatearFecha(fechaSeleccionada)} (${totalUbicaciones} registros)`;
     }
-    return mostrarTodos 
-      ? `Mostrando todas las ubicaciones (${totalUbicaciones})` 
-      : 'Selecciona una fecha para ver ubicaciones';
+    if (mostrarTodos) {
+      return `Mostrando todas las ubicaciones (${totalUbicaciones} registros)`;
+    }
+    if (fechaPendiente) {
+      return `Fecha ${formatearFecha(fechaPendiente)} seleccionada - Presiona "Actualizar Mapa"`;
+    }
+    return 'Selecciona una fecha para ver ubicaciones';
   };
 
   return (
@@ -70,7 +91,7 @@ const ControlesMapa: React.FC<ControlesMapaProps> = ({
           <label htmlFor="fecha-filtro">📅 Filtrar por fecha:</label>
           <select
             id="fecha-filtro"
-            value={fechaSeleccionada || (mostrarTodos ? 'todas' : '')}
+            value={fechaSeleccionada || fechaPendiente || (mostrarTodos ? 'todas' : '')}
             onChange={handleFechaChange}
             disabled={loading}
           >
@@ -90,10 +111,28 @@ const ControlesMapa: React.FC<ControlesMapaProps> = ({
           <span className="estadisticas">
             {loading ? '⏳ Cargando...' : getEstadisticas()}
           </span>
+          {hayFechaPendiente && (
+            <div className="fecha-pendiente">
+              <span className="pendiente-icon">⚠️</span>
+              <span className="pendiente-text">Fecha seleccionada, presiona "Actualizar Mapa"</span>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="mapa-controles__acciones">
+        {/* Botón Actualizar Mapa - Solo visible cuando hay fecha pendiente */}
+        {hayFechaPendiente && (
+          <button
+            type="button"
+            onClick={handleActualizarMapa}
+            disabled={loading}
+            className="mapa-controles__boton primario"
+            title="Actualizar el mapa con la fecha seleccionada"
+          >
+            🗺️ Actualizar Mapa
+          </button>
+        )}
         {onCentrarMapa && (
           <button
             type="button"

@@ -6,7 +6,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig({
   plugins: [
     react(),
-    VitePWA({
+    // Temporalmente deshabilitado para evitar error crypto.hash en builds de servidor
+    ...(process.env.NODE_ENV !== 'production' ? [VitePWA({
       registerType: 'autoUpdate',
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,woff2,ttf}'],
@@ -39,7 +40,7 @@ export default defineConfig({
       },
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'favicon.svg'],
       manifest: false, // Usar manifest.json estático de public/
-    })
+    })] : [])
   ],
   base: '/', // EC2 Single Server - servir desde raíz
   server: {

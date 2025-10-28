@@ -245,11 +245,73 @@ export class JornadaController {
     distancia: number;
     tolerancia: number;
     ubicacion: { nombre: string; latitud: number; longitud: number } | null;
-    tipoValidacion: 'ubicacion_especifica' | 'regional' | 'sin_restriccion';
+    tipoValidacion: 'ubicacion_especifica' | 'regional' | 'sin_restriccion' | 'visita_flexible';
   }> {
     try {
       console.log('🎯 [DEBUG] Validando ubicación para usuario:', usuarioId);
       console.log('🎯 [DEBUG] Coordenadas recibidas:', { latitude, longitude });
+      
+      // Verificar el tipo de usuario desde el request autenticado
+      const tipoUsuario = req.usuario?.tipo_usuario;
+      console.log('👤 [DEBUG] Tipo de usuario:', tipoUsuario);
+      
+      // Si es usuario de visita, aplicar reglas más flexibles
+      if (tipoUsuario === 'visita') {
+        console.log('🚗 [VISITA] Usuario de visita detectado - aplicando validación flexible');
+        
+        // Para usuarios de visita, usar tolerancia muy amplia o solo verificar que esté en Colombia
+        const toleranciaVisita = 5000; // 5km de tolerancia para visitas
+        
+        // Obtener la regional del usuario para referencia
+        const regional = await RegionalModel.obtenerPorUsuario(usuarioId);
+        
+        if (regional && regional.latitud && regional.longitud) {
+          const regionalLat = typeof regional.latitud === 'string' ? parseFloat(regional.latitud) : Number(regional.latitud);
+          const regionalLng = typeof regional.longitud === 'string' ? parseFloat(regional.longitud) : Number(regional.longitud);
+          
+          if (!isNaN(regionalLat) && !isNaN(regionalLng)) {
+            const distancia = JornadaController.calcularDistancia(
+              latitude,
+              longitude,
+              regionalLat,
+              regionalLng
+            );
+            
+            console.log('🚗 [VISITA] Validación flexible:', {
+              distancia: Math.round(distancia),
+              tolerancia: toleranciaVisita,
+              valida: distancia <= toleranciaVisita,
+              mensaje: 'Usuario de visita - tolerancia amplia aplicada'
+            });
+            
+            return {
+              valida: distancia <= toleranciaVisita,
+              distancia,
+              tolerancia: toleranciaVisita,
+              ubicacion: {
+                nombre: `${regional.nombre} (Visita)`,
+                latitud: regionalLat,
+                longitud: regionalLng
+              },
+              tipoValidacion: 'visita_flexible'
+            };
+          }
+        }
+        
+        // Si no hay regional o hay error, permitir acceso para visitas
+        console.log('🚗 [VISITA] Sin restricción de ubicación para usuario de visita');
+        return {
+          valida: true,
+          distancia: 0,
+          tolerancia: toleranciaVisita,
+          ubicacion: {
+            nombre: 'Ubicación de visita',
+            latitud: latitude,
+            longitud: longitude
+          },
+          tipoValidacion: 'visita_flexible'
+        };
+      }
       
       // Primero intentar obtener ubicación específica del usuario
       const queryUsuario = `

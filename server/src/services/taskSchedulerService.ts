@@ -34,14 +34,16 @@ export class TaskSchedulerService {
           if (resultado.jornadasCerradas > 0) {
             console.log(`✅ Auto-cerradas ${resultado.jornadasCerradas} jornadas`);
             
-            // Enviar emails de notificación
+            // Enviar emails de notificación con información del horario empresarial
             for (const detalle of resultado.detalles) {
               try {
                 await emailService.enviarJornadaAutoCerrada({
                   usuario: {
                     nombre: detalle.nombre,
                     email: detalle.email
-                  }
+                  },
+                  horarioConfiguracion: detalle.horarioConfiguracion,
+                  salida: detalle.salida
                 });
               } catch (emailError) {
                 console.error(`❌ Error enviando email a ${detalle.email}:`, emailError);
@@ -108,7 +110,9 @@ export class TaskSchedulerService {
               usuario: {
                 nombre: detalle.nombre,
                 email: detalle.email
-              }
+              },
+              horarioConfiguracion: detalle.horarioConfiguracion,
+              salida: detalle.salida
             });
             emailsEnviados.push(detalle.email);
           } catch (emailError) {

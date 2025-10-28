@@ -11,6 +11,7 @@ export interface Usuario {
   rol: 'admin' | 'empleado' | 'supervisor';
   activo: boolean;
   fechaCreacion: Date;
+  tipo_usuario?: 'planta' | 'visita' | 'temporal' | null;
 }
 
 export interface AuthenticatedRequest extends Request {

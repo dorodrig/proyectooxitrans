@@ -68,7 +68,8 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
       cargo: user.cargo,
       rol: user.rol,
       activo: user.estado === 'activo',
-      fechaCreacion: new Date(user.created_at)
+      fechaCreacion: new Date(user.created_at),
+      tipo_usuario: user.tipo_usuario
     };
 
     // Asignar el usuario al request

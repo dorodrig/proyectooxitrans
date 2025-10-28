@@ -338,22 +338,191 @@ export class JornadaModel {
   }
 
   /**
-   * Ejecutar auto-cierre de jornadas
+   * Ejecutar auto-cierre de jornadas usando configuración dinámica
    */
-  static async ejecutarAutoCierre(): Promise<{ jornadasCerradas: number; detalles: any[] }> {
+  static async ejecutarAutoCierre(): Promise<{ jornadasCerradas: number; detalles: Array<{
+    usuarioId: number;
+    nombre: string;
+    email: string;
+    entrada: string;
+    salida: string;
+    horarioConfiguracion?: string;
+  }> }> {
     try {
-      // Por ahora retornamos valores dummy
+      console.log('🔄 [AutoCierre] Iniciando auto-cierre con configuración dinámica...');
+      
+      // 1. Obtener configuración de tiempo laboral global
+      const configQuery = `
+        SELECT hora_entrada, fin_jornada_laboral, tiempo_trabajo_dia
+        FROM jornadas_config 
+        WHERE usuario_id = -1 AND activa = 1
+        ORDER BY fecha_actualizacion DESC 
+        LIMIT 1
+      `;
+      
+      const configResult = await pool.execute(configQuery) as [RowDataPacket[], any];
+      const config = configResult[0][0];
+      
+      if (!config) {
+        console.log('⚠️ [AutoCierre] No hay configuración global, usando fallback de 8 horas');
+        // Fallback a 8 horas si no hay configuración
+        return await this.ejecutarAutoCierreFallback();
+      }
+      
+      console.log('✅ [AutoCierre] Configuración encontrada:', {
+        entrada: config.hora_entrada,
+        salida: config.fin_jornada_laboral,
+        horas_trabajo: config.tiempo_trabajo_dia
+      });
+      
+      // 2. Buscar jornadas que deben cerrarse según configuración maestra
+      const jornadasQuery = `
+        SELECT jl.*, u.nombre, u.apellido, u.email
+        FROM jornadas_laborales jl
+        JOIN usuarios u ON jl.usuario_id = u.id
+        WHERE jl.fecha = CURDATE() 
+          AND jl.entrada IS NOT NULL 
+          AND jl.salida IS NULL
+          AND jl.auto_cerrada = FALSE
+          AND TIME(NOW()) >= ?
+      `;
+      
+      const jornadasResult = await pool.execute(jornadasQuery, [config.fin_jornada_laboral]) as [RowDataPacket[], any];
+      const jornadas = jornadasResult[0];
+      
+      if (jornadas.length === 0) {
+        console.log('✅ [AutoCierre] No hay jornadas para cerrar automáticamente');
+        return { jornadasCerradas: 0, detalles: [] };
+      }
+      
+      console.log(`🔄 [AutoCierre] Cerrando ${jornadas.length} jornadas...`);
+      
+      const detalles: Array<{
+        usuarioId: number;
+        nombre: string;
+        email: string;
+        entrada: string;
+        salida: string;
+        horarioConfiguracion?: string;
+      }> = [];
+      
+      // 3. Cerrar cada jornada usando la hora de fin configurada
+      for (const jornada of jornadas) {
+        const fechaHoy = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+        const horaCierre = `${fechaHoy} ${config.fin_jornada_laboral}:00`; // Formato MySQL
+        
+        const updateQuery = `
+          UPDATE jornadas_laborales 
+          SET salida = ?,
+              auto_cerrada = TRUE,
+              observaciones = CONCAT(
+                COALESCE(observaciones, ''), 
+                '\n🤖 Auto-cerrada a las ', ?, ' (horario empresarial configurado)'
+              ),
+              updated_at = NOW()
+          WHERE id = ?
+        `;
+        
+        await pool.execute(updateQuery, [horaCierre, config.fin_jornada_laboral, jornada.id]);
+        
+        // Recalcular horas trabajadas
+        await this.calcularHorasTrabajadas(jornada.id);
+        
+        detalles.push({
+          usuarioId: jornada.usuario_id,
+          nombre: `${jornada.nombre} ${jornada.apellido}`,
+          email: jornada.email,
+          entrada: jornada.entrada,
+          salida: horaCierre,
+          horarioConfiguracion: `${config.hora_entrada} - ${config.fin_jornada_laboral}`
+        });
+        
+        console.log(`✅ [AutoCierre] Jornada cerrada: ${jornada.nombre} ${jornada.apellido} (${config.fin_jornada_laboral})`);
+      }
+      
+      console.log(`🎉 [AutoCierre] Completado: ${jornadas.length} jornadas cerradas automáticamente`);
+      
       return {
-        jornadasCerradas: 0,
-        detalles: []
+        jornadasCerradas: jornadas.length,
+        detalles
       };
+      
     } catch (error) {
-      console.error('Error en auto-cierre:', error);
+      console.error('❌ [AutoCierre] Error ejecutando auto-cierre:', error);
       return {
         jornadasCerradas: 0,
         detalles: []
       };
     }
+  }
+
+  /**
+   * Auto-cierre fallback usando 8 horas (cuando no hay configuración)
+   */
+  private static async ejecutarAutoCierreFallback(): Promise<{ jornadasCerradas: number; detalles: Array<{
+    usuarioId: number;
+    nombre: string;
+    email: string;
+    entrada: string;
+    salida: string;
+    horarioConfiguracion?: string;
+  }> }> {
+    const query = `
+      SELECT jl.*, u.nombre, u.apellido, u.email
+      FROM jornadas_laborales jl
+      JOIN usuarios u ON jl.usuario_id = u.id
+      WHERE jl.fecha = CURDATE()
+        AND jl.entrada IS NOT NULL
+        AND jl.salida IS NULL
+        AND jl.auto_cerrada = FALSE
+        AND TIMESTAMPDIFF(HOUR, jl.entrada, NOW()) >= 8
+    `;
+    
+    const result = await pool.execute(query) as [RowDataPacket[], any];
+    const jornadas = result[0];
+    
+    if (jornadas.length === 0) {
+      return { jornadasCerradas: 0, detalles: [] };
+    }
+    
+    const detalles: Array<{
+      usuarioId: number;
+      nombre: string;
+      email: string;
+      entrada: string;
+      salida: string;
+      horarioConfiguracion?: string;
+    }> = [];
+    
+    for (const jornada of jornadas) {
+      const entrada = new Date(jornada.entrada);
+      const cierreAutomatico = new Date(entrada.getTime() + (8 * 60 * 60 * 1000));
+      const timestampCierre = convertirTimestampParaMySQL(cierreAutomatico.toISOString());
+      
+      const updateQuery = `
+        UPDATE jornadas_laborales 
+        SET salida = ?,
+            auto_cerrada = TRUE,
+            observaciones = CONCAT(COALESCE(observaciones, ''), '\n🤖 Auto-cerrada tras 8 horas (fallback)')
+        WHERE id = ?
+      `;
+      
+      await pool.execute(updateQuery, [timestampCierre, jornada.id]);
+      await this.calcularHorasTrabajadas(jornada.id);
+      
+      detalles.push({
+        usuarioId: jornada.usuario_id,
+        nombre: `${jornada.nombre} ${jornada.apellido}`,
+        email: jornada.email,
+        entrada: jornada.entrada,
+        salida: timestampCierre
+      });
+    }
+    
+    return {
+      jornadasCerradas: jornadas.length,
+      detalles
+    };
   }
 
   /**

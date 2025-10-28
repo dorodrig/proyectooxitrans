@@ -10,6 +10,8 @@ import '../styles/jornada-laboral-gps.css';
 import { useGPSStore } from '../services/gpsService';
 import { tiempoLaboralService, obtenerTimestampColombia, formatearHoraUI } from '../services/tiempoLaboralService';
 import { notificacionesService } from '../services/notificacionesService';
+import { jornadaConfigService } from '../services/jornadaConfigService';
+import { offlineService } from '../services/offlineService';
 import JornadaTimeline from '../components/jornada/JornadaTimeline';
 import Swal from 'sweetalert2';
 
@@ -78,6 +80,8 @@ const JornadaLaboralPage: React.FC = () => {
     obtenerUbicacionAvanzada: getGPSLocationAdvanced
   } = useGPSStore();
   const [tiempoTranscurrido, setTiempoTranscurrido] = useState<string>('00:00:00');
+  const [estaOnline, setEstaOnline] = useState<boolean>(navigator.onLine);
+  const [esPWA, setEsPWA] = useState<boolean>(false);
 
   // Query para obtener jornada actual
   const { data: jornada, isLoading, error, refetch } = useQuery({
@@ -87,6 +91,14 @@ const JornadaLaboralPage: React.FC = () => {
     gcTime: 5 * 60000,     // Mantener en cache por 5 minutos (antes cacheTime)
     refetchInterval: 30000, // Refrescar cada 30 segundos
     enabled: !!usuario, // Solo ejecutar si hay usuario autenticado
+  });
+
+  // Query para obtener configuración de tiempo laboral global
+  const { data: configMaestra } = useQuery({
+    queryKey: ['tiempo-laboral-global'],
+    queryFn: () => jornadaConfigService.obtenerTiempoLaboralGlobal(),
+    staleTime: 10 * 60000, // Cache por 10 minutos
+    enabled: !!usuario, // Solo si hay usuario autenticado
   });
 
   // Debug: log de la jornada (solo errores)
@@ -209,6 +221,62 @@ const JornadaLaboralPage: React.FC = () => {
       }, 1000);
     }
   }, [usuario]); // Ejecutar cuando el usuario esté disponible
+
+  // Detectar estado PWA y conectividad
+  useEffect(() => {
+    // Detectar PWA
+    const isPWAInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+                          (window.navigator as any).standalone === true;
+    setEsPWA(isPWAInstalled);
+
+    // Listeners de conectividad
+    const handleOnline = () => setEstaOnline(true);
+    const handleOffline = () => setEstaOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Función para validar horarios según control maestro
+  const validarHorarioControlMaestro = (tipoEvento: RegistroTiempo['tipo']): { esValido: boolean; mensaje?: string } => {
+    if (!configMaestra) {
+      return { esValido: true }; // Si no hay config, permitir (fallback)
+    }
+
+    const ahora = new Date();
+    const horaActual = `${ahora.getHours().toString().padStart(2, '0')}:${ahora.getMinutes().toString().padStart(2, '0')}`;
+    
+    const horaEntradaMaestra = configMaestra.hora_entrada;
+    const horaSalidaMaestra = configMaestra.fin_jornada_laboral;
+
+    // Validaciones por tipo de evento
+    switch (tipoEvento) {
+      case 'entrada':
+        if (horaActual < horaEntradaMaestra) {
+          return {
+            esValido: false,
+            mensaje: `⏰ No puede registrar entrada antes de las ${horaEntradaMaestra}. Hora configurada por administración.`
+          };
+        }
+        break;
+      
+      case 'salida':
+        if (horaActual > horaSalidaMaestra) {
+          return {
+            esValido: false,
+            mensaje: `⏰ La jornada debe cerrarse antes de las ${horaSalidaMaestra}. Contacte a su supervisor para horario extendido.`
+          };
+        }
+        break;
+    }
+
+    return { esValido: true };
+  };
 
   // Función para mostrar confirmación con SweetAlert2
   const mostrarConfirmacionAccion = async (tipo: RegistroTiempo['tipo']): Promise<boolean> => {
@@ -344,6 +412,30 @@ const JornadaLaboralPage: React.FC = () => {
 
   // Función para registrar evento con confirmación
   const registrarEvento = async (tipo: RegistroTiempo['tipo']) => {
+    // 🌐 VALIDACIÓN OFFLINE/ONLINE PWA
+    const validacionOffline = await offlineService.validarDisponibilidad(tipo);
+    if (!validacionOffline.permitido) {
+      await Swal.fire({
+        title: 'Conexión Requerida',
+        html: `
+          <div style="text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 15px;">📶</div>
+            <p style="color: #dc2626; font-weight: 500;">${validacionOffline.razon}</p>
+            <div style="background: #fef2f2; padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <p style="margin: 0; color: #7f1d1d; font-size: 14px;">
+                <strong>💡 Consejo:</strong><br/>
+                Verifique su conexión WiFi o datos móviles<br/>
+                Los descansos y almuerzo pueden registrarse offline
+              </p>
+            </div>
+          </div>
+        `,
+        icon: 'error',
+        confirmButtonColor: '#dc2626'
+      });
+      return;
+    }
+
     if (!ubicacionActual) {
       await Swal.fire({
         title: 'GPS no disponible',
@@ -369,6 +461,31 @@ const JornadaLaboralPage: React.FC = () => {
         const distancia = Math.round(validacion.distancia);
         const tolerancia = validacion.tolerancia;
         const ubicacionNombre = validacion.ubicacion?.nombre || 'tu ubicación de trabajo';
+        const tipoValidacion = validacion.tipoValidacion;
+        
+        // Mensajes personalizados según el tipo de validación
+        if (tipoValidacion === 'visita_flexible') {
+          // Usuario de visita con tolerancia amplia pero aún fuera de rango
+          await Swal.fire({
+            title: 'Ubicación de Visita Fuera de Rango',
+            html: `
+              <div style="text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 15px;">🚗</div>
+                <p>Como usuario de <strong>visita</strong>, tienes mayor flexibilidad de ubicación</p>
+                <div style="background: #fef7cd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                  <p style="margin: 0; color: #d97706;">
+                    <strong>Distancia actual:</strong> ${distancia}m<br/>
+                    <strong>Tolerancia de visita:</strong> ${tolerancia}m
+                  </p>
+                </div>
+                <p style="color: #6b7280;">Estás muy lejos de ${ubicacionNombre}. Por favor acércate más para poder registrar tu ${tipo}.</p>
+              </div>
+            `,
+            icon: 'warning',
+            confirmButtonColor: '#d97706'
+          });
+          return;
+        }
         
         if (necesitaValidacionEstricta) {
           // Para entrada y salida, mostrar error y no permitir continuar
@@ -430,6 +547,30 @@ const JornadaLaboralPage: React.FC = () => {
       if (!result.isConfirmed) return;
     }
 
+    // 🚨 VALIDACIÓN CONTROL MAESTRO - NUEVOS HORARIOS
+    const validacionHorario = validarHorarioControlMaestro(tipo);
+    if (!validacionHorario.esValido) {
+      await Swal.fire({
+        title: 'Horario no permitido',
+        html: `
+          <div style="text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 15px;">⏰</div>
+            <p style="color: #dc2626; font-weight: 500;">${validacionHorario.mensaje}</p>
+            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <p style="margin: 0; color: #92400e;">
+                <strong>Configuración empresarial:</strong><br/>
+                Entrada permitida desde: <strong>${configMaestra?.hora_entrada || 'N/A'}</strong><br/>
+                Jornada finaliza a las: <strong>${configMaestra?.fin_jornada_laboral || 'N/A'}</strong>
+              </p>
+            </div>
+          </div>
+        `,
+        icon: 'error',
+        confirmButtonColor: '#dc2626'
+      });
+      return;
+    }
+
     // Validación adicional para salida
     if (tipo === 'salida' && jornada?.entrada) {
       const timestamp = obtenerTimestampColombia();
@@ -478,10 +619,41 @@ const JornadaLaboralPage: React.FC = () => {
       tipo,
       timestamp,
       ubicacion: ubicacionActual,
-      observaciones: ''
+      observaciones: validacionOffline.modoOffline ? '[Registrado offline]' : ''
     };
 
-    // Registrar el evento
+    // 📱 MODO OFFLINE: Almacenar localmente si es evento permitido offline
+    if (validacionOffline.modoOffline) {
+      try {
+        await offlineService.almacenarEventoOffline({
+          tipo,
+          timestamp,
+          ubicacion: ubicacionActual,
+          observaciones: 'Registrado en modo offline - sincronización pendiente'
+        });
+        
+        // Simular éxito para la UI
+        mostrarExitoRegistro(tipo);
+        
+        // Refrescar datos para actualizar la UI
+        setTimeout(() => {
+          refetch();
+        }, 1000);
+        
+        return;
+      } catch (error) {
+        console.error('Error almacenando evento offline:', error);
+        await Swal.fire({
+          title: 'Error modo offline',
+          text: 'No se pudo almacenar el evento offline. Intente cuando tenga conexión.',
+          icon: 'error',
+          confirmButtonColor: '#dc2626'
+        });
+        return;
+      }
+    }
+
+    // 🌐 MODO ONLINE: Registrar normalmente
     registrarTiempoMutation.mutate(registro, {
       onSuccess: () => {
         // Mostrar mensaje de éxito
@@ -638,6 +810,34 @@ const JornadaLaboralPage: React.FC = () => {
                 {tiempoTranscurrido.startsWith('-') ? '00:00:00' : tiempoTranscurrido}
               </span>
             </div>
+            {configMaestra && (
+              <div className="info-item">
+                <span className="label">Horario empresarial</span>
+                <span className="value" style={{ fontSize: '0.9rem', color: '#059669' }}>
+                  {configMaestra.hora_entrada} - {configMaestra.fin_jornada_laboral}
+                </span>
+              </div>
+            )}
+            {esPWA && (
+              <div className="info-item">
+                <span className="label">Estado</span>
+                <span className="value" style={{ 
+                  fontSize: '0.9rem', 
+                  color: estaOnline ? '#059669' : '#dc2626',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  <span style={{ 
+                    width: '8px', 
+                    height: '8px', 
+                    borderRadius: '50%', 
+                    backgroundColor: estaOnline ? '#10b981' : '#ef4444' 
+                  }}></span>
+                  {estaOnline ? '🌐 Online' : '📱 Offline'}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1013,6 +1213,11 @@ const JornadaLaboralPage: React.FC = () => {
           </div>
         )}
 
+        {/* Estado de sincronización offline (solo en PWA) */}
+        {esPWA && (
+          <OfflineStatusComponent />
+        )}
+
         {/* Línea de tiempo visual de la jornada */}
         {jornada && (
           <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
@@ -1022,6 +1227,64 @@ const JornadaLaboralPage: React.FC = () => {
       </div>
     </div>
     </ErrorBoundary>
+  );
+};
+
+// Componente para mostrar el estado offline
+const OfflineStatusComponent: React.FC = () => {
+  const [estadisticas, setEstadisticas] = useState<{ pendientes: number; ultimaSincronizacion?: string }>({ pendientes: 0 });
+
+  useEffect(() => {
+    const actualizarEstadisticas = () => {
+      const stats = offlineService.obtenerEstadisticas();
+      setEstadisticas(stats);
+    };
+
+    // Actualizar al montar
+    actualizarEstadisticas();
+
+    // Actualizar cada 5 segundos
+    const interval = setInterval(actualizarEstadisticas, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (estadisticas.pendientes === 0) {
+    return null;
+  }
+
+  return (
+    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
+      <div className="flex items-center">
+        <div className="flex-shrink-0">
+          <div className="animate-pulse">
+            <span className="text-blue-500 text-lg">📱</span>
+          </div>
+        </div>
+        <div className="ml-3 flex-1">
+          <h3 className="text-sm font-medium text-blue-800">
+            Eventos offline pendientes
+          </h3>
+          <div className="mt-1 text-sm text-blue-600">
+            <p>
+              {estadisticas.pendientes} registro{estadisticas.pendientes !== 1 ? 's' : ''} esperando sincronización
+            </p>
+            <p className="text-xs text-blue-500 mt-1">
+              Se sincronizarán automáticamente cuando tengas conexión
+            </p>
+          </div>
+        </div>
+        <div className="flex-shrink-0">
+          <button
+            onClick={() => offlineService.sincronizarEventosOffline()}
+            className="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded text-sm"
+            disabled={!navigator.onLine}
+          >
+            {navigator.onLine ? '🔄 Sincronizar' : '📶 Sin conexión'}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

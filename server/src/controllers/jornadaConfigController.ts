@@ -375,15 +375,9 @@ class JornadaConfigController {
     try {
       console.log('🔍 [tiempoLaboral] Obteniendo configuración global OXITRANS');
       
-      // Solo admins pueden acceder a la configuración global
-      const usuarioAutenticado = req.usuario!;
-      if (usuarioAutenticado.rol !== 'admin') {
-        res.status(403).json({
-          success: false,
-          error: 'Solo los administradores pueden acceder a la configuración empresarial'
-        });
-        return;
-      }
+      // Permitir acceso a cualquier usuario autenticado
+      // const usuarioAutenticado = req.usuario!;
+      // No se realiza verificación de rol
 
       const configuracion = await this.jornadaConfigModel.obtenerConfiguracionGlobal();
 

@@ -21,7 +21,17 @@ NGINX_CONF="/etc/nginx/sites-available/oxitrans"
 
 echo -e "${BLUE}📁 Directorio del proyecto: ${PROJECT_DIR}${NC}"
 
-# 1. Actualizar código desde Git
+git pull origin main
+set -e
+
+# 1. Backup de base de datos antes de actualizar
+echo -e "${YELLOW}🗄️  Realizando backup de base de datos...${NC}"
+if [ -f server/.env ]; then
+    source <(grep = server/.env | sed 's/^/export /')
+    mysqldump -u $DB_USER -p$DB_PASSWORD $DB_NAME > backup_$(date +%Y%m%d_%H%M%S).sql || echo -e "${RED}⚠️  Backup fallido${NC}"
+fi
+
+# 2. Actualizar código desde Git
 echo -e "${YELLOW}📥 Actualizando código desde Git...${NC}"
 cd $PROJECT_DIR
 git pull origin main
@@ -36,13 +46,15 @@ cd server
 npm install
 cd ..
 
+trap 'echo -e "${RED}❌ Error en el deployment. Ejecutando rollback...${NC}"; exit 1' ERR
+
 # 4. Construir Frontend
 echo -e "${YELLOW}🔨 Construyendo Frontend...${NC}"
-npm run build
+npm run build || { echo -e "${RED}❌ Build frontend fallido${NC}"; exit 1; }
 
 # 5. Construir Backend
 echo -e "${YELLOW}🔨 Construyendo Backend...${NC}"
-npm run build:server
+npm run build:server || { echo -e "${RED}❌ Build backend fallido${NC}"; exit 1; }
 
 # 6. Configurar Nginx (si no existe)
 if [ ! -f "$NGINX_CONF" ]; then
@@ -114,11 +126,14 @@ RestartSec=10
 WantedBy=multi-user.target
 EOF
 
-# 8. Reload y restart servicios
 echo -e "${YELLOW}🔄 Reiniciando servicios...${NC}"
-sudo systemctl daemon-reload
-sudo systemctl enable oxitrans-backend
-sudo systemctl restart oxitrans-backend
+if command -v pm2 &> /dev/null; then
+    pm2 restart oxitrans-backend || pm2 start server/ecosystem.config.js
+else
+    sudo systemctl daemon-reload
+    sudo systemctl enable oxitrans-backend
+    sudo systemctl restart oxitrans-backend
+fi
 
 # 9. Verificar estado
 echo -e "${BLUE}📊 Estado de servicios:${NC}"

@@ -24,7 +24,7 @@ export interface GPSState {
       latitud: number;
       longitud: number;
     } | null;
-    tipoValidacion: 'ubicacion_especifica' | 'regional' | 'sin_restriccion';
+    tipoValidacion: 'ubicacion_especifica' | 'regional' | 'sin_restriccion' | 'visita_flexible';
     timestamp: number;
   } | null;
   // Métodos

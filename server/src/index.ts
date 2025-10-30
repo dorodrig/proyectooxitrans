@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import compression from 'compression';
+import * as compression from 'compression';
 import dotenv from 'dotenv';
 import path from 'path';
 import rateLimit from 'express-rate-limit';
@@ -85,7 +85,7 @@ app.use(cors({
 }));
 
 // Middleware general
-app.use(compression());
+app.use(compression.default());
 app.use(morgan('combined'));
 
 // DEBUG: Middleware para capturar todos los requests

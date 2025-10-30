@@ -56,9 +56,9 @@ cd server
 npm install || { echo -e "${RED}❌ npm install backend fallido${NC}"; exit 1; }
 cd ..
 
-# 5. Construir Frontend
+# 5. Construir Frontend (sin PWA para evitar crypto.hash error)
 echo -e "${YELLOW}🔨 Construyendo Frontend...${NC}"
-NODE_ENV=production npx vite build --config vite.config.production.ts || { echo -e "${RED}❌ Build frontend fallido${NC}"; exit 1; }
+npm run build || { echo -e "${RED}❌ Build frontend fallido${NC}"; exit 1; }
 
 # 6. Construir Backend
 echo -e "${YELLOW}🔨 Construyendo Backend...${NC}"

@@ -1,46 +1,47 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
+// import { VitePWA } from 'vite-plugin-pwa'; // Deshabilitado temporalmente por error crypto.hash
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    // Temporalmente deshabilitado para evitar error crypto.hash en builds de servidor
-    ...(process.env.NODE_ENV !== 'production' ? [VitePWA({
-      registerType: 'autoUpdate',
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,woff2,ttf}'],
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/(api|server)/],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/api\.mapbox\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'mapbox-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 días
-              },
-            },
-          },
-          {
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images',
-              expiration: {
-                maxEntries: 60,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 días
-              },
-            },
-          }
-        ]
-      },
-      includeAssets: ['favicon.png', 'apple-touch-icon.png', 'favicon.svg'],
-      manifest: false, // Usar manifest.json estático de public/
-    })] : [])
+    // PWA temporalmente deshabilitado para evitar error crypto.hash en Node.js moderno
+    // Se puede rehabilitar después del despliegue inicial
+    // VitePWA({
+    //   registerType: 'autoUpdate',
+    //   workbox: {
+    //     globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,jpg,jpeg,woff2,ttf}'],
+    //     navigateFallback: '/index.html',
+    //     navigateFallbackDenylist: [/^\/(api|server)/],
+    //     runtimeCaching: [
+    //       {
+    //         urlPattern: /^https:\/\/api\.mapbox\.com\/.*/i,
+    //         handler: 'CacheFirst',
+    //         options: {
+    //           cacheName: 'mapbox-cache',
+    //           expiration: {
+    //             maxEntries: 10,
+    //             maxAgeSeconds: 60 * 60 * 24 * 30, // 30 días
+    //           },
+    //         },
+    //       },
+    //       {
+    //         urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+    //         handler: 'CacheFirst',
+    //         options: {
+    //           cacheName: 'images',
+    //           expiration: {
+    //             maxEntries: 60,
+    //             maxAgeSeconds: 60 * 60 * 24 * 30, // 30 días
+    //           },
+    //         },
+    //       }
+    //     ]
+    //   },
+    //   includeAssets: ['favicon.png', 'apple-touch-icon.png', 'favicon.svg'],
+    //   manifest: false, // Usar manifest.json estático de public/
+    // })
   ],
   base: '/', // EC2 Single Server - servir desde raíz
   server: {
